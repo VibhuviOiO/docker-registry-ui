@@ -108,6 +108,9 @@ function loadRepositories(registryName, force = false) {
             
             document.getElementById('repo-list').innerHTML = html;
             
+            // Update repository count
+            document.getElementById('stat-repos').textContent = repos.length;
+            
             // Attach click handlers
             document.querySelectorAll('.repo-row').forEach(row => {
                 row.addEventListener('click', function() {
@@ -131,6 +134,9 @@ function loadTags(registryName, repo) {
         deleteBtn.style.display = (typeof readOnly !== 'undefined' && readOnly) ? 'none' : 'block';
     }
     
+    // Hide tag count badge initially
+    document.getElementById('stat-tags').style.display = 'none';
+    
     showLoading('tags-container');
     
     fetch(`/api/tags/${encodeURIComponent(registryName)}/${encodeURIComponent(repo)}`)
@@ -143,6 +149,12 @@ function loadTags(registryName, repo) {
             }
             
             const tags = data.tags;
+            
+            // Update tag count badge
+            const tagBadge = document.getElementById('stat-tags');
+            tagBadge.textContent = tags.length;
+            tagBadge.style.display = 'inline-block';
+            
             if (tags.length === 0) {
                 document.getElementById('tags-container').innerHTML = 
                     '<p class="text-muted text-center p-4">No tags found</p>';
