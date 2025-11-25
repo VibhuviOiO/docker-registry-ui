@@ -23,7 +23,7 @@ services:
 
   # Registry UI
   registry-ui:
-    build: .
+    image: ghcr.io/vibhuvio/docker-registry-ui:latest
     container_name: registry-ui
     ports:
       - "8080:5000"
