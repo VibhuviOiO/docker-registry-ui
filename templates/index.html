@@ -69,7 +69,7 @@
           <div class="col-md-4">
             <div class="card">
               <div class="card-header d-flex justify-content-between align-items-center">
-                <strong>Repositories</strong>
+                <strong>Repositories <span class="badge bg-secondary" id="stat-repos">0</span></strong>
                 <button class="btn btn-sm btn-primary" id="refreshRepos">
                   <i class="bi bi-arrow-clockwise"></i>
                 </button>
@@ -87,7 +87,11 @@
           <div class="col-md-8">
             <div class="card">
               <div class="card-header d-flex justify-content-between align-items-center">
-                <strong id="repo-title">Select a repository</strong>
+                <div>
+                  <strong id="repo-title">Select a repository</strong>
+                  <span class="badge bg-secondary ms-2" id="stat-tags" style="display:none;">0</span>
+                </div>
+                <div>
                 {% if not read_only %}
                 <button class="btn btn-sm btn-danger" id="deleteRepoBtn" style="display:none;">
                   <i class="bi bi-trash"></i> Delete Repository
