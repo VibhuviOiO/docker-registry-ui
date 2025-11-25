@@ -78,7 +78,7 @@ function showLoading(elementId) {
 function loadRepositories(registryName, force = false) {
     showLoading('repo-list');
     
-    fetch(`/api/repositories/${registryName}`)
+    fetch(`/api/repositories/${encodeURIComponent(registryName)}`)
         .then(r => r.json())
         .then(data => {
             if (data.error) {
@@ -126,11 +126,14 @@ function loadRepositories(registryName, force = false) {
 function loadTags(registryName, repo) {
     currentRepo = repo;
     document.getElementById('repo-title').textContent = repo;
-    document.getElementById('deleteRepoBtn').style.display = readOnly ? 'none' : 'block';
+    const deleteBtn = document.getElementById('deleteRepoBtn');
+    if (deleteBtn) {
+        deleteBtn.style.display = (typeof readOnly !== 'undefined' && readOnly) ? 'none' : 'block';
+    }
     
     showLoading('tags-container');
     
-    fetch(`/api/tags/${registryName}/${repo}`)
+    fetch(`/api/tags/${encodeURIComponent(registryName)}/${encodeURIComponent(repo)}`)
         .then(r => r.json())
         .then(data => {
             if (data.error) {
@@ -179,7 +182,7 @@ function loadTagSizes(registryName, repo, tags) {
         const batch = tags.slice(index, index + batchSize);
         
         batch.forEach(tag => {
-            fetch(`/api/tag-details/${registryName}/${repo}/${tag}`)
+            fetch(`/api/tag-details/${encodeURIComponent(registryName)}/${encodeURIComponent(repo)}/${encodeURIComponent(tag)}`)
                 .then(r => r.json())
                 .then(data => {
                     const sizeEl = document.querySelector(`.tag-size[data-tag="${tag}"]`);
@@ -207,7 +210,7 @@ function loadTagSizes(registryName, repo, tags) {
 function deleteTag(registryName, repo, tag) {
     if (!confirm(`Delete tag ${tag} from ${repo}?`)) return;
     
-    fetch(`/api/delete/tag/${registryName}/${repo}/${tag}`, { method: 'DELETE' })
+    fetch(`/api/delete/tag/${encodeURIComponent(registryName)}/${encodeURIComponent(repo)}/${encodeURIComponent(tag)}`, { method: 'DELETE' })
         .then(r => r.json())
         .then(data => {
             if (data.success) {
@@ -224,7 +227,7 @@ document.getElementById('deleteRepoBtn').addEventListener('click', function() {
     
     if (!confirm(`Delete entire repository ${currentRepo}? This will delete all tags.`)) return;
     
-    fetch(`/api/delete/repo/${currentRegistry}/${currentRepo}`, { method: 'DELETE' })
+    fetch(`/api/delete/repo/${encodeURIComponent(currentRegistry)}/${encodeURIComponent(currentRepo)}`, { method: 'DELETE' })
         .then(r => r.json())
         .then(data => {
             if (data.success) {
