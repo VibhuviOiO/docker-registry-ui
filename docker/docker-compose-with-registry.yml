@@ -26,10 +26,11 @@ services:
       dockerfile: Dockerfile
     container_name: registry-ui
     ports:
-      - "5002:5000"
+      - "5003:5000"
     environment:
       - REGISTRIES=[{"name":"Local Registry","api":"http://registry:5000","isAuthEnabled":false,"user":"","password":"","apiToken":"","default":true}]
       - READ_ONLY=true
+      - BUILT_BY=Test
     logging:
       driver: "json-file"
       options:
