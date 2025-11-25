@@ -10,6 +10,8 @@ A modern web interface for Docker Registry with multi-registry support.
 docker-compose -f docker/docker-compose-with-registry.yml up -d
 ```
 
+> **Note:** Uses pre-built image from `ghcr.io/vibhuvio/docker-registry-ui:latest`
+
 **Access:**
 - Registry: http://localhost:5001
 - UI: http://localhost:8080

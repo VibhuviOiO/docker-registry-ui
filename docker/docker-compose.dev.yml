@@ -11,7 +11,7 @@ services:
 
   registry-ui:
     build:
-      context: .
+      context: ..
       dockerfile: Dockerfile.dev
     container_name: registry-ui-dev
     ports:
@@ -20,9 +20,9 @@ services:
       - REGISTRIES=[{"name":"Local Registry","api":"http://registry:5000","isAuthEnabled":false,"user":"","password":"","apiToken":"","default":true}]
       - READ_ONLY=false
     volumes:
-      - ./app:/app/app
-      - ./templates:/app/templates
-      - ./static:/app/static
+      - ../app:/app/app
+      - ../templates:/app/templates
+      - ../static:/app/static
     depends_on:
       - registry
 
