@@ -129,15 +129,15 @@ function loadRepositories(registryName, force = false) {
 function loadTags(registryName, repo) {
     currentRepo = repo;
     document.getElementById('repo-title').textContent = repo;
+    document.getElementById('image-name-section').style.display = 'block';
+    
     const deleteBtn = document.getElementById('deleteRepoBtn');
     if (deleteBtn) {
         deleteBtn.style.display = (typeof readOnly !== 'undefined' && readOnly) ? 'none' : 'block';
     }
     
-    // Hide tag count badge initially
     document.getElementById('stat-tags').style.display = 'none';
-    
-    showLoading('tags-container');
+    showLoading('tags-list');
     
     fetch(`/api/tags/${encodeURIComponent(registryName)}/${encodeURIComponent(repo)}`)
         .then(r => r.json())
@@ -156,7 +156,7 @@ function loadTags(registryName, repo) {
             tagBadge.style.display = 'inline-block';
             
             if (tags.length === 0) {
-                document.getElementById('tags-container').innerHTML = 
+                document.getElementById('tags-list').innerHTML = 
                     '<p class="text-muted text-center p-4">No tags found</p>';
                 return;
             }
@@ -165,10 +165,18 @@ function loadTags(registryName, repo) {
             tags.forEach(tag => {
                 html += `<div class="tag-item" data-tag="${tag}">
                     <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <strong>${tag}</strong>
-                            <div class="tag-size text-muted small" data-registry="${registryName}" data-repo="${repo}" data-tag="${tag}">
-                                <span class="spinner-border spinner-border-sm"></span> Loading size...
+                        <div class="flex-grow-1">
+                            <div class="d-flex align-items-center mb-1">
+                                <strong class="me-2">${tag}</strong>
+                                <span class="badge bg-light text-dark tag-digest" data-tag="${tag}"></span>
+                            </div>
+                            <div class="d-flex gap-3 text-muted small">
+                                <span class="tag-size" data-registry="${registryName}" data-repo="${repo}" data-tag="${tag}">
+                                    <i class="bi bi-hdd"></i> <span class="spinner-border spinner-border-sm"></span>
+                                </span>
+                                <span class="tag-created" data-tag="${tag}">
+                                    <i class="bi bi-clock"></i> <span class="spinner-border spinner-border-sm"></span>
+                                </span>
                             </div>
                         </div>
                         ${!readOnly ? `<button class="btn btn-sm btn-outline-danger" onclick="deleteTag('${registryName}', '${repo}', '${tag}')">
@@ -178,7 +186,7 @@ function loadTags(registryName, repo) {
                 </div>`;
             });
             
-            document.getElementById('tags-container').innerHTML = html;
+            document.getElementById('tags-list').innerHTML = html;
             
             // Load tag sizes on-demand (lazy loading)
             loadTagSizes(registryName, repo, tags);
@@ -199,13 +207,29 @@ function loadTagSizes(registryName, repo, tags) {
                 .then(data => {
                     const sizeEl = document.querySelector(`.tag-size[data-tag="${tag}"]`);
                     if (sizeEl) {
-                        sizeEl.innerHTML = formatSize(data.size);
+                        sizeEl.innerHTML = `<i class="bi bi-hdd"></i> ${formatSize(data.size)}`;
+                    }
+                    
+                    const createdEl = document.querySelector(`.tag-created[data-tag="${tag}"]`);
+                    if (createdEl && data.created) {
+                        createdEl.innerHTML = `<i class="bi bi-clock"></i> ${formatTimeAgo(data.created)}`;
+                    } else if (createdEl) {
+                        createdEl.innerHTML = `<i class="bi bi-clock"></i> Unknown`;
+                    }
+                    
+                    const digestEl = document.querySelector(`.tag-digest[data-tag="${tag}"]`);
+                    if (digestEl && data.digest) {
+                        digestEl.textContent = data.digest.substring(7, 19);
                     }
                 })
                 .catch(() => {
                     const sizeEl = document.querySelector(`.tag-size[data-tag="${tag}"]`);
                     if (sizeEl) {
-                        sizeEl.innerHTML = '<span class="text-muted">Size unavailable</span>';
+                        sizeEl.innerHTML = '<i class="bi bi-hdd"></i> N/A';
+                    }
+                    const createdEl = document.querySelector(`.tag-created[data-tag="${tag}"]`);
+                    if (createdEl) {
+                        createdEl.innerHTML = '<i class="bi bi-clock"></i> N/A';
                     }
                 });
         });
@@ -245,7 +269,8 @@ document.getElementById('deleteRepoBtn').addEventListener('click', function() {
             if (data.success) {
                 showAlert(`Repository ${currentRepo} deleted (${data.deleted}/${data.total} tags)`);
                 loadRepositories(currentRegistry, true);
-                document.getElementById('tags-container').innerHTML = 
+                document.getElementById('image-name-section').style.display = 'none';
+                document.getElementById('tags-list').innerHTML = 
                     '<p class="text-muted text-center">Select a repository to view tags</p>';
             } else {
                 showAlert(data.error || 'Failed to delete repository', 'danger');
@@ -262,4 +287,17 @@ function formatSize(bytes) {
         unitIndex++;
     }
     return `${size.toFixed(2)} ${units[unitIndex]}`;
+}
+
+function formatTimeAgo(dateString) {
+    const date = new Date(dateString);
+    const now = new Date();
+    const seconds = Math.floor((now - date) / 1000);
+    
+    if (seconds < 60) return 'just now';
+    if (seconds < 3600) return `${Math.floor(seconds / 60)} minutes ago`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)} hours ago`;
+    if (seconds < 2592000) return `${Math.floor(seconds / 86400)} days ago`;
+    if (seconds < 31536000) return `${Math.floor(seconds / 2592000)} months ago`;
+    return `${Math.floor(seconds / 31536000)} years ago`;
 }

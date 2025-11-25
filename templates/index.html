@@ -88,8 +88,7 @@
             <div class="card">
               <div class="card-header d-flex justify-content-between align-items-center">
                 <div>
-                  <strong id="repo-title">Select a repository</strong>
-                  <span class="badge bg-secondary ms-2" id="stat-tags" style="display:none;">0</span>
+                  <strong>Tags <span class="badge bg-secondary" id="stat-tags" style="display:none;">0</span></strong>
                 </div>
                 <div>
                 {% if not read_only %}
@@ -97,9 +96,15 @@
                   <i class="bi bi-trash"></i> Delete Repository
                 </button>
                 {% endif %}
+                </div>
               </div>
               <div class="card-body" id="tags-container" style="max-height: 70vh; overflow-y: auto;">
-                <p class="text-muted text-center">Select a repository to view tags</p>
+                <div id="image-name-section" style="display:none;" class="mb-3 pb-3 border-bottom">
+                  <h5 class="mb-0"><i class="bi bi-box-seam"></i> <span id="repo-title"></span></h5>
+                </div>
+                <div id="tags-list">
+                  <p class="text-muted text-center">Select a repository to view tags</p>
+                </div>
               </div>
             </div>
           </div>
@@ -145,12 +150,12 @@
       <div class="container-fluid">
         <div class="row">
           <div class="col-md-6">
-            <span class="text-muted">Docker Registry UI v{{ version }} - Built by <strong>Vibhuvi OiO</strong></span>
+            <span class="text-muted">Docker Registry UI v{{ version }} - Built by <strong>{{ built_by }}</strong></span>
           </div>
           <div class="col-md-6 text-end">
             <span class="text-muted">
               <i class="bi bi-github"></i> 
-              <a href="https://github.com/vibhuvio" class="text-decoration-none" target="_blank">GitHub</a>
+              <a href="https://github.com/VibhuviOiO/docker-registry-ui" class="text-decoration-none" target="_blank">GitHub</a>
             </span>
           </div>
         </div>
