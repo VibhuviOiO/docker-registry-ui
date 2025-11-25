@@ -41,3 +41,4 @@ logs/
 dist/
 build/
 *.egg-info/
+docker/docker-compose.yml
