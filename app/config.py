@@ -1,0 +1,39 @@
+import os
+import json
+
+class Config:
+    # Legacy single registry support
+    REGISTRY_URL = os.getenv("REGISTRY_URL", "http://docker-repo.vibhuvioio.com")
+    READ_ONLY = os.getenv("READ_ONLY", "true").lower() == "true"
+    CHECK_INTERVAL = int(os.getenv("CHECK_INTERVAL", "300"))
+    TIMEOUT = int(os.getenv("TIMEOUT", "10"))
+    
+    # Multi-registry support
+    REGISTRIES = []
+    
+    @staticmethod
+    def load_registries():
+        """Load registries from environment or config file"""
+        registries_json = os.getenv("REGISTRIES")
+        
+        if registries_json:
+            try:
+                Config.REGISTRIES = json.loads(registries_json)
+            except:
+                pass
+        
+        # If no registries configured, use legacy single registry
+        if not Config.REGISTRIES:
+            Config.REGISTRIES = [{
+                "name": "Default Registry",
+                "api": Config.REGISTRY_URL,
+                "isAuthEnabled": False,
+                "user": "",
+                "password": "",
+                "apiToken": ""
+            }]
+        
+        return Config.REGISTRIES
+
+# Load registries on import
+Config.load_registries()

@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Production Registry",
+    "api": "http://docker-repo.vibhuvioio.com",
+    "isAuthEnabled": false,
+    "user": "",
+    "password": "",
+    "apiToken": ""
+  },
+  {
+    "name": "Staging Registry",
+    "api": "https://registry-staging.example.com",
+    "isAuthEnabled": true,
+    "user": "admin",
+    "password": "secret",
+    "apiToken": ""
+  },
+  {
+    "name": "Dev Registry with Token",
+    "api": "https://registry-dev.example.com",
+    "isAuthEnabled": true,
+    "user": "",
+    "password": "",
+    "apiToken": "your-bearer-token-here"
+  }
+]
