@@ -1,0 +1,55 @@
+services:
+  # Docker Registry
+  registry:
+    image: registry:2
+    container_name: docker-registry
+    ports:
+      - "5001:5000"
+    environment:
+      REGISTRY_STORAGE_DELETE_ENABLED: "true"
+    volumes:
+      - registry-data:/var/lib/registry
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:5000/v2/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+
+  # Registry UI
+  registry-ui:
+    build: .
+    container_name: registry-ui
+    ports:
+      - "8080:5000"
+    environment:
+      - REGISTRIES=[{"name":"Local Registry","api":"http://registry:5000","isAuthEnabled":false,"user":"","password":"","apiToken":"","default":true}]
+      - READ_ONLY=false
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    depends_on:
+      registry:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:5000/health/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+
+volumes:
+  registry-data:

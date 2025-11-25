@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+*.log
+*.pyc
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment
+.env
+.env.local
+registries.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+registry-data/
+*.tar
+*.tar.gz
+
+# Logs
+*.log
+logs/
+
+# Build
+dist/
+build/
+*.egg-info/

@@ -1,0 +1,30 @@
+services:
+  registry:
+    image: registry:2
+    container_name: docker-registry-dev
+    ports:
+      - "5001:5000"
+    environment:
+      REGISTRY_STORAGE_DELETE_ENABLED: "true"
+    volumes:
+      - registry-data:/var/lib/registry
+
+  registry-ui:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: registry-ui-dev
+    ports:
+      - "8080:5000"
+    environment:
+      - REGISTRIES=[{"name":"Local Registry","api":"http://registry:5000","isAuthEnabled":false,"user":"","password":"","apiToken":"","default":true}]
+      - READ_ONLY=false
+    volumes:
+      - ./app:/app/app
+      - ./templates:/app/templates
+      - ./static:/app/static
+    depends_on:
+      - registry
+
+volumes:
+  registry-data:
