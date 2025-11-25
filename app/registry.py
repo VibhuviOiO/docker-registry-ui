@@ -107,7 +107,22 @@ def fetch_tag_details(registry_api, repo, tag, auth=None):
                         manifest = r2.json()
                         size = sum(layer.get("size", 0) for layer in manifest.get("layers", []))
                         size += manifest.get("config", {}).get("size", 0)
-                        return {"tag": tag, "size": size, "digest": manifest_digest}
+                        
+                        # Get created timestamp from config
+                        created = None
+                        config_digest = manifest.get("config", {}).get("digest")
+                        if config_digest:
+                            config_r = requests.get(
+                                f"{registry_api}/v2/{repo}/blobs/{config_digest}",
+                                headers=headers2,
+                                auth=auth_obj,
+                                timeout=Config.TIMEOUT
+                            )
+                            if config_r.status_code == 200:
+                                config = config_r.json()
+                                created = config.get("created")
+                        
+                        return {"tag": tag, "size": size, "digest": manifest_digest, "created": created}
         
         # Fallback to Docker v2 manifest
         headers = {"Accept": "application/vnd.docker.distribution.manifest.v2+json"}
@@ -126,11 +141,26 @@ def fetch_tag_details(registry_api, repo, tag, auth=None):
             digest = r.headers.get("Docker-Content-Digest", "")
             size = sum(layer.get("size", 0) for layer in manifest.get("layers", []))
             size += manifest.get("config", {}).get("size", 0)
-            return {"tag": tag, "size": size, "digest": digest}
+            
+            # Get created timestamp from config
+            created = None
+            config_digest = manifest.get("config", {}).get("digest")
+            if config_digest:
+                config_r = requests.get(
+                    f"{registry_api}/v2/{repo}/blobs/{config_digest}",
+                    headers=headers,
+                    auth=auth_obj,
+                    timeout=Config.TIMEOUT
+                )
+                if config_r.status_code == 200:
+                    config = config_r.json()
+                    created = config.get("created")
+            
+            return {"tag": tag, "size": size, "digest": digest, "created": created}
         
-        return {"tag": tag, "size": 0, "digest": ""}
+        return {"tag": tag, "size": 0, "digest": "", "created": None}
     except:
-        return {"tag": tag, "size": 0, "digest": ""}
+        return {"tag": tag, "size": 0, "digest": "", "created": None}
 
 
 def delete_tag(registry_api, repo, tag, auth=None):

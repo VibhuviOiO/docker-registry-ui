@@ -7,6 +7,7 @@ class Config:
     READ_ONLY = os.getenv("READ_ONLY", "true").lower() == "true"
     CHECK_INTERVAL = int(os.getenv("CHECK_INTERVAL", "300"))
     TIMEOUT = int(os.getenv("TIMEOUT", "10"))
+    BUILT_BY = os.getenv("BUILT_BY", "Vibhuvi OiO")
     
     # Multi-registry support
     REGISTRIES = []

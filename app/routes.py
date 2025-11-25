@@ -19,7 +19,8 @@ def index():
     return render_template('index.html',
                           registries=registries,
                           read_only=Config.READ_ONLY,
-                          version=current_app.config.get('VERSION', '1.0.0'))
+                          version=current_app.config.get('VERSION', '1.0.0'),
+                          built_by=Config.BUILT_BY)
 
 @api_bp.route("/registries")
 def api_registries():
