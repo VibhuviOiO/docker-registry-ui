@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docker Registry UI - Modern Web Interface for Docker Registry</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <span class="logo">🐳</span>
+                <span class="brand-name">Docker Registry UI</span>
+            </div>
+            <div class="nav-links">
+                <a href="#features">Features</a>
+                <a href="#installation">Installation</a>
+                <a href="#docs">Documentation</a>
+                <a href="https://github.com/vibhuvi/docker-registry-ui" target="_blank">GitHub</a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="container">
+            <h1>Docker Registry UI</h1>
+            <p class="subtitle">Modern, lightweight web interface for managing your Docker Registry</p>
+            <div class="hero-buttons">
+                <a href="#installation" class="btn btn-primary">Get Started</a>
+                <a href="getting-started.html" class="btn btn-secondary">Documentation</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="features" class="features">
+        <div class="container">
+            <h2>Features</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">📦</div>
+                    <h3>Repository Management</h3>
+                    <p>Browse, search, and manage Docker images and tags with an intuitive interface</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3>Read/Write Modes</h3>
+                    <p>Toggle between read-only and read-write modes for safe registry operations</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🗑️</div>
+                    <h3>Bulk Operations</h3>
+                    <p>Delete multiple images based on patterns, age, and retention policies</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🛡️</div>
+                    <h3>Vulnerability Scanning</h3>
+                    <p>Built-in Trivy integration for scanning images and viewing CVE details</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔗</div>
+                    <h3>Multi-Registry Support</h3>
+                    <p>Connect and manage multiple Docker registries from a single interface</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Analytics & Insights</h3>
+                    <p>View storage usage, image statistics, and layer information</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="installation" class="installation">
+        <div class="container">
+            <h2>Quick Start</h2>
+            <div class="install-methods">
+                <div class="install-card">
+                    <h3>Docker Run</h3>
+                    <pre><code>docker run -d \
+  -p 5000:5000 \
+  -e CONFIG_FILE=/app/data/registries.config.json \
+  -e READ_ONLY=false \
+  -v ./data:/app/data \
+  vibhuvi/docker-registry-ui:latest</code></pre>
+                </div>
+                <div class="install-card">
+                    <h3>Docker Compose</h3>
+                    <pre><code>version: '3.8'
+services:
+  registry-ui:
+    image: vibhuvi/docker-registry-ui:latest
+    ports:
+      - "5000:5000"
+    environment:
+      - CONFIG_FILE=/app/data/registries.config.json
+      - READ_ONLY=false
+    volumes:
+      - ./data:/app/data</code></pre>
+                </div>
+            </div>
+            <div class="install-note">
+                <p>Access the UI at <code>http://localhost:5000</code></p>
+            </div>
+        </div>
+    </section>
+
+    <section id="docs" class="documentation">
+        <div class="container">
+            <h2>Documentation</h2>
+            <div class="doc-grid">
+                <a href="getting-started.html" class="doc-card">
+                    <h3>🚀 Getting Started</h3>
+                    <p>Installation and basic setup guide</p>
+                </a>
+                <a href="configuration.html" class="doc-card">
+                    <h3>⚙️ Configuration</h3>
+                    <p>Configure registries and settings</p>
+                </a>
+                <a href="features.html" class="doc-card">
+                    <h3>✨ Features Guide</h3>
+                    <p>Explore all available features</p>
+                </a>
+                <a href="api.html" class="doc-card">
+                    <h3>🔌 API Reference</h3>
+                    <p>Docker Registry API integration</p>
+                </a>
+                <a href="security.html" class="doc-card">
+                    <h3>🛡️ Security Scanning</h3>
+                    <p>Vulnerability scanning with Trivy</p>
+                </a>
+                <a href="development.html" class="doc-card">
+                    <h3>💻 Development</h3>
+                    <p>Contributing and development setup</p>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Docker Registry UI</h4>
+                    <p>Modern web interface for Docker Registry management</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Links</h4>
+                    <a href="https://github.com/vibhuvi/docker-registry-ui">GitHub</a>
+                    <a href="getting-started.html">Documentation</a>
+                    <a href="https://hub.docker.com/r/vibhuvi/docker-registry-ui">Docker Hub</a>
+                </div>
+                <div class="footer-section">
+                    <h4>Resources</h4>
+                    <a href="https://docs.docker.com/registry/">Docker Registry Docs</a>
+                    <a href="https://nvd.nist.gov/">National Vulnerability Database</a>
+                    <a href="https://aquasecurity.github.io/trivy/">Trivy Scanner</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>Developed by <a href="https://vibhuvioio.com" target="_blank">Vibhuvi OiO</a></p>
+                <p class="footer-message">Part of giving back to the open source community. Built with ❤️ for the community that helped me grow.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

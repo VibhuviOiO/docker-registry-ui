@@ -1,135 +1,139 @@
 # Docker Registry UI
 
-A modern web interface for Docker Registry with multi-registry support.
+Modern, lightweight web interface for managing Docker Registry with built-in vulnerability scanning.
 
-## Quick Start
+[![Docker Pulls](https://img.shields.io/docker/pulls/vibhuvi/docker-registry-ui)](https://hub.docker.com/r/vibhuvi/docker-registry-ui)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-### 1. Start Registry + UI
+## ✨ Features
+
+- 📦 **Repository Management** - Browse, search, and manage Docker images and tags
+- 🔒 **Read/Write Modes** - Toggle between read-only and read-write modes
+- 🗑️ **Bulk Operations** - Delete multiple images based on patterns, age, and retention policies
+- 🛡️ **Vulnerability Scanning** - Built-in Trivy integration with CVE details linked to NVD
+- 🔗 **Multi-Registry Support** - Manage multiple Docker registries from a single interface
+- 📊 **Analytics** - View storage usage, image statistics, and layer information
+- 🎨 **Modern UI** - Clean, responsive interface with Jira/Bitbucket-inspired design
+
+## 🚀 Quick Start
+
+### Docker Run
 
 ```bash
-docker-compose -f docker/docker-compose-with-registry.yml up -d
+docker run -d \
+  --name registry-ui \
+  -p 5000:5000 \
+  -e CONFIG_FILE=/app/data/registries.config.json \
+  -e READ_ONLY=false \
+  -v $(pwd)/data:/app/data \
+  vibhuvi/docker-registry-ui:latest
 ```
 
-> **Note:** Uses pre-built image from `ghcr.io/vibhuvio/docker-registry-ui:latest`
+### Docker Compose
 
-**Access:**
-- Registry: http://localhost:5001
-- UI: http://localhost:8080
-
-### 2. Push an Image
-
-```bash
-docker pull nginx
-docker tag nginx localhost:5001/nginx:latest
-docker push localhost:5001/nginx:latest
-```
-
-### 3. View in UI
-
-Open http://localhost:8080 - nginx will appear automatically!
-
-## Features
-
-### Core
-- ✅ Multi-registry support with authentication
-- ✅ View repositories and tags with details
-- ✅ Delete tags and repositories (read-write mode)
-- ✅ Real-time search and filtering
-- ✅ OCI index and multi-platform manifest support
-- ✅ Health checks and status monitoring
-- ✅ Production-ready (Uvicorn with 4 workers)
-
-### v2.0 Features
-- ✅ **Dark Mode** - Toggle with system theme detection
-- ✅ **Docker Hub-style Copy** - Inline pull commands with copy button
-- ✅ **Tag Sorting** - Sort by name, size, or date
-- ✅ **Manifest Viewer** - View raw manifest, layers, and config JSON
-- ✅ **Bulk Operations** - Cleanup rules with dry-run mode
-- ✅ **Analytics Dashboard** - Charts and statistics with CSV export
-- ✅ **Modular UI** - Component-based architecture
-
-## Configuration
-
-### Single Registry (Environment)
 ```yaml
-environment:
-  - REGISTRIES=[{"name":"Local","api":"http://registry:5000","isAuthEnabled":false,"user":"","password":"","apiToken":"","default":true}]
-  - READ_ONLY=false
+version: '3.8'
+
+services:
+  registry:
+    image: registry:2
+    ports:
+      - "5001:5000"
+    environment:
+      REGISTRY_STORAGE_DELETE_ENABLED: "true"
+    volumes:
+      - registry-data:/var/lib/registry
+
+  registry-ui:
+    image: vibhuvi/docker-registry-ui:latest
+    ports:
+      - "5000:5000"
+    environment:
+      - CONFIG_FILE=/app/data/registries.config.json
+      - READ_ONLY=false
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - registry
+
+volumes:
+  registry-data:
 ```
 
-### Multiple Registries (JSON File)
+Access the UI at `http://localhost:5000`
 
-1. Copy example:
+## 📖 Documentation
+
+Full documentation is available at [docker-registry-ui.vibhuvioio.com](https://docker-registry-ui.vibhuvioio.com)
+
+- [Getting Started](https://docker-registry-ui.vibhuvioio.com/getting-started.html)
+- [Configuration Guide](https://docker-registry-ui.vibhuvioio.com/configuration.html)
+- [Features Overview](https://docker-registry-ui.vibhuvioio.com/features.html)
+- [Security Scanning](https://docker-registry-ui.vibhuvioio.com/security.html)
+- [API Reference](https://docker-registry-ui.vibhuvioio.com/api.html)
+- [Development Guide](https://docker-registry-ui.vibhuvioio.com/development.html)
+
+## 🛡️ Vulnerability Scanning
+
+Built-in Trivy scanner provides:
+- Per-tag vulnerability scanning
+- CVE details with severity levels (Critical, High, Medium, Low)
+- Direct links to National Vulnerability Database (NVD)
+- Layer-by-layer vulnerability breakdown
+- Persistent scan results
+
+## 🗑️ Bulk Operations
+
+Delete multiple images efficiently:
+- Pattern-based deletion (wildcards supported)
+- Age-based cleanup (older than X days)
+- Retention policies (keep minimum N tags)
+- Dry-run mode for safe testing
+
+## 🔌 Docker Registry API
+
+Integrates with Docker Registry v2 API:
+- `/v2/_catalog` - List repositories
+- `/v2/<name>/tags/list` - List tags
+- `/v2/<name>/manifests/<tag>` - Get manifest
+- `/v2/<name>/manifests/<digest>` - Delete image
+
+## 💻 Development
+
 ```bash
-cp registries.json.example registries.json
-```
+# Clone repository
+git clone https://github.com/vibhuvi/docker-registry-ui.git
+cd docker-registry-ui
 
-2. Edit `registries.json`:
-```json
-[
-  {
-    "name": "Production",
-    "api": "http://registry.example.com",
-    "isAuthEnabled": false,
-    "user": "",
-    "password": "",
-    "apiToken": "",
-    "default": true
-  }
-]
-```
+# Create virtual environment
+python3 -m venv venv
+source venv/bin/activate
 
-3. Use in docker-compose:
-```yaml
-environment:
-  - REGISTRIES=${REGISTRIES}
-```
-
-Then run:
-```bash
-export REGISTRIES=$(cat registries.json)
-docker-compose up -d
-```
-
-## Development
-
-### With Docker (Recommended)
-```bash
-docker-compose -f docker/docker-compose.dev.yml up
-```
-
-### With Python
-```bash
+# Install dependencies
 pip install -r requirements.txt
-export REGISTRIES='[{"name":"Local","api":"http://localhost:5001","isAuthEnabled":false,"user":"","password":"","apiToken":"","default":true}]'
-python run.py
+
+# Run application
+python app.py
 ```
 
-## API Reference
+## 🤝 Contributing
 
-See [REGISTRY_API.md](REGISTRY_API.md) for complete Docker Registry API documentation.
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-## Version
+## 📝 License
 
-Current version: **2.0.0-dev** (defined in `app/version.py`)
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## License
+## 🙏 Acknowledgments
 
-MIT License - see [LICENSE](LICENSE) for details.
+Developed by [Vibhuvi OiO](https://vibhuvioio.com) as part of giving back to the open source community.
 
-## Contributing
+This project exists because of the countless open source contributors who helped me learn and grow. I'm grateful to the community and hope this tool helps others manage their Docker registries more effectively.
 
-Contributions welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+## 🔗 Links
 
-## Screenshots
-
-- **Repositories View** - Browse and search repositories
-- **Tag Details** - Size, digest, creation date, inline pull command
-- **Manifest Viewer** - Inspect manifest, layers, and config
-- **Bulk Operations** - Configure cleanup rules with preview
-- **Analytics** - Charts and statistics for storage usage
-- **Dark Mode** - Full dark theme support
-
-## Built By
-
-**Vibhuvi OiO** - [GitHub](https://github.com/VibhuviOiO)
+- [Documentation](https://docker-registry-ui.vibhuvioio.com)
+- [Docker Hub](https://hub.docker.com/r/vibhuvi/docker-registry-ui)
+- [GitHub](https://github.com/vibhuvi/docker-registry-ui)
+- [National Vulnerability Database](https://nvd.nist.gov/)
+- [Trivy Scanner](https://aquasecurity.github.io/trivy/)
