@@ -1,66 +1,28 @@
-[
-  {
-    "name": "Production Registry",
-    "api": "http://registry.example.com",
-    "isAuthEnabled": false,
-    "user": "",
-    "password": "",
-    "apiToken": "",
-    "default": true,
-    "bulkOperationsEnabled": false,
-    
-    "vulnerabilityScan": {
-      "enabled": true,
-      "scanner": "trivy",
-      "scannerUrl": "http://trivy-server:8080",
-      "autoScan": false,
-      "severity": ["CRITICAL", "HIGH"]
+{
+  "registries": [
+    {
+      "name": "Local Registry",
+      "url": "http://localhost:5001",
+      "auth": {
+        "type": "none"
+      }
     },
-    
-    "cleanupPolicies": {
-      "enabled": true,
-      "rules": [
-        {
-          "name": "Delete old dev tags",
-          "repositories": ["*/dev-*", "*/feature-*"],
-          "olderThanDays": 30,
-          "keepMinimum": 3
-        },
-        {
-          "name": "Keep only latest releases",
-          "repositories": ["*/release-*"],
-          "keepLatest": 10
-        },
-        {
-          "name": "Remove untagged",
-          "repositories": ["*"],
-          "untaggedOnly": true,
-          "olderThanDays": 7
-        }
-      ]
-    }
-  },
-  {
-    "name": "Development Registry",
-    "api": "http://dev-registry:5000",
-    "isAuthEnabled": true,
-    "user": "admin",
-    "password": "secret",
-    "apiToken": "",
-    "default": false,
-    "bulkOperationsEnabled": true,
-    
-    "vulnerabilityScan": {
-      "enabled": true,
-      "scanner": "clair",
-      "scannerUrl": "http://clair:6060",
-      "autoScan": true,
-      "severity": ["CRITICAL", "HIGH", "MEDIUM"]
+    {
+      "name": "Production Registry",
+      "url": "https://registry.example.com",
+      "auth": {
+        "type": "basic",
+        "username": "admin",
+        "password": "secret"
+      }
     },
-    
-    "cleanupPolicies": {
-      "enabled": false,
-      "rules": []
+    {
+      "name": "Private Registry with Token",
+      "url": "https://registry-private.example.com",
+      "auth": {
+        "type": "bearer",
+        "token": "your-bearer-token-here"
+      }
     }
-  }
-]
+  ]
+}

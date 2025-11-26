@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-PX6NFGMV');</script>
+    <!-- End Google Tag Manager -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Testing Guide - Docker Registry UI</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐳</text></svg>">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="docs.css">
+</head>
+<body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PX6NFGMV"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="https://vibhuvioio.com/docker-registry-ui/" class="nav-brand" style="text-decoration: none; color: inherit;">
+                <span class="logo">🐳</span>
+                <span class="brand-name">Docker Registry UI</span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="getting-started.html">Docs</a>
+                <a href="https://github.com/vibhuvi/docker-registry-ui" target="_blank">GitHub</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="docs-layout">
+        <aside class="sidebar">
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <h3>Getting Started</h3>
+                    <a href="getting-started.html">Installation</a>
+                    <a href="configuration.html">Configuration</a>
+                </div>
+                <div class="nav-section">
+                    <h3>Features</h3>
+                    <a href="features.html">Overview</a>
+                    <a href="security.html">Security Scanning</a>
+                    <a href="bulk-operations.html">Bulk Operations</a>
+                </div>
+                <div class="nav-section">
+                    <h3>Reference</h3>
+                    <a href="api.html">API Integration</a>
+                    <a href="testing.html" class="active">Testing Guide</a>
+                    <a href="development.html">Development</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="docs-content">
+            <h1>Testing Guide</h1>
+
+            <h2>Full Feature Testing with Multi-Registry Setup</h2>
+            <p>Test all features of Docker Registry UI with a realistic multi-registry environment populated with real images.</p>
+
+            <h2>Quick Setup</h2>
+            <p>Download the required files and start testing in minutes:</p>
+
+            <h3>Step 1: Download Files</h3>
+            <pre><code># Create a test directory
+mkdir docker-registry-ui-test
+cd docker-registry-ui-test
+
+# Download multi-registry compose file
+wget https://raw.githubusercontent.com/VibhuviOiO/docker-registry-ui/refs/heads/main/docker/docker-compose-multi-registry.yml
+
+# Download test image population script
+wget https://raw.githubusercontent.com/VibhuviOiO/docker-registry-ui/refs/heads/main/docker/populate-test-images.sh
+
+# Make script executable
+chmod +x populate-test-images.sh</code></pre>
+
+            <h3>Step 2: Start Multi-Registry Environment</h3>
+            <pre><code># Start two registries and the UI
+docker-compose -f docker-compose-multi-registry.yml up -d
+
+# Wait for services to be ready (about 10 seconds)
+sleep 10</code></pre>
+
+            <h3>Step 3: Populate with Test Images</h3>
+            <pre><code># Run the population script
+./populate-test-images.sh
+
+# This will:
+# - Pull popular images (alpine, nginx, redis, postgres, node, python, etc.)
+# - Push them to both test registries
+# - Create ~40+ images in Registry 1
+# - Create ~10+ images in Registry 2
+# - Takes about 5-10 minutes depending on your internet speed</code></pre>
+
+            <h3>Step 4: Access the UI</h3>
+            <pre><code># Open in your browser
+http://localhost:5003</code></pre>
+
+            <h2>What Gets Created</h2>
+            <h3>Registry 1 (localhost:5001)</h3>
+            <ul>
+                <li><strong>alpine</strong>: 3.18, 3.17, 3.16, latest</li>
+                <li><strong>nginx</strong>: 1.25, 1.24, 1.23, alpine, latest</li>
+                <li><strong>redis</strong>: 7.2, 7.0, 6.2, alpine, latest</li>
+                <li><strong>postgres</strong>: 16, 15, 14, 13, alpine</li>
+                <li><strong>node</strong>: 20, 18, 16, 20-alpine, 18-alpine</li>
+                <li><strong>python</strong>: 3.11, 3.10, 3.9, 3.11-slim, 3.10-alpine</li>
+                <li><strong>busybox</strong>: 1.36, 1.35, latest, musl</li>
+                <li><strong>ubuntu</strong>: 22.04, 20.04, 18.04, latest</li>
+                <li><strong>mysql</strong>: 8.0, 5.7, latest</li>
+                <li><strong>mongo</strong>: 7.0, 6.0, 5.0, latest</li>
+                <li><strong>myapp/service-1,2,3</strong>: v1.0.0, v1.1.0, latest</li>
+            </ul>
+
+            <h3>Registry 2 (localhost:5002)</h3>
+            <ul>
+                <li><strong>alpine</strong>: 3.18, latest</li>
+                <li><strong>nginx</strong>: 1.25, alpine</li>
+                <li><strong>redis</strong>: 7.2, alpine</li>
+                <li><strong>postgres</strong>: 16, alpine</li>
+                <li><strong>node</strong>: 20, 20-alpine</li>
+            </ul>
+
+            <h2>Features to Test</h2>
+
+            <h3>1. Multi-Registry Management</h3>
+            <ul>
+                <li>Switch between Registry 1 and Registry 2 using dropdown</li>
+                <li>View different image sets in each registry</li>
+                <li>Configure registry settings</li>
+            </ul>
+
+            <h3>2. Repository Browsing</h3>
+            <ul>
+                <li>Browse all repositories</li>
+                <li>Search for specific repositories</li>
+                <li>View repository details and statistics</li>
+            </ul>
+
+            <h3>3. Tag Management</h3>
+            <ul>
+                <li>View all tags for each repository</li>
+                <li>See tag sizes and creation dates</li>
+                <li>View layer information</li>
+                <li>Delete individual tags</li>
+            </ul>
+
+            <h3>4. Vulnerability Scanning</h3>
+            <ul>
+                <li>Scan any image tag for vulnerabilities</li>
+                <li>View CVE details with severity levels</li>
+                <li>Filter vulnerabilities by severity</li>
+                <li>See which layer introduced each vulnerability</li>
+            </ul>
+
+            <h3>5. Bulk Operations</h3>
+            <ul>
+                <li>Delete multiple tags by pattern (e.g., <code>*-alpine</code>)</li>
+                <li>Age-based cleanup (e.g., older than 30 days)</li>
+                <li>Retention policies (keep last N tags)</li>
+                <li>Dry run mode to preview deletions</li>
+            </ul>
+
+            <h3>6. Analytics</h3>
+            <ul>
+                <li>View storage usage by repository</li>
+                <li>See tag distribution</li>
+                <li>Analyze disk usage patterns</li>
+            </ul>
+
+            <h2>Test Scenarios</h2>
+
+            <h3>Scenario 1: Clean Up Old Alpine Versions</h3>
+            <pre><code>1. Navigate to Bulk Operations
+2. Repository pattern: alpine
+3. Tag pattern: 3.*
+4. Keep minimum: 2
+5. Enable dry run
+6. Review what would be deleted
+7. Execute deletion</code></pre>
+
+            <h3>Scenario 2: Scan for Vulnerabilities</h3>
+            <pre><code>1. Navigate to nginx repository
+2. Click "Scan" on nginx:latest
+3. Wait for scan to complete
+4. View vulnerability badges
+5. Click badge to see CVE details
+6. Filter by severity (Critical, High)
+7. Click CVE ID to view in NVD</code></pre>
+
+            <h3>Scenario 3: Layer Inspection</h3>
+            <pre><code>1. Navigate to postgres repository
+2. Click on postgres:16 tag
+3. Click "View Layers"
+4. See layer sizes and commands
+5. View vulnerability counts per layer</code></pre>
+
+            <h2>Cleanup</h2>
+            <p>When done testing, clean up everything:</p>
+            <pre><code># Stop and remove all containers
+docker-compose -f docker-compose-multi-registry.yml down -v
+
+# Remove downloaded images (optional)
+docker image prune -a</code></pre>
+
+            <h2>Troubleshooting</h2>
+
+            <h3>Script Fails to Pull Images</h3>
+            <ul>
+                <li>Check internet connectivity</li>
+                <li>Verify Docker Hub is accessible</li>
+                <li>Try running script again (it will skip already pulled images)</li>
+            </ul>
+
+            <h3>UI Not Accessible</h3>
+            <ul>
+                <li>Check if containers are running: <code>docker ps</code></li>
+                <li>Check logs: <code>docker-compose logs registry-ui</code></li>
+                <li>Verify port 5003 is not in use</li>
+            </ul>
+
+            <h3>Registries Not Showing Images</h3>
+            <ul>
+                <li>Ensure populate script completed successfully</li>
+                <li>Check registry logs: <code>docker-compose logs registry-1</code></li>
+                <li>Verify images were pushed: <code>curl http://localhost:5001/v2/_catalog</code></li>
+            </ul>
+
+            <h2>Advanced Testing</h2>
+
+            <h3>Custom Test Images</h3>
+            <p>Add your own test images:</p>
+            <pre><code># Tag and push custom image
+docker tag myapp:latest localhost:5001/myapp:v1.0.0
+docker push localhost:5001/myapp:v1.0.0</code></pre>
+
+            <h3>Test with Authentication</h3>
+            <p>Modify docker-compose-multi-registry.yml to add basic auth to registries and test authentication flow.</p>
+
+            <h2>Automated Testing</h2>
+            <p><strong>Note:</strong> This project currently does not have automated test coverage. Contributions for unit and integration tests are welcome!</p>
+        </main>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>Developed by <a href="https://vibhuvioio.com" target="_blank">Vibhuvi OiO</a></p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
