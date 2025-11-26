@@ -31,25 +31,132 @@ function viewManifest(registryName, repo, tag) {
         return;
     }
     
-    document.getElementById('manifestJson').textContent = JSON.stringify(details.manifest || {}, null, 2);
-    
-    const layers = details.manifest?.layers || [];
-    let layersHtml = '<div class="list-group">';
-    layers.forEach((layer, idx) => {
-        layersHtml += `<div class="list-group-item">
-            <div class="d-flex justify-content-between">
-                <strong>Layer ${idx + 1}</strong>
-                <span class="badge bg-secondary">${formatSize(layer.size)}</span>
+    let html = `
+        <div class="modal fade" id="manifestOnlyModal" tabindex="-1">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Manifest: ${repo}:${tag}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <pre><code>${JSON.stringify(details.manifest || {}, null, 2)}</code></pre>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
             </div>
-            <small class="text-muted">${layer.digest}</small>
         </div>`;
-    });
-    layersHtml += '</div>';
-    document.getElementById('layersList').innerHTML = layersHtml;
     
-    document.getElementById('configJson').textContent = JSON.stringify(details.config || {}, null, 2);
+    const existingModal = document.getElementById('manifestOnlyModal');
+    if (existingModal) existingModal.remove();
     
-    manifestModal.show();
+    document.body.insertAdjacentHTML('beforeend', html);
+    const modal = new bootstrap.Modal(document.getElementById('manifestOnlyModal'));
+    modal.show();
+}
+
+function viewLayers(repo, tag) {
+    fetch(`/api/vulnerabilities/${encodeURIComponent(currentRegistry)}`)
+        .then(r => r.json())
+        .then(data => {
+            const results = data.results || {};
+            const key = `${repo}:${tag}`;
+            const result = results[key];
+            const details = tagDetailsCache[tag];
+            const manifestLayers = details?.manifest?.layers || [];
+            
+            let html = `
+                <div class="modal fade" id="layersModal" tabindex="-1">
+                    <div class="modal-dialog modal-xl">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Layers: ${repo}:${tag}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">`;
+            
+            manifestLayers.forEach((layer, idx) => {
+                const layerDigest = layer.digest.substring(7, 19);
+                let vulnLayer = null;
+                
+                if (result && result.layers) {
+                    vulnLayer = result.layers[idx];
+                }
+                
+                html += `<div class="card mb-2">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>Layer ${idx + 1}</strong> <code>${layerDigest}</code>
+                                <span class="badge bg-secondary ms-2">${formatSize(layer.size)}</span>
+                            </div>
+                            <div>`;
+                
+                if (vulnLayer && vulnLayer.total > 0) {
+                    html += `<span class="badge bg-danger">${vulnLayer.summary.CRITICAL || 0} C</span>
+                            <span class="badge bg-warning">${vulnLayer.summary.HIGH || 0} H</span>
+                            <span class="badge bg-info">${vulnLayer.summary.MEDIUM || 0} M</span>
+                            <span class="badge bg-secondary">${vulnLayer.summary.LOW || 0} L</span>`;
+                } else {
+                    html += `<span class="text-muted">No vulnerabilities</span>`;
+                }
+                
+                html += `</div>
+                        </div>
+                    </div>
+                </div>`;
+            });
+            
+            html += `</div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            
+            const existingModal = document.getElementById('layersModal');
+            if (existingModal) existingModal.remove();
+            
+            document.body.insertAdjacentHTML('beforeend', html);
+            const modal = new bootstrap.Modal(document.getElementById('layersModal'));
+            modal.show();
+        });
+}
+
+function viewConfig(registryName, repo, tag) {
+    const details = tagDetailsCache[tag];
+    if (!details) {
+        showAlert('Loading tag details...', 'info');
+        return;
+    }
+    
+    let html = `
+        <div class="modal fade" id="configModal" tabindex="-1">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Config: ${repo}:${tag}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <pre><code>${JSON.stringify(details.config || {}, null, 2)}</code></pre>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+    
+    const existingModal = document.getElementById('configModal');
+    if (existingModal) existingModal.remove();
+    
+    document.body.insertAdjacentHTML('beforeend', html);
+    const modal = new bootstrap.Modal(document.getElementById('configModal'));
+    modal.show();
 }
 
 function scanVulnerabilities(registryName, repo, tag) {

@@ -9,11 +9,12 @@
     "default": false,
     "bulkOperationsEnabled": true,
     "vulnerabilityScan": {
-      "enabled": false,
+      "enabled": true,
       "scanner": "trivy",
-      "scannerUrl": "",
+      "scannerUrl": "http://trivy:8080",
       "autoScanRules": [],
-      "scanLatestOnly": 1
+      "scanLatestOnly": 1,
+      "autoScan": true
     }
   },
   {

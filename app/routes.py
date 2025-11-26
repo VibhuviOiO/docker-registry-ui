@@ -147,9 +147,6 @@ def api_bulk_operation():
     if not registry:
         return jsonify({"success": False, "error": "Registry not found"}), 404
     
-    if not registry.get("bulkOperationsEnabled", False):
-        return jsonify({"success": False, "error": "Bulk operations not enabled for this registry"}), 403
-    
     registry_name = data.get("registry")
     repo_pattern = data.get("repoPattern", "*")
     older_than_days = data.get("olderThanDays")
@@ -254,16 +251,18 @@ def api_scan_image(registry_name, repo, tag):
     if not registry:
         return jsonify({"error": "Registry not found"}), 404
     
-    vuln_scan = registry.get("vulnerabilityScan", {})
-    if not vuln_scan.get("enabled"):
-        return jsonify({"error": "Vulnerability scanning not enabled for this registry"}), 400
-    
     try:
-        from .scanners.factory import get_scanner
-        scanner = get_scanner(vuln_scan.get("scanner", "trivy"), vuln_scan.get("scannerUrl"))
+        from .scanners.trivy import TrivyScanner
+        from .data_store import store_scan_results
         
-        registry_url = registry["api"].replace("http://", "").replace("https://", "")
+        scanner = TrivyScanner("builtin", 300)
+        
+        registry_url = registry["api"]
+        logger.info(f"Scanning {registry_url}/{repo}:{tag}")
         result = scanner.scan_image(registry_url, repo, tag)
+        logger.info(f"Scan result: {result}")
+        
+        store_scan_results(registry_name, repo, tag, result)
         
         return jsonify(result)
     except Exception as e:
@@ -372,6 +371,7 @@ def api_scan_all(registry_name):
     
     try:
         from .scanners.factory import get_scanner
+        from .data_store import store_scan_results
         import re
         
         scanner = get_scanner(vuln_scan.get("scanner", "trivy"), vuln_scan.get("scannerUrl"))
@@ -383,8 +383,10 @@ def api_scan_all(registry_name):
         
         auto_scan_rules = vuln_scan.get("autoScanRules", [])
         scan_latest_only = vuln_scan.get("scanLatestOnly", 1)
-        registry_url = registry["api"].replace("http://", "").replace("https://", "")
+        registry_url = registry["api"]
         scanned = 0
+        
+        logger.info(f"Starting scan-all for {registry_name}, {len(repos)} repos")
         
         for repo in repos:
             should_scan = not auto_scan_rules
@@ -400,9 +402,13 @@ def api_scan_all(registry_name):
             
             tags = fetch_repository_tags(registry["api"], repo, auth)
             for tag in tags[:scan_latest_only]:
-                scanner.scan_image(registry_url, repo, tag)
+                logger.info(f"Scanning {repo}:{tag}")
+                result = scanner.scan_image(registry_url, repo, tag)
+                logger.info(f"Scan result for {repo}:{tag}: {result}")
+                store_scan_results(registry_name, repo, tag, result)
                 scanned += 1
         
+        logger.info(f"Scan-all completed: {scanned} images scanned")
         return jsonify({"success": True, "scanned": scanned})
     except Exception as e:
         logger.error(f"Scan all error: {str(e)}")
@@ -411,7 +417,9 @@ def api_scan_all(registry_name):
 @api_bp.route("/vulnerabilities/<registry_name>")
 def api_vulnerabilities(registry_name):
     """Get vulnerability scan results"""
-    return jsonify({"results": {}, "error": "Scan results storage not implemented yet"})
+    from .data_store import get_scan_results
+    results = get_scan_results(registry_name)
+    return jsonify({"results": results})
 
 @api_bp.route("/analytics/<registry_name>")
 def api_analytics(registry_name):

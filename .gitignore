@@ -32,6 +32,7 @@ Thumbs.db
 registry-data/
 *.tar
 *.tar.gz
+docker/data/
 
 # Logs
 *.log
@@ -41,4 +42,3 @@ logs/
 dist/
 build/
 *.egg-info/
-docker/docker-compose.yml

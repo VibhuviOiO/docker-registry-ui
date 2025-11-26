@@ -20,66 +20,7 @@ function switchToRegistryConfig() {
 }
 
 function checkBulkOpsEnabled() {
-    fetch('/api/registries')
-        .then(r => r.json())
-        .then(data => {
-            const registry = data.registries.find(r => r.name === currentRegistry);
-            if (!registry || !registry.bulkOperationsEnabled) {
-                const bulkView = document.getElementById('bulk-operations-view');
-                bulkView.innerHTML = `
-                    <div class="bg-success bg-opacity-10 border border-success rounded p-4">
-                        <h5 class="text-success"><i class="bi bi-shield-lock"></i> Bulk Operations Setup</h5>
-                        <p class="text-dark">Bulk operations are currently disabled for <strong>${currentRegistry}</strong> registry.</p>
-                        <hr>
-                        <h6 class="text-success">Two Ways to Enable:</h6>
-                        
-                        <div class="row mt-3">
-                            <div class="col-md-6">
-                                <div class="card h-100">
-                                    <div class="card-header bg-success text-white">
-                                        <strong>Option 1: Via UI (Recommended)</strong>
-                                    </div>
-                                    <div class="card-body">
-                                        <ol class="mb-0">
-                                            <li>Go to <a href="#" onclick="switchToRegistryConfig(); return false;" class="fw-bold">Registry Configuration</a></li>
-                                            <li>Click the gear icon next to your registry</li>
-                                            <li>Enable "Bulk Operations"</li>
-                                            <li>Click "Save Configuration"</li>
-                                            <li>Restart the application</li>
-                                        </ol>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="col-md-6">
-                                <div class="card h-100">
-                                    <div class="card-header bg-info text-white">
-                                        <strong>Option 2: Via Configuration File</strong>
-                                    </div>
-                                    <div class="card-body">
-                                        <p><strong>Update REGISTRIES environment variable:</strong></p>
-                                        <pre class="bg-dark text-light p-2" style="font-size: 0.8rem;">REGISTRIES='[{
-  "name": "${currentRegistry}",
-  "api": "...",
-  "bulkOperationsEnabled": true
-}]'</pre>
-                                        <p class="mb-0"><strong>Then restart:</strong></p>
-                                        <pre class="bg-dark text-light p-2" style="font-size: 0.8rem;">docker-compose restart registry-ui</pre>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="alert alert-warning mt-3 mb-0">
-                            <strong><i class="bi bi-exclamation-triangle"></i> Safety Note:</strong><br>
-                            Bulk operations can permanently delete multiple images at once. This feature is disabled by default to prevent accidental data loss.
-                        </div>
-                    </div>
-                `;
-            } else {
-                populateBulkRepoDropdown();
-            }
-        });
+    populateBulkRepoDropdown();
 }
 
 function populateBulkRepoDropdown() {
@@ -224,75 +165,9 @@ function initBulkOperations() {
     updateBulkSummary();
 }
 
-function toggleBulkOperations(registryName, enabled) {
-    fetch('/api/registry/bulk-operations', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({registry: registryName, enabled: enabled})
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (data.success) {
-            const msg = `Bulk operations ${enabled ? 'enabled' : 'disabled'} for ${registryName}. <button class="btn btn-sm btn-success ms-2" onclick="downloadConfig()"><i class="bi bi-download"></i> Download Backup</button>`;
-            showAlert(msg, 'success');
-        } else {
-            showAlert(data.error || 'Failed to update setting', 'danger');
-        }
-    });
-}
 
-function showRegistryConfig(registryName) {
-    fetch('/api/registries')
-        .then(r => r.json())
-        .then(data => {
-            const registry = data.registries.find(r => r.name === registryName);
-            if (!registry) return;
-            
-            document.getElementById('config-registry-name').textContent = registryName;
-            document.getElementById('config-bulk-ops').checked = registry.bulkOperationsEnabled || false;
-            
-            const vulnScan = registry.vulnerabilityScan || {};
-            const vulnEnabled = document.getElementById('config-vuln-enabled');
-            vulnEnabled.checked = vulnScan.enabled || false;
-            document.getElementById('vuln-scan-config').style.display = vulnScan.enabled ? 'block' : 'none';
-            document.getElementById('config-scanner').value = vulnScan.scanner || 'trivy';
-            document.getElementById('config-scanner-url').value = vulnScan.scannerUrl || '';
-            document.getElementById('config-autoscan').checked = vulnScan.autoScan || false;
-            
-            document.getElementById('registry-config-details').style.display = 'block';
-            document.getElementById('registry-config-details').dataset.registry = registryName;
-        });
-}
 
-function saveRegistryConfig() {
-    const registryName = document.getElementById('registry-config-details').dataset.registry;
-    const config = {
-        registry: registryName,
-        bulkOperationsEnabled: document.getElementById('config-bulk-ops').checked,
-        vulnerabilityScan: {
-            enabled: document.getElementById('config-vuln-enabled').checked,
-            scanner: document.getElementById('config-scanner').value,
-            scannerUrl: document.getElementById('config-scanner-url').value,
-            autoScan: document.getElementById('config-autoscan').checked
-        }
-    };
-    
-    fetch('/api/registry/config', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(config)
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (data.success) {
-            const msg = `${data.message || 'Configuration saved successfully.'} <button class="btn btn-sm btn-success ms-2" onclick="downloadConfig()"><i class="bi bi-download"></i> Download Backup</button>`;
-            showAlert(msg, 'success');
-            document.getElementById('registry-config-details').style.display = 'none';
-        } else {
-            showAlert(data.error || 'Failed to save configuration', 'danger');
-        }
-    });
-}
+
 
 function downloadConfig() {
     fetch('/api/registries')

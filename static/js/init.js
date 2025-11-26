@@ -33,7 +33,7 @@ window.addEventListener('DOMContentLoaded', function() {
             document.getElementById('cleanup-view').style.display = view === 'cleanup' ? 'block' : 'none';
             document.getElementById('bulk-operations-view').style.display = view === 'bulk' ? 'block' : 'none';
             document.getElementById('analytics-view').style.display = view === 'analytics' ? 'block' : 'none';
-            document.getElementById('vulnerabilities-view').style.display = view === 'vulnerabilities' ? 'block' : 'none';
+
             
             const setupView = document.getElementById('setup-wizard-view');
             if (setupView) setupView.style.display = 'none';
@@ -44,9 +44,7 @@ window.addEventListener('DOMContentLoaded', function() {
             if (view === 'bulk' && currentRegistry) {
                 checkBulkOpsEnabled();
             }
-            if (view === 'vulnerabilities' && currentRegistry) {
-                loadVulnerabilities();
-            }
+
         });
     });
     
@@ -206,39 +204,9 @@ window.addEventListener('DOMContentLoaded', function() {
     initSetupWizard();
     checkFirstRun();
     
-    const scanAllBtn = document.getElementById('scanAllBtn');
-    if (scanAllBtn) {
-        scanAllBtn.addEventListener('click', scanAllImages);
-    }
+
     
-    const refreshVulnBtn = document.getElementById('refreshVulnBtn');
-    if (refreshVulnBtn) {
-        refreshVulnBtn.addEventListener('click', loadVulnerabilities);
-    }
-    
-    document.querySelectorAll('.bulk-ops-toggle').forEach(toggle => {
-        toggle.addEventListener('change', function() {
-            toggleBulkOperations(this.dataset.registry, this.checked);
-        });
-    });
-    
-    document.querySelectorAll('.config-details-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            showRegistryConfig(this.dataset.registry);
-        });
-    });
-    
-    const vulnEnabled = document.getElementById('config-vuln-enabled');
-    if (vulnEnabled) {
-        vulnEnabled.addEventListener('change', function() {
-            document.getElementById('vuln-scan-config').style.display = this.checked ? 'block' : 'none';
-        });
-    }
-    
-    const saveConfigBtn = document.getElementById('save-registry-config');
-    if (saveConfigBtn) {
-        saveConfigBtn.addEventListener('click', saveRegistryConfig);
-    }
+
     
     const downloadConfigBtn = document.getElementById('download-config-btn');
     if (downloadConfigBtn) {
@@ -361,9 +329,5 @@ window.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    document.querySelectorAll('.vuln-scan-toggle').forEach(toggle => {
-        toggle.addEventListener('change', function() {
-            toggleVulnScan(this.dataset.registry, this.checked);
-        });
-    });
+
 });

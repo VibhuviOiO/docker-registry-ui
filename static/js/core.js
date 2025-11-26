@@ -37,7 +37,7 @@ function formatSize(bytes) {
 }
 
 function formatTimeAgo(dateString) {
-    const date = new Date(dateString);
+    const date = new Date(dateString.replace('Z', ''));
     const now = new Date();
     const seconds = Math.floor((now - date) / 1000);
     
@@ -48,3 +48,5 @@ function formatTimeAgo(dateString) {
     if (seconds < 31536000) return `${Math.floor(seconds / 2592000)} months ago`;
     return `${Math.floor(seconds / 31536000)} years ago`;
 }
+
+

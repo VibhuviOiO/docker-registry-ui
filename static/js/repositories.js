@@ -98,25 +98,39 @@ function renderTags(tags) {
             <div class="mb-2">
                 <div class="d-flex justify-content-between align-items-center">
                     <div class="flex-grow-1">
-                        <div class="d-flex align-items-center mb-1">
-                            <strong class="me-2">${tag}</strong>
-                            <span class="badge bg-light text-dark tag-digest" data-tag="${tag}"></span>
-                        </div>
-                        <div class="d-flex gap-3 text-muted small">
-                            <span class="tag-size" data-tag="${tag}">
-                                <i class="bi bi-hdd"></i> <span class="spinner-border spinner-border-sm"></span>
-                            </span>
-                            <span class="tag-created" data-tag="${tag}">
-                                <i class="bi bi-clock"></i> <span class="spinner-border spinner-border-sm"></span>
-                            </span>
+                        <div class="d-flex align-items-start">
+                            <div class="flex-grow-1">
+                                <div class="d-flex align-items-center mb-1">
+                                    <strong class="me-2">${tag}</strong>
+                                    <span class="badge bg-light text-dark tag-digest" data-tag="${tag}"></span>
+                                </div>
+                                <div class="d-flex gap-3 text-muted small">
+                                    <span class="tag-size" data-tag="${tag}">
+                                        <i class="bi bi-hdd"></i> <span class="spinner-border spinner-border-sm"></span>
+                                    </span>
+                                    <span class="tag-created" data-tag="${tag}">
+                                        <i class="bi bi-clock"></i> <span class="spinner-border spinner-border-sm"></span>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="tag-vuln" data-tag="${tag}" style="min-width: 250px;"></div>
                         </div>
                     </div>
                     <div class="btn-group btn-group-sm">
                         <button class="btn btn-outline-secondary" onclick="viewManifest('${currentRegistry}', '${currentRepo}', '${tag}')" title="View manifest">
-                            <i class="bi bi-file-code"></i>
+                            Manifest
                         </button>
-                        <button class="btn btn-outline-info scan-vuln-btn" onclick="scanVulnerabilities('${currentRegistry}', '${currentRepo}', '${tag}')" title="Scan vulnerabilities">
-                            <i class="bi bi-shield-check"></i>
+                        <button class="btn btn-outline-secondary" onclick="viewLayers('${currentRepo}', '${tag}')" title="View layers">
+                            Layers
+                        </button>
+                        <button class="btn btn-outline-secondary" onclick="viewConfig('${currentRegistry}', '${currentRepo}', '${tag}')" title="View config">
+                            Config
+                        </button>
+                        <button class="btn btn-outline-primary tag-scan-btn" data-tag="${tag}" onclick="scanTagVulnerabilities('${currentRegistry}', '${currentRepo}', '${tag}', this)" title="Scan vulnerabilities">
+                            Scan
+                        </button>
+                        <button class="btn btn-outline-secondary tag-cve-btn d-none" data-tag="${tag}" onclick="viewCVEDetails('${currentRepo}', '${tag}')" title="View CVEs">
+                            CVEs
                         </button>
                         ${!readOnly ? `<button class="btn btn-outline-danger" onclick="deleteTag('${currentRegistry}', '${currentRepo}', '${tag}')">
                             <i class="bi bi-trash"></i>
@@ -134,6 +148,7 @@ function renderTags(tags) {
     });
     
     document.getElementById('tags-list').innerHTML = html;
+    loadTagVulnerabilities(tags);
 }
 
 function loadTagSizes(registryName, repo, tags) {
@@ -218,6 +233,218 @@ function sortAndFilterTags() {
             tagsList.appendChild(item);
         }
     });
+}
+
+function loadTagVulnerabilities(tags) {
+    fetch(`/api/vulnerabilities/${encodeURIComponent(currentRegistry)}`)
+        .then(r => r.json())
+        .then(data => {
+            const results = data.results || {};
+            tags.forEach(tag => {
+                const key = `${currentRepo}:${tag}`;
+                const result = results[key];
+                const vulnEl = document.querySelector(`.tag-vuln[data-tag="${tag}"]`);
+                const btnEl = document.querySelector(`.tag-scan-btn[data-tag="${tag}"]`);
+                
+                if (result && vulnEl && btnEl) {
+                    const summary = result.summary || {};
+                    const total = result.total || 0;
+                    
+                    let badges = '<div><small class="text-muted">Vulnerabilities:</small></div>';
+                    badges += '<div class="d-flex gap-2 mt-1">';
+                    badges += `<span class="badge bg-danger">${summary.CRITICAL || 0} C</span>`;
+                    badges += `<span class="badge bg-warning">${summary.HIGH || 0} H</span>`;
+                    badges += `<span class="badge bg-info">${summary.MEDIUM || 0} M</span>`;
+                    badges += `<span class="badge bg-secondary">${summary.LOW || 0} L</span>`;
+                    badges += '</div>';
+                    vulnEl.innerHTML = badges;
+                    
+                    btnEl.textContent = 'Rescan';
+                    btnEl.classList.remove('btn-outline-primary');
+                    btnEl.classList.add('btn-outline-secondary');
+                    
+                    const cveBtn = document.querySelector(`.tag-cve-btn[data-tag="${tag}"]`);
+                    if (cveBtn && total > 0) {
+                        cveBtn.classList.remove('d-none');
+                    }
+                }
+            });
+        });
+}
+
+function scanTagVulnerabilities(registryName, repo, tag, btn) {
+    const originalHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+    
+    fetch(`/api/scan/${encodeURIComponent(registryName)}/${encodeURIComponent(repo)}/${encodeURIComponent(tag)}`)
+        .then(r => r.json())
+        .then(data => {
+            btn.disabled = false;
+            btn.innerHTML = originalHtml;
+            
+            if (data.error) {
+                showAlert(`Scan failed: ${data.error}`, 'danger');
+            } else {
+                const total = data.total || 0;
+                const critical = data.summary?.CRITICAL || 0;
+                const high = data.summary?.HIGH || 0;
+                
+                const vulnEl = document.querySelector(`.tag-vuln[data-tag="${tag}"]`);
+                if (vulnEl) {
+                    let badges = '<div><small class="text-muted">Vulnerabilities:</small></div>';
+                    badges += '<div class="d-flex gap-2 mt-1">';
+                    badges += `<span class="badge bg-danger">${critical} C</span>`;
+                    badges += `<span class="badge bg-warning">${high} H</span>`;
+                    badges += `<span class="badge bg-info">${data.summary?.MEDIUM || 0} M</span>`;
+                    badges += `<span class="badge bg-secondary">${data.summary?.LOW || 0} L</span>`;
+                    badges += '</div>';
+                    vulnEl.innerHTML = badges;
+                }
+                
+                const cveBtn = document.querySelector(`.tag-cve-btn[data-tag="${tag}"]`);
+                if (cveBtn) {
+                    if (total > 0) {
+                        cveBtn.classList.remove('d-none');
+                    } else {
+                        cveBtn.classList.add('d-none');
+                    }
+                }
+                
+                btn.textContent = 'Rescan';
+                btn.classList.remove('btn-outline-primary');
+                btn.classList.add('btn-outline-secondary');
+                
+                if (total === 0) {
+                    showAlert(`✓ No vulnerabilities found in ${repo}:${tag}`, 'success');
+                } else {
+                    showAlert(`Found ${total} vulnerabilities (Critical: ${critical}, High: ${high}) in ${repo}:${tag}`, 'warning');
+                }
+            }
+        })
+        .catch(err => {
+            btn.disabled = false;
+            btn.innerHTML = originalHtml;
+            showAlert('Scan failed: ' + err.message, 'danger');
+        });
+}
+
+function viewCVEDetails(repo, tag) {
+    fetch(`/api/vulnerabilities/${encodeURIComponent(currentRegistry)}`)
+        .then(r => r.json())
+        .then(data => {
+            const results = data.results || {};
+            const key = `${repo}:${tag}`;
+            const result = results[key];
+            
+            if (!result || !result.details) {
+                showAlert('No CVE details available', 'warning');
+                return;
+            }
+            
+            const details = result.details || [];
+            let html = `
+                <div class="modal fade" id="cveModal" tabindex="-1">
+                    <div class="modal-dialog modal-xl">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">CVE Details: ${repo}:${tag}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label class="form-label">Filter by Severity:</label>
+                                    <div class="btn-group" role="group">
+                                        <input type="checkbox" class="btn-check" id="filter-critical" checked>
+                                        <label class="btn btn-outline-danger btn-sm" for="filter-critical">CRITICAL</label>
+                                        
+                                        <input type="checkbox" class="btn-check" id="filter-high" checked>
+                                        <label class="btn btn-outline-warning btn-sm" for="filter-high">HIGH</label>
+                                        
+                                        <input type="checkbox" class="btn-check" id="filter-medium" checked>
+                                        <label class="btn btn-outline-info btn-sm" for="filter-medium">MEDIUM</label>
+                                        
+                                        <input type="checkbox" class="btn-check" id="filter-low" checked>
+                                        <label class="btn btn-outline-secondary btn-sm" for="filter-low">LOW</label>
+                                        
+                                        <input type="checkbox" class="btn-check" id="filter-unknown" checked>
+                                        <label class="btn btn-outline-secondary btn-sm" for="filter-unknown">UNKNOWN</label>
+                                    </div>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-hover" id="cve-table">
+                                        <thead>
+                                            <tr>
+                                                <th>CVE ID</th>
+                                                <th>Severity</th>
+                                                <th>Package</th>
+                                                <th>Installed</th>
+                                                <th>Fixed</th>
+                                                <th>Title</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>`;
+            
+            details.forEach(vuln => {
+                const severityClass = vuln.severity === 'CRITICAL' ? 'danger' : 
+                                     vuln.severity === 'HIGH' ? 'warning' : 
+                                     vuln.severity === 'MEDIUM' ? 'info' : 'secondary';
+                const cveId = vuln.id || 'N/A';
+                const cveLink = cveId !== 'N/A' ? `https://nvd.nist.gov/vuln/detail/${cveId}` : '#';
+                html += `<tr data-severity="${vuln.severity}">
+                    <td><a href="${cveLink}" target="_blank" rel="noopener"><code>${cveId}</code></a></td>
+                    <td><span class="badge bg-${severityClass}">${vuln.severity}</span></td>
+                    <td>${vuln.package || 'N/A'}</td>
+                    <td><code>${vuln.version || 'N/A'}</code></td>
+                    <td><code>${vuln.fixedVersion || 'N/A'}</code></td>
+                    <td><small>${vuln.title || 'N/A'}</small></td>
+                </tr>`;
+            });
+            
+            html += `</tbody></table></div>`;
+            
+            if (result.layers && result.layers.length > 0) {
+                html += `<h6 class="mt-4">Vulnerabilities by Layer</h6>`;
+                result.layers.forEach((layer, idx) => {
+                    html += `<div class="card mb-2">
+                        <div class="card-header" style="font-size:0.875rem;">
+                            <strong>Layer ${idx + 1}</strong> <code>${layer.digest}</code>
+                            <span class="float-end">
+                                <span class="badge bg-danger">${layer.summary.CRITICAL || 0}</span>
+                                <span class="badge bg-warning">${layer.summary.HIGH || 0}</span>
+                                <span class="badge bg-info">${layer.summary.MEDIUM || 0}</span>
+                                <span class="badge bg-secondary">${layer.summary.LOW || 0}</span>
+                            </span>
+                        </div>
+                    </div>`;
+                });
+            }
+            
+            html += `</div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            
+            const existingModal = document.getElementById('cveModal');
+            if (existingModal) existingModal.remove();
+            
+            document.body.insertAdjacentHTML('beforeend', html);
+            const modal = new bootstrap.Modal(document.getElementById('cveModal'));
+            modal.show();
+            
+            // Add filter event listeners
+            ['critical', 'high', 'medium', 'low', 'unknown'].forEach(severity => {
+                document.getElementById(`filter-${severity}`).addEventListener('change', function() {
+                    const rows = document.querySelectorAll(`#cve-table tbody tr[data-severity="${severity.toUpperCase()}"]`);
+                    rows.forEach(row => {
+                        row.style.display = this.checked ? '' : 'none';
+                    });
+                });
+            });
+        });
 }
 
 function copyToClipboard(inputId) {
