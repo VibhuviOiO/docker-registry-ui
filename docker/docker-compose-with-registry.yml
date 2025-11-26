@@ -24,9 +24,7 @@ services:
           cpus: '1'
           memory: 512M
   registry-ui:
-    build:
-      context: ..
-      dockerfile: Dockerfile
+    image: ghcr.io/vibhuvioio/docker-registry-ui:latest
     container_name: registry-ui
     ports:
       - "5003:5000"

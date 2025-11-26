@@ -83,14 +83,14 @@
   -e CONFIG_FILE=/app/data/registries.config.json \
   -e READ_ONLY=false \
   -v ./data:/app/data \
-  vibhuvi/docker-registry-ui:latest</code></pre>
+  ghcr.io/vibhuvioio/docker-registry-ui:latest</code></pre>
                 </div>
                 <div class="install-card">
                     <h3>Docker Compose</h3>
                     <pre><code>version: '3.8'
 services:
   registry-ui:
-    image: vibhuvi/docker-registry-ui:latest
+    image: ghcr.io/vibhuvioio/docker-registry-ui:latest
     ports:
       - "5000:5000"
     environment:

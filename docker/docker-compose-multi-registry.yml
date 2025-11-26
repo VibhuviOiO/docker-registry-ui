@@ -35,9 +35,7 @@ services:
 
   # Registry UI
   registry-ui:
-    build:
-      context: ..
-      dockerfile: Dockerfile
+    image: ghcr.io/vibhuvioio/docker-registry-ui:latest
     container_name: registry-ui
     ports:
       - "5003:5000"

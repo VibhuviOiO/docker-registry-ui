@@ -65,7 +65,7 @@
   -e CONFIG_FILE=/app/data/registries.config.json \
   -e READ_ONLY=false \
   -v $(pwd)/data:/app/data \
-  vibhuvi/docker-registry-ui:latest</code></pre>
+  ghcr.io/vibhuvioio/docker-registry-ui:latest</code></pre>
 
             <h3>2. Docker Compose</h3>
             <p>Create a <code>docker-compose.yml</code> file:</p>
@@ -82,7 +82,7 @@ services:
       - registry-data:/var/lib/registry
 
   registry-ui:
-    image: vibhuvi/docker-registry-ui:latest
+    image: ghcr.io/vibhuvioio/docker-registry-ui:latest
     ports:
       - "5000:5000"
     environment:
