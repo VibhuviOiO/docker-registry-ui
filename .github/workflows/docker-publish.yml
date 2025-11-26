@@ -43,6 +43,13 @@ jobs:
         run: |
           echo "org_lower=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
 
+      - name: Extract version from version.py
+        id: version
+        run: |
+          VERSION=$(grep -oP '__version__ = "\K[^"]+' app/version.py)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Extracted version: $VERSION"
+
       - name: Extract metadata for Docker
         id: meta
         uses: docker/metadata-action@v5
@@ -50,11 +57,10 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ steps.lowercase.outputs.org_lower }}/${{ env.IMAGE_NAME }}
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=${{ steps.version.outputs.version }},enable={{is_default_branch}}
             type=ref,event=branch
             type=ref,event=pr,prefix=pr-
             type=sha,prefix={{branch}}-,format=short
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5

@@ -253,14 +253,6 @@ function deleteTag(registryName, repo, tag) {
     deleteModal.show();
 }
 
-function switchToRegistryConfigOld() {
-    document.querySelectorAll('[data-view]').forEach(l => l.classList.remove('active'));
-    document.querySelector('[data-view="cleanup"]').classList.add('active');
-    document.getElementById('repositories-view').style.display = 'none';
-    document.getElementById('registries-view').style.display = 'none';
-    document.getElementById('cleanup-view').style.display = 'block';
-}
-
 function checkRegistryHealth() {
     fetch('/api/registries')
         .then(r => r.json())
