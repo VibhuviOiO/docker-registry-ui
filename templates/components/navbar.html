@@ -1,6 +1,6 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+<nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
   <div class="container-fluid">
-    <button class="btn btn-dark" id="sidebarToggle">
+    <button class="btn btn-outline-secondary" id="sidebarToggle">
       <i class="bi bi-list"></i>
     </button>
     <a class="navbar-brand ms-2" href="#">🐳 Docker Registry UI</a>
@@ -13,7 +13,7 @@
         {% endfor %}
       </select>
       
-      <span class="badge {{ 'bg-info' if read_only else 'bg-warning text-dark' }} me-2">
+      <span class="badge {{ 'bg-success' if read_only else 'bg-danger' }} me-2">
         {{ 'READ ONLY' if read_only else 'READ/WRITE' }}
       </span>
     </div>

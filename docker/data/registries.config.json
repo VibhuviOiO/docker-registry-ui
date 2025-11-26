@@ -1,20 +1,54 @@
 [
   {
-    "name": "Local",
-    "api": "http://registry:5000",
+    "name": "Local 1",
+    "api": "http://registry-1:5000",
+    "isAuthEnabled": false,
+    "user": "",
+    "password": "",
+    "apiToken": "",
+    "default": false,
+    "bulkOperationsEnabled": true,
+    "vulnerabilityScan": {
+      "enabled": false,
+      "scanner": "trivy",
+      "scannerUrl": "",
+      "autoScanRules": [],
+      "scanLatestOnly": 1
+    }
+  },
+  {
+    "name": "Local 2 ",
+    "api": "http://registry-2:5000",
+    "url": "",
+    "isAuthEnabled": false,
+    "user": "",
+    "password": "",
+    "apiToken": "",
+    "default": false,
+    "bulkOperationsEnabled": false,
+    "vulnerabilityScan": {
+      "enabled": false,
+      "scanner": "trivy",
+      "scannerUrl": "",
+      "autoScanRules": [],
+      "scanLatestOnly": 1
+    }
+  },
+  {
+    "name": "Local 1",
+    "api": "http://registry-1:5000",
     "isAuthEnabled": false,
     "user": "",
     "password": "",
     "apiToken": "",
     "default": true,
-    "bulkOperationsEnabled": true,
+    "bulkOperationsEnabled": false,
     "vulnerabilityScan": {
-      "enabled": true,
+      "enabled": false,
       "scanner": "trivy",
       "scannerUrl": "",
       "autoScanRules": [],
-      "scanLatestOnly": 1,
-      "autoScan": true
+      "scanLatestOnly": 1
     }
   }
 ]

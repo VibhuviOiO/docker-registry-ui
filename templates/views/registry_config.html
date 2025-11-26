@@ -1,5 +1,81 @@
 <div id="registries-view" style="display: none;">
-  <h4>Registry Configuration</h4>
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <h4 class="mb-0">Registry Configuration</h4>
+    <div>
+      <button class="btn btn-sm btn-success me-2" id="download-all-config-btn">
+        <i class="bi bi-download"></i> Download Config
+      </button>
+      <button class="btn btn-sm btn-primary" id="add-registry-btn">
+        <i class="bi bi-plus-circle"></i> Add Registry
+      </button>
+    </div>
+  </div>
+  <hr class="mb-3">
+  
+  <div id="add-registry-form" style="display: none;" class="card mb-3">
+    <div class="card-header bg-primary text-white">
+      <h5 class="mb-0"><i class="bi bi-plus-circle"></i> Add New Registry</h5>
+    </div>
+    <div class="card-body">
+      <form id="inline-registry-form">
+        <div class="row">
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label class="form-label">Registry Name <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="inline-name" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Registry API URL <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="inline-api" placeholder="http://registry:5000" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Registry URL (for docker pull)</label>
+              <input type="text" class="form-control" id="inline-url" placeholder="localhost:5000">
+              <small class="text-muted">Leave empty to auto-detect from API URL</small>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mb-3">
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="inline-auth">
+                <label class="form-check-label">Enable Authentication</label>
+              </div>
+            </div>
+            <div id="inline-auth-fields" style="display: none;">
+              <div class="mb-3">
+                <label class="form-label">Username</label>
+                <input type="text" class="form-control" id="inline-user">
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Password</label>
+                <input type="password" class="form-control" id="inline-password">
+              </div>
+            </div>
+            <div class="mb-3">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="inline-default">
+                <label class="form-check-label">Set as default registry</label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <hr>
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Add Registry
+          </button>
+          <button type="button" class="btn btn-secondary" id="cancel-add-registry">
+            <i class="bi bi-x"></i> Cancel
+          </button>
+          <button type="button" class="btn btn-outline-secondary" id="inline-test-connection">
+            <i class="bi bi-plug"></i> Test Connection
+          </button>
+          <span id="inline-test-result"></span>
+        </div>
+      </form>
+    </div>
+  </div>
+  
   <div class="table-responsive">
     <table class="table table-striped">
       <thead>

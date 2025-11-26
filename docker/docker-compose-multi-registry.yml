@@ -1,0 +1,67 @@
+services:
+  # First Docker Registry
+  registry-1:
+    image: registry:2
+    container_name: docker-registry-1
+    ports:
+      - "5001:5000"
+    environment:
+      REGISTRY_STORAGE_DELETE_ENABLED: "true"
+    volumes:
+      - registry-1-data:/var/lib/registry
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:5000/v2/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Second Docker Registry
+  registry-2:
+    image: registry:2
+    container_name: docker-registry-2
+    ports:
+      - "5002:5000"
+    environment:
+      REGISTRY_STORAGE_DELETE_ENABLED: "true"
+    volumes:
+      - registry-2-data:/var/lib/registry
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:5000/v2/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Registry UI
+  registry-ui:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    container_name: registry-ui
+    ports:
+      - "5003:5000"
+    environment:
+      - CONFIG_FILE=/app/data/registries.config.json
+      - READ_ONLY=false
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - registry-1
+      - registry-2
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:5000/health/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  registry-1-data:
+  registry-2-data:

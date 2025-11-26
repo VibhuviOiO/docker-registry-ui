@@ -117,6 +117,7 @@ function createRegistry(e) {
 
 function showSetupSuccess(registry) {
     const wizardView = document.getElementById('setup-wizard-view');
+    if (!wizardView) return;
     wizardView.innerHTML = `
         <div class="row justify-content-center">
             <div class="col-lg-8">
@@ -205,10 +206,14 @@ function checkFirstRun() {
 }
 
 function showSetupWizard() {
-    document.getElementById('setup-wizard-view').style.display = 'block';
-    document.getElementById('repositories-view').style.display = 'none';
-    document.querySelector('.sidebar').style.display = 'none';
-    updateConfigPreview();
+    const setupView = document.getElementById('setup-wizard-view');
+    if (setupView) {
+        setupView.style.display = 'block';
+        document.getElementById('repositories-view').style.display = 'none';
+        const sidebar = document.querySelector('.sidebar');
+        if (sidebar) sidebar.style.display = 'none';
+        updateConfigPreview();
+    }
 }
 
 function updateConfigPreview() {

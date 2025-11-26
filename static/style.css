@@ -1,109 +1,159 @@
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #f5f7fa;
     min-height: 100vh;
+    font-size: 0.875rem;
 }
 
 .navbar {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    background: #0747a6 !important;
+    border-bottom: none;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    min-height: 36px;
+}
+
+.navbar .navbar-brand {
+    color: #ffffff !important;
+    font-size: 1.1rem;
+    font-weight: 600;
+    padding: 0.2rem 0;
+    line-height: 1.2;
+}
+
+.navbar .form-select {
+    font-size: 0.875rem;
+    padding: 0.3rem 0.6rem;
+    background-color: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #ffffff;
+}
+
+.navbar .form-select option {
+    background: #ffffff;
+    color: #333;
+}
+
+.navbar .badge {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.5rem;
+}
+
+.navbar .btn {
+    color: #ffffff !important;
+    border-color: rgba(255,255,255,0.3);
+    font-size: 0.8rem;
+    padding: 0.25rem 0.5rem;
+}
+
+.navbar .btn:hover {
+    background-color: rgba(255,255,255,0.1);
 }
 
 .sidebar {
-    width: 250px;
+    width: 220px;
     min-height: 100vh;
     transition: all 0.3s;
-    background: white;
-    box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+    background: #f4f5f7;
+    box-shadow: 2px 0 4px rgba(0,0,0,0.05);
 }
 
 .sidebar.collapsed {
-    margin-left: -250px;
+    margin-left: -220px;
 }
 
 .sidebar .nav-link {
-    color: #4a5568;
-    padding: 0.875rem 1.25rem;
-    border-radius: 0.5rem;
-    margin: 0.25rem 0.75rem;
+    color: #42526e;
+    padding: 0.45rem 0.75rem;
+    border-radius: 0.25rem;
+    margin: 0.1rem 0.5rem;
     font-weight: 500;
-    transition: all 0.2s;
+    transition: all 0.15s;
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+
+.sidebar h6 {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #6b778c;
+    padding: 0.4rem 0.75rem 0.2rem;
+    margin-bottom: 0.15rem;
 }
 
 .sidebar .nav-link:hover {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #0052cc;
     color: white;
-    transform: translateX(5px);
 }
 
 .sidebar .nav-link.active {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #0052cc;
     color: white;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 2px 8px rgba(0, 82, 204, 0.2);
 }
 
 .sidebar .nav-link i {
     margin-right: 0.5rem;
 }
 
+.navbar .container-fluid {
+    padding: 0.5rem 0.75rem;
+}
+
 .container-fluid {
-    background: white;
-    border-radius: 1rem;
-    margin: 1rem;
-    padding: 2rem;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    padding: 1rem;
 }
 
 .card {
-    border: none;
-    border-radius: 1rem;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    transition: transform 0.2s, box-shadow 0.2s;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    box-shadow: none;
+    transition: box-shadow 0.2s;
 }
 
 .card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
 }
 
 .card-header {
-    border-radius: 1rem 1rem 0 0 !important;
-    border-bottom: none;
-    padding: 1.25rem 1.5rem;
+    background: #ffffff;
+    border-radius: 0.375rem 0.375rem 0 0 !important;
+    border-bottom: 1px solid #dee2e6;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
 }
 
 .repo-row {
-    padding: 1rem 1.25rem;
+    padding: 0.75rem 1rem;
     cursor: pointer;
     border-bottom: 1px solid #e2e8f0;
     transition: all 0.2s;
-    border-radius: 0.5rem;
-    margin-bottom: 0.5rem;
+    border-radius: 0.375rem;
+    margin-bottom: 0.25rem;
+    font-size: 0.875rem;
 }
 
 .repo-row:hover {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-    transform: translateX(5px);
+    background: #f8fafc;
 }
 
 .repo-row.active {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
-    border-left: 4px solid #667eea;
-    box-shadow: 0 2px 10px rgba(102, 126, 234, 0.2);
+    background: #e6f2ff;
+    border-left: 3px solid #0052cc;
 }
 
 .tag-item {
-    padding: 1.25rem;
+    padding: 0.875rem;
     border: 1px solid #e2e8f0;
-    border-radius: 0.75rem;
-    margin-bottom: 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 0.75rem;
     background: white;
-    transition: all 0.2s;
+    transition: box-shadow 0.2s;
+    font-size: 0.875rem;
 }
 
 .tag-item:hover {
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
 .tag-digest {
@@ -112,37 +162,46 @@ body {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #0052cc;
     border: none;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-    transition: all 0.2s;
+    font-size: 0.875rem;
+    padding: 0.5rem 1rem;
 }
 
 .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+    background: #0747a6;
 }
 
 .btn-success {
-    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    background: #059669;
     border: none;
-    box-shadow: 0 4px 15px rgba(17, 153, 142, 0.4);
+    font-size: 0.875rem;
+    padding: 0.5rem 1rem;
 }
 
 .btn-success:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(17, 153, 142, 0.5);
+    background: #047857;
+}
+
+.btn-sm {
+    font-size: 0.8rem;
+    padding: 0.375rem 0.75rem;
+}
+
+.form-control, .form-select {
+    font-size: 0.875rem;
 }
 
 .form-control:focus, .form-select:focus {
-    border-color: #667eea;
-    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    border-color: #0052cc;
+    box-shadow: 0 0 0 0.2rem rgba(0, 82, 204, 0.15);
 }
 
 .badge {
-    padding: 0.5rem 0.75rem;
-    border-radius: 0.5rem;
+    padding: 0.35rem 0.6rem;
+    border-radius: 0.375rem;
     font-weight: 500;
+    font-size: 0.75rem;
 }
 
 #alert-container {
@@ -160,22 +219,40 @@ body {
 }
 
 .table {
-    border-radius: 0.75rem;
+    border-radius: 0.5rem;
     overflow: hidden;
+    font-size: 0.875rem;
 }
 
 .table thead {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #0052cc;
     color: white;
+}
+
+.table th, .table td {
+    padding: 0.75rem;
 }
 
 .modal-content {
     border: none;
-    border-radius: 1rem;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+h4, h5, h6 {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+small, .small {
+    font-size: 0.8rem;
 }
 
 .footer {
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    padding: 0.6rem 1rem;
+    width: 100%;
     margin-top: auto;
 }
 
@@ -183,10 +260,10 @@ body {
     .sidebar {
         position: fixed;
         z-index: 1000;
-        background: white;
+        background: #f4f5f7;
     }
     
     .sidebar.collapsed {
-        margin-left: -250px;
+        margin-left: -220px;
     }
 }

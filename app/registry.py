@@ -68,24 +68,34 @@ def fetch_tag_details(registry_api, repo, tag, auth=None):
     try:
         auth_obj = auth if isinstance(auth, HTTPBasicAuth) else None
         
-        # Try OCI index first (multi-platform)
-        headers = {"Accept": "application/vnd.oci.image.index.v1+json"}
-        if isinstance(auth, dict):
-            headers.update(auth)
+        # Try multiple manifest formats (order matters - try most common first)
+        manifest_formats = [
+            "application/vnd.oci.image.manifest.v1+json",
+            "application/vnd.docker.distribution.manifest.v2+json",
+            "application/vnd.oci.image.index.v1+json",
+            "application/vnd.docker.distribution.manifest.list.v2+json"
+        ]
         
-        r = requests.get(
-            f"{registry_api}/v2/{repo}/manifests/{tag}",
-            headers=headers,
-            auth=auth_obj,
-            timeout=Config.TIMEOUT
-        )
-        
-        if r.status_code == 200:
-            index = r.json()
+        for accept_type in manifest_formats:
+            headers = {"Accept": accept_type}
+            if isinstance(auth, dict):
+                headers.update(auth)
             
-            # If it's an OCI index, get the first platform manifest
-            if "manifests" in index:
-                for manifest_ref in index["manifests"]:
+            r = requests.get(
+                f"{registry_api}/v2/{repo}/manifests/{tag}",
+                headers=headers,
+                auth=auth_obj,
+                timeout=Config.TIMEOUT
+            )
+            
+            if r.status_code != 200:
+                continue
+            
+            data = r.json()
+            
+            # Handle manifest list (multi-arch)
+            if "manifests" in data:
+                for manifest_ref in data["manifests"]:
                     # Skip attestation manifests
                     if manifest_ref.get("annotations", {}).get("vnd.docker.reference.type") == "attestation-manifest":
                         continue
@@ -105,8 +115,9 @@ def fetch_tag_details(registry_api, repo, tag, auth=None):
                     
                     if r2.status_code == 200:
                         manifest = r2.json()
-                        size = sum(layer.get("size", 0) for layer in manifest.get("layers", []))
-                        size += manifest.get("config", {}).get("size", 0)
+                        layers = manifest.get("layers", [])
+                        config_size = manifest.get("config", {}).get("size", 0)
+                        size = sum(layer.get("size", 0) for layer in layers) + config_size
                         
                         # Get created timestamp from config
                         created = None
@@ -123,40 +134,32 @@ def fetch_tag_details(registry_api, repo, tag, auth=None):
                                 created = config.get("created")
                         
                         return {"tag": tag, "size": size, "digest": manifest_digest, "created": created, "manifest": manifest, "config": config if config_digest else {}}
-        
-        # Fallback to Docker v2 manifest
-        headers = {"Accept": "application/vnd.docker.distribution.manifest.v2+json"}
-        if isinstance(auth, dict):
-            headers.update(auth)
-        
-        r = requests.get(
-            f"{registry_api}/v2/{repo}/manifests/{tag}",
-            headers=headers,
-            auth=auth_obj,
-            timeout=Config.TIMEOUT
-        )
-        
-        if r.status_code == 200:
-            manifest = r.json()
-            digest = r.headers.get("Docker-Content-Digest", "")
-            size = sum(layer.get("size", 0) for layer in manifest.get("layers", []))
-            size += manifest.get("config", {}).get("size", 0)
+                    else:
+                        continue
             
-            # Get created timestamp from config
-            created = None
-            config_digest = manifest.get("config", {}).get("digest")
-            if config_digest:
-                config_r = requests.get(
-                    f"{registry_api}/v2/{repo}/blobs/{config_digest}",
-                    headers=headers,
-                    auth=auth_obj,
-                    timeout=Config.TIMEOUT
-                )
-                if config_r.status_code == 200:
-                    config = config_r.json()
-                    created = config.get("created")
-            
-            return {"tag": tag, "size": size, "digest": digest, "created": created, "manifest": manifest, "config": config if config_digest else {}}
+            # Handle single manifest (v2 schema 2)
+            elif "layers" in data:
+                manifest = data
+                digest = r.headers.get("Docker-Content-Digest", "")
+                layers = manifest.get("layers", [])
+                config_size = manifest.get("config", {}).get("size", 0)
+                size = sum(layer.get("size", 0) for layer in layers) + config_size
+                
+                # Get created timestamp from config
+                created = None
+                config_digest = manifest.get("config", {}).get("digest")
+                if config_digest:
+                    config_r = requests.get(
+                        f"{registry_api}/v2/{repo}/blobs/{config_digest}",
+                        headers=headers,
+                        auth=auth_obj,
+                        timeout=Config.TIMEOUT
+                    )
+                    if config_r.status_code == 200:
+                        config = config_r.json()
+                        created = config.get("created")
+                
+                return {"tag": tag, "size": size, "digest": digest, "created": created, "manifest": manifest, "config": config if config_digest else {}}
         
         return {"tag": tag, "size": 0, "digest": "", "created": None}
     except:

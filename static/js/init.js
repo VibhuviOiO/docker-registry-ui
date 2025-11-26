@@ -35,6 +35,9 @@ window.addEventListener('DOMContentLoaded', function() {
             document.getElementById('analytics-view').style.display = view === 'analytics' ? 'block' : 'none';
             document.getElementById('vulnerabilities-view').style.display = view === 'vulnerabilities' ? 'block' : 'none';
             
+            const setupView = document.getElementById('setup-wizard-view');
+            if (setupView) setupView.style.display = 'none';
+            
             if (view === 'analytics' && currentRegistry) {
                 loadAnalytics(currentRegistry);
             }
@@ -240,6 +243,122 @@ window.addEventListener('DOMContentLoaded', function() {
     const downloadConfigBtn = document.getElementById('download-config-btn');
     if (downloadConfigBtn) {
         downloadConfigBtn.addEventListener('click', downloadConfig);
+    }
+    
+    const downloadAllConfigBtn = document.getElementById('download-all-config-btn');
+    if (downloadAllConfigBtn) {
+        downloadAllConfigBtn.addEventListener('click', downloadConfig);
+    }
+    
+    const addRegistryBtn = document.getElementById('add-registry-btn');
+    if (addRegistryBtn) {
+        addRegistryBtn.addEventListener('click', function() {
+            document.getElementById('add-registry-form').style.display = 'block';
+            this.style.display = 'none';
+        });
+    }
+    
+    const cancelAddBtn = document.getElementById('cancel-add-registry');
+    if (cancelAddBtn) {
+        cancelAddBtn.addEventListener('click', function() {
+            document.getElementById('add-registry-form').style.display = 'none';
+            document.getElementById('add-registry-btn').style.display = 'inline-block';
+            document.getElementById('inline-registry-form').reset();
+        });
+    }
+    
+    const inlineAuth = document.getElementById('inline-auth');
+    if (inlineAuth) {
+        inlineAuth.addEventListener('change', function() {
+            document.getElementById('inline-auth-fields').style.display = this.checked ? 'block' : 'none';
+        });
+    }
+    
+    const inlineTestBtn = document.getElementById('inline-test-connection');
+    if (inlineTestBtn) {
+        inlineTestBtn.addEventListener('click', function() {
+            const api = document.getElementById('inline-api').value;
+            if (!api) {
+                showAlert('Please enter Registry API URL', 'warning');
+                return;
+            }
+            
+            const result = document.getElementById('inline-test-result');
+            this.disabled = true;
+            this.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Testing...';
+            result.innerHTML = '';
+            
+            fetch('/api/test-registry', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    api: api,
+                    isAuthEnabled: document.getElementById('inline-auth').checked,
+                    user: document.getElementById('inline-user').value,
+                    password: document.getElementById('inline-password').value
+                })
+            })
+            .then(r => r.json())
+            .then(data => {
+                this.disabled = false;
+                this.innerHTML = '<i class="bi bi-plug"></i> Test Connection';
+                
+                if (data.success) {
+                    result.innerHTML = '<span class="badge bg-success"><i class="bi bi-check-circle"></i> Connected</span>';
+                } else {
+                    result.innerHTML = `<span class="badge bg-danger"><i class="bi bi-x-circle"></i> Failed: ${data.error}</span>`;
+                }
+            })
+            .catch(() => {
+                this.disabled = false;
+                this.innerHTML = '<i class="bi bi-plug"></i> Test Connection';
+                result.innerHTML = '<span class="badge bg-danger"><i class="bi bi-x-circle"></i> Error</span>';
+            });
+        });
+    }
+    
+    const inlineForm = document.getElementById('inline-registry-form');
+    if (inlineForm) {
+        inlineForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const registry = {
+                name: document.getElementById('inline-name').value,
+                api: document.getElementById('inline-api').value,
+                url: document.getElementById('inline-url').value || '',
+                isAuthEnabled: document.getElementById('inline-auth').checked,
+                user: document.getElementById('inline-user').value || '',
+                password: document.getElementById('inline-password').value || '',
+                apiToken: '',
+                default: document.getElementById('inline-default').checked,
+                bulkOperationsEnabled: false,
+                vulnerabilityScan: {
+                    enabled: false,
+                    scanner: 'trivy',
+                    scannerUrl: '',
+                    autoScanRules: [],
+                    scanLatestOnly: 1
+                }
+            };
+            
+            fetch('/api/registry/create', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(registry)
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert(`Registry "${registry.name}" added successfully! <button class="btn btn-sm btn-success ms-2" onclick="downloadConfig()"><i class="bi bi-download"></i> Download Backup</button> Refresh page to see changes.`, 'success');
+                    document.getElementById('add-registry-form').style.display = 'none';
+                    document.getElementById('add-registry-btn').style.display = 'inline-block';
+                    this.reset();
+                    setTimeout(() => window.location.reload(), 2000);
+                } else {
+                    showAlert(data.error || 'Failed to add registry', 'danger');
+                }
+            });
+        });
     }
     
     document.querySelectorAll('.vuln-scan-toggle').forEach(toggle => {

@@ -1,4 +1,7 @@
 <div id="repositories-view">
+  <h4 class="mb-2">Repositories & Images</h4>
+  <hr class="mb-3">
+  
   <div class="mb-3 d-flex gap-2">
     <input type="text" id="searchBox" class="form-control" placeholder="Search repositories...">
   </div>
@@ -47,8 +50,10 @@
           </div>
         </div>
         <div class="card-body" id="tags-container" style="max-height: 70vh; overflow-y: auto;">
-          <div id="image-name-section" style="display:none;" class="mb-3 pb-3 border-bottom">
-            <h5 class="mb-0"><i class="bi bi-box-seam"></i> <span id="repo-title"></span></h5>
+          <div id="image-name-section" style="display:none;" class="mb-3 pb-2 border-bottom">
+            <h5 class="mb-0 fw-semibold" style="font-size: 1.1rem; color: #172b4d;">
+              <i class="bi bi-box-seam text-primary"></i> <span id="repo-title"></span>
+            </h5>
           </div>
           <div id="tags-list">
             <p class="text-muted text-center">Select a repository to view tags</p>
