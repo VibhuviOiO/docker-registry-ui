@@ -1,0 +1,64 @@
+[
+  {
+    "name": "Production Registry",
+    "api": "http://registry.example.com",
+    "isAuthEnabled": false,
+    "user": "",
+    "password": "",
+    "apiToken": "",
+    "default": true,
+    
+    "vulnerabilityScan": {
+      "enabled": true,
+      "scanner": "trivy",
+      "scannerUrl": "http://trivy-server:8080",
+      "autoScan": false,
+      "severity": ["CRITICAL", "HIGH"]
+    },
+    
+    "cleanupPolicies": {
+      "enabled": true,
+      "rules": [
+        {
+          "name": "Delete old dev tags",
+          "repositories": ["*/dev-*", "*/feature-*"],
+          "olderThanDays": 30,
+          "keepMinimum": 3
+        },
+        {
+          "name": "Keep only latest releases",
+          "repositories": ["*/release-*"],
+          "keepLatest": 10
+        },
+        {
+          "name": "Remove untagged",
+          "repositories": ["*"],
+          "untaggedOnly": true,
+          "olderThanDays": 7
+        }
+      ]
+    }
+  },
+  {
+    "name": "Development Registry",
+    "api": "http://dev-registry:5000",
+    "isAuthEnabled": true,
+    "user": "admin",
+    "password": "secret",
+    "apiToken": "",
+    "default": false,
+    
+    "vulnerabilityScan": {
+      "enabled": true,
+      "scanner": "clair",
+      "scannerUrl": "http://clair:6060",
+      "autoScan": true,
+      "severity": ["CRITICAL", "HIGH", "MEDIUM"]
+    },
+    
+    "cleanupPolicies": {
+      "enabled": false,
+      "rules": []
+    }
+  }
+]

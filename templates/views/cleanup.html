@@ -1,0 +1,56 @@
+<div id="cleanup-view" style="display: none;">
+  <h4><i class="bi bi-trash3"></i> Garbage Collection Instructions</h4>
+  
+  <div class="alert alert-warning mt-3">
+    <strong><i class="bi bi-exclamation-triangle"></i> Important:</strong> Deleting tags only removes manifest references, not the actual image layers. To free disk space, you must run garbage collection manually.
+  </div>
+  
+  <div class="card mt-3">
+    <div class="card-header">
+      <strong>Docker Container Deployment</strong>
+    </div>
+    <div class="card-body">
+      <pre class="bg-light p-2 rounded mb-0"><code>docker exec &lt;registry-container&gt; bin/registry garbage-collect /etc/docker/registry/config.yml</code></pre>
+    </div>
+  </div>
+  
+  <div class="card mt-3">
+    <div class="card-header">
+      <strong>Podman Container Deployment</strong>
+    </div>
+    <div class="card-body">
+      <pre class="bg-light p-2 rounded mb-0"><code>podman exec &lt;registry-container&gt; bin/registry garbage-collect /etc/docker/registry/config.yml</code></pre>
+    </div>
+  </div>
+  
+  <div class="card mt-3">
+    <div class="card-header">
+      <strong>Kubernetes Deployment</strong>
+    </div>
+    <div class="card-body">
+      <pre class="bg-light p-2 rounded mb-0"><code>kubectl exec &lt;registry-pod&gt; -- bin/registry garbage-collect /etc/docker/registry/config.yml</code></pre>
+    </div>
+  </div>
+  
+  <div class="card mt-3">
+    <div class="card-header">
+      <strong>Host Installation (Binary)</strong>
+    </div>
+    <div class="card-body">
+      <pre class="bg-light p-2 rounded mb-0"><code>registry garbage-collect /path/to/config.yml</code></pre>
+    </div>
+  </div>
+  
+  <div class="card mt-3">
+    <div class="card-header">
+      <strong>Nexus Repository Manager</strong>
+    </div>
+    <div class="card-body">
+      <p class="mb-0">Nexus handles cleanup automatically via "Cleanup Policies" and "Compact blob store" tasks in Admin settings.</p>
+    </div>
+  </div>
+  
+  <div class="alert alert-info mt-4">
+    <strong>Note:</strong> During garbage collection, the registry operates in read-only mode. Pulls work, but pushes are blocked.
+  </div>
+</div>

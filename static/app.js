@@ -2,11 +2,13 @@ let currentRegistry = null;
 let currentRepo = null;
 let loadedTags = new Set();
 let deleteModal = null;
+let copyModal = null;
 let pendingDelete = null;
 
-// Initialize modal on page load
+// Initialize modals and dark mode on page load
 window.addEventListener('DOMContentLoaded', function() {
     deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    copyModal = new bootstrap.Modal(document.getElementById('copyModal'));
     
     document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
         if (pendingDelete) {
@@ -14,6 +16,21 @@ window.addEventListener('DOMContentLoaded', function() {
             deleteModal.hide();
             pendingDelete = null;
         }
+    });
+    
+    // Initialize dark mode
+    initDarkMode();
+    
+    // Copy command button
+    document.getElementById('copyCommandBtn').addEventListener('click', function() {
+        const input = document.getElementById('copyCommandInput');
+        input.select();
+        navigator.clipboard.writeText(input.value).then(() => {
+            this.innerHTML = '<i class="bi bi-check"></i> Copied!';
+            setTimeout(() => {
+                this.innerHTML = '<i class="bi bi-clipboard"></i> Copy';
+            }, 2000);
+        });
     });
 });
 
@@ -198,9 +215,14 @@ function loadTags(registryName, repo) {
                                 </span>
                             </div>
                         </div>
-                        ${!readOnly ? `<button class="btn btn-sm btn-outline-danger" onclick="deleteTag('${registryName}', '${repo}', '${tag}')">
-                            <i class="bi bi-trash"></i>
-                        </button>` : ''}
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-secondary" onclick="copyPullCommand('${registryName}', '${repo}', '${tag}')" title="Copy pull command">
+                                <i class="bi bi-clipboard"></i>
+                            </button>
+                            ${!readOnly ? `<button class="btn btn-outline-danger" onclick="deleteTag('${registryName}', '${repo}', '${tag}')">
+                                <i class="bi bi-trash"></i>
+                            </button>` : ''}
+                        </div>
                     </div>
                 </div>`;
             });
@@ -362,4 +384,53 @@ function checkRegistryHealth() {
                     });
             });
         });
+}
+
+// Dark mode functionality
+function initDarkMode() {
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+    const html = document.documentElement;
+    
+    // Load saved theme or detect system preference
+    const savedTheme = localStorage.getItem('theme');
+    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    const currentTheme = savedTheme || systemTheme;
+    
+    html.setAttribute('data-bs-theme', currentTheme);
+    updateThemeIcon(currentTheme);
+    
+    themeToggle.addEventListener('click', function() {
+        const current = html.getAttribute('data-bs-theme');
+        const newTheme = current === 'dark' ? 'light' : 'dark';
+        html.setAttribute('data-bs-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        updateThemeIcon(newTheme);
+    });
+}
+
+function updateThemeIcon(theme) {
+    const icon = document.getElementById('themeIcon');
+    icon.className = theme === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
+}
+
+// Copy commands functionality
+function copyPullCommand(registryName, repo, tag) {
+    fetch('/api/registries')
+        .then(r => r.json())
+        .then(data => {
+            const registry = data.registries.find(r => r.name === registryName);
+            if (!registry) return;
+            
+            const registryUrl = registry.url.replace(/^https?:\/\//, '');
+            const pullCommand = `docker pull ${registryUrl}/${repo}:${tag}`;
+            
+            document.getElementById('copyCommandInput').value = pullCommand;
+            copyModal.show();
+        });
+}
+
+function copyDigest(digest) {
+    document.getElementById('copyCommandInput').value = digest;
+    copyModal.show();
 }

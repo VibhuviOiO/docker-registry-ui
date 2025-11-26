@@ -1,0 +1,31 @@
+<div id="registries-view" style="display: none;">
+  <h4>Registry Configuration</h4>
+  <div class="table-responsive">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>API URL</th>
+          <th>Auth Enabled</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="registry-config-table">
+        {% for reg in registries %}
+        <tr>
+          <td><strong>{{ reg.name }}</strong></td>
+          <td><code>{{ reg.api }}</code></td>
+          <td>
+            {% if reg.isAuthEnabled %}
+            <span class="badge bg-success">Yes</span>
+            {% else %}
+            <span class="badge bg-secondary">No</span>
+            {% endif %}
+          </td>
+          <td id="registry-status-{{ loop.index0 }}"><span class="badge bg-secondary">Not checked</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
