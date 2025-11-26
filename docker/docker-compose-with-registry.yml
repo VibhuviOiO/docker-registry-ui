@@ -7,6 +7,9 @@ services:
       - "5001:5000"
     environment:
       REGISTRY_STORAGE_DELETE_ENABLED: "true"
+      # Note: Deleting tags only removes manifests, not layers
+      # Run garbage collection to free space:
+      # docker exec docker-registry bin/registry garbage-collect /etc/docker/registry/config.yml
     volumes:
       - registry-data:/var/lib/registry
     restart: unless-stopped
@@ -29,8 +32,7 @@ services:
       - "5003:5000"
     environment:
       - REGISTRIES=[{"name":"Local Registry","api":"http://registry:5000","isAuthEnabled":false,"user":"","password":"","apiToken":"","default":true}]
-      - READ_ONLY=true
-      - BUILT_BY=Test
+      - READ_ONLY=false
     logging:
       driver: "json-file"
       options:

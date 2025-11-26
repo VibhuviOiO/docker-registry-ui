@@ -50,6 +50,11 @@
             <i class="bi bi-server"></i> Registry Config
           </a>
         </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" data-view="cleanup">
+            <i class="bi bi-trash3"></i> Cleanup Instructions
+          </a>
+        </li>
       </ul>
     </div>
   </div>
@@ -136,11 +141,69 @@
                   <span class="badge bg-secondary">No</span>
                   {% endif %}
                 </td>
-                <td><span class="badge bg-secondary">Not checked</span></td>
+                <td id="registry-status-{{ loop.index0 }}"><span class="badge bg-secondary">Not checked</span></td>
               </tr>
               {% endfor %}
             </tbody>
           </table>
+        </div>
+      </div>
+
+      <!-- Cleanup Instructions View -->
+      <div id="cleanup-view" style="display: none;">
+        <h4><i class="bi bi-trash3"></i> Garbage Collection Instructions</h4>
+        
+        <div class="alert alert-warning mt-3">
+          <strong><i class="bi bi-exclamation-triangle"></i> Important:</strong> Deleting tags only removes manifest references, not the actual image layers. To free disk space, you must run garbage collection manually.
+        </div>
+        
+        <div class="card mt-3">
+          <div class="card-header">
+            <strong>Docker Container Deployment</strong>
+          </div>
+          <div class="card-body">
+            <pre class="bg-light p-2 rounded mb-0"><code>docker exec &lt;registry-container&gt; bin/registry garbage-collect /etc/docker/registry/config.yml</code></pre>
+          </div>
+        </div>
+        
+        <div class="card mt-3">
+          <div class="card-header">
+            <strong>Podman Container Deployment</strong>
+          </div>
+          <div class="card-body">
+            <pre class="bg-light p-2 rounded mb-0"><code>podman exec &lt;registry-container&gt; bin/registry garbage-collect /etc/docker/registry/config.yml</code></pre>
+          </div>
+        </div>
+        
+        <div class="card mt-3">
+          <div class="card-header">
+            <strong>Kubernetes Deployment</strong>
+          </div>
+          <div class="card-body">
+            <pre class="bg-light p-2 rounded mb-0"><code>kubectl exec &lt;registry-pod&gt; -- bin/registry garbage-collect /etc/docker/registry/config.yml</code></pre>
+          </div>
+        </div>
+        
+        <div class="card mt-3">
+          <div class="card-header">
+            <strong>Host Installation (Binary)</strong>
+          </div>
+          <div class="card-body">
+            <pre class="bg-light p-2 rounded mb-0"><code>registry garbage-collect /path/to/config.yml</code></pre>
+          </div>
+        </div>
+        
+        <div class="card mt-3">
+          <div class="card-header">
+            <strong>Nexus Repository Manager</strong>
+          </div>
+          <div class="card-body">
+            <p class="mb-0">Nexus handles cleanup automatically via "Cleanup Policies" and "Compact blob store" tasks in Admin settings.</p>
+          </div>
+        </div>
+        
+        <div class="alert alert-info mt-4">
+          <strong>Note:</strong> During garbage collection, the registry operates in read-only mode. Pulls work, but pushes are blocked.
         </div>
       </div>
     </div>
@@ -161,6 +224,25 @@
         </div>
       </div>
     </footer>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title"><i class="bi bi-trash"></i> Confirm Deletion</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p id="deleteModalMessage"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+      </div>
+    </div>
   </div>
 </div>
 

@@ -1,6 +1,21 @@
 let currentRegistry = null;
 let currentRepo = null;
 let loadedTags = new Set();
+let deleteModal = null;
+let pendingDelete = null;
+
+// Initialize modal on page load
+window.addEventListener('DOMContentLoaded', function() {
+    deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    
+    document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+        if (pendingDelete) {
+            pendingDelete();
+            deleteModal.hide();
+            pendingDelete = null;
+        }
+    });
+});
 
 // Sidebar toggle
 document.getElementById('sidebarToggle').addEventListener('click', function() {
@@ -20,6 +35,7 @@ document.querySelectorAll('[data-view]').forEach(link => {
         // Show/hide views
         document.getElementById('repositories-view').style.display = view === 'repositories' ? 'block' : 'none';
         document.getElementById('registries-view').style.display = view === 'registries' ? 'block' : 'none';
+        document.getElementById('cleanup-view').style.display = view === 'cleanup' ? 'block' : 'none';
     });
 });
 
@@ -42,6 +58,9 @@ window.addEventListener('DOMContentLoaded', function() {
         currentRegistry = defaultOption.value;
         loadRepositories(currentRegistry);
     }
+    
+    // Check registry health status
+    checkRegistryHealth();
 });
 
 // Refresh repositories
@@ -244,38 +263,48 @@ function loadTagSizes(registryName, repo, tags) {
 }
 
 function deleteTag(registryName, repo, tag) {
-    if (!confirm(`Delete tag ${tag} from ${repo}?`)) return;
+    document.getElementById('deleteModalMessage').innerHTML = 
+        `Are you sure you want to delete tag <strong>${tag}</strong> from <strong>${repo}</strong>?`;
     
-    fetch(`/api/delete/tag/${encodeURIComponent(registryName)}/${encodeURIComponent(repo)}/${encodeURIComponent(tag)}`, { method: 'DELETE' })
-        .then(r => r.json())
-        .then(data => {
-            if (data.success) {
-                showAlert(`Tag ${tag} deleted successfully`);
-                loadTags(registryName, repo);
-            } else {
-                showAlert(data.error || 'Failed to delete tag', 'danger');
-            }
-        });
+    pendingDelete = function() {
+        fetch(`/api/delete/tag/${encodeURIComponent(registryName)}/${encodeURIComponent(repo)}/${encodeURIComponent(tag)}`, { method: 'DELETE' })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert(`Tag <strong>${tag}</strong> deleted successfully. <a href="#" onclick="switchToRegistryConfig(); return false;" class="alert-link">Run garbage collection</a> to free disk space.`, 'warning');
+                    loadTags(registryName, repo);
+                } else {
+                    showAlert(data.error || 'Failed to delete tag', 'danger');
+                }
+            });
+    };
+    
+    deleteModal.show();
 }
 
 document.getElementById('deleteRepoBtn').addEventListener('click', function() {
     if (!currentRepo || !currentRegistry) return;
     
-    if (!confirm(`Delete entire repository ${currentRepo}? This will delete all tags.`)) return;
+    document.getElementById('deleteModalMessage').innerHTML = 
+        `Are you sure you want to delete the entire repository <strong>${currentRepo}</strong>?<br><br>This will delete all tags in this repository.`;
     
-    fetch(`/api/delete/repo/${encodeURIComponent(currentRegistry)}/${encodeURIComponent(currentRepo)}`, { method: 'DELETE' })
-        .then(r => r.json())
-        .then(data => {
-            if (data.success) {
-                showAlert(`Repository ${currentRepo} deleted (${data.deleted}/${data.total} tags)`);
-                loadRepositories(currentRegistry, true);
-                document.getElementById('image-name-section').style.display = 'none';
-                document.getElementById('tags-list').innerHTML = 
-                    '<p class="text-muted text-center">Select a repository to view tags</p>';
-            } else {
-                showAlert(data.error || 'Failed to delete repository', 'danger');
-            }
-        });
+    pendingDelete = function() {
+        fetch(`/api/delete/repo/${encodeURIComponent(currentRegistry)}/${encodeURIComponent(currentRepo)}`, { method: 'DELETE' })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert(`Repository <strong>${currentRepo}</strong> deleted (${data.deleted}/${data.total} tags). <a href="#" onclick="switchToRegistryConfig(); return false;" class="alert-link">Run garbage collection</a> to free disk space.`, 'warning');
+                    loadRepositories(currentRegistry, true);
+                    document.getElementById('image-name-section').style.display = 'none';
+                    document.getElementById('tags-list').innerHTML = 
+                        '<p class="text-muted text-center">Select a repository to view tags</p>';
+                } else {
+                    showAlert(data.error || 'Failed to delete repository', 'danger');
+                }
+            });
+    };
+    
+    deleteModal.show();
 });
 
 function formatSize(bytes) {
@@ -300,4 +329,37 @@ function formatTimeAgo(dateString) {
     if (seconds < 2592000) return `${Math.floor(seconds / 86400)} days ago`;
     if (seconds < 31536000) return `${Math.floor(seconds / 2592000)} months ago`;
     return `${Math.floor(seconds / 31536000)} years ago`;
+}
+
+function switchToRegistryConfig() {
+    document.querySelectorAll('[data-view]').forEach(l => l.classList.remove('active'));
+    document.querySelector('[data-view="cleanup"]').classList.add('active');
+    document.getElementById('repositories-view').style.display = 'none';
+    document.getElementById('registries-view').style.display = 'none';
+    document.getElementById('cleanup-view').style.display = 'block';
+}
+
+function checkRegistryHealth() {
+    fetch('/api/registries')
+        .then(r => r.json())
+        .then(data => {
+            data.registries.forEach((registry, index) => {
+                const statusCell = document.querySelector(`#registry-status-${index}`);
+                if (!statusCell) return;
+                
+                statusCell.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Checking...';
+                
+                fetch(`/api/repositories/${encodeURIComponent(registry.name)}`)
+                    .then(r => {
+                        if (r.ok) {
+                            statusCell.innerHTML = '<span class="badge bg-success"><i class="bi bi-check-circle"></i> Online</span>';
+                        } else {
+                            statusCell.innerHTML = '<span class="badge bg-danger"><i class="bi bi-x-circle"></i> Error</span>';
+                        }
+                    })
+                    .catch(() => {
+                        statusCell.innerHTML = '<span class="badge bg-danger"><i class="bi bi-x-circle"></i> Offline</span>';
+                    });
+            });
+        });
 }

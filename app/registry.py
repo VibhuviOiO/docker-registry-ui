@@ -166,31 +166,44 @@ def fetch_tag_details(registry_api, repo, tag, auth=None):
 def delete_tag(registry_api, repo, tag, auth=None):
     """Delete a specific tag"""
     try:
-        headers = {"Accept": "application/vnd.docker.distribution.manifest.v2+json"}
-        if isinstance(auth, dict):
-            headers.update(auth)
-        
         auth_obj = auth if isinstance(auth, HTTPBasicAuth) else None
+        digest = None
         
-        # Get manifest digest
-        manifest_r = requests.get(
-            f"{registry_api}/v2/{repo}/manifests/{tag}",
-            headers=headers,
-            auth=auth_obj,
-            timeout=Config.TIMEOUT
-        )
+        # Try multiple accept headers to get digest
+        accept_headers = [
+            "application/vnd.oci.image.index.v1+json",
+            "application/vnd.docker.distribution.manifest.v2+json",
+            "application/vnd.docker.distribution.manifest.v1+json"
+        ]
         
-        if manifest_r.status_code != 200:
-            return False, "Tag not found"
+        for accept in accept_headers:
+            headers = {"Accept": accept}
+            if isinstance(auth, dict):
+                headers.update(auth)
+            
+            manifest_r = requests.get(
+                f"{registry_api}/v2/{repo}/manifests/{tag}",
+                headers=headers,
+                auth=auth_obj,
+                timeout=Config.TIMEOUT
+            )
+            
+            if manifest_r.status_code == 200:
+                digest = manifest_r.headers.get("Docker-Content-Digest")
+                if digest:
+                    break
         
-        digest = manifest_r.headers.get("Docker-Content-Digest")
         if not digest:
             return False, "No digest found"
         
         # Delete by digest
+        delete_headers = {}
+        if isinstance(auth, dict):
+            delete_headers.update(auth)
+        
         delete_r = requests.delete(
             f"{registry_api}/v2/{repo}/manifests/{digest}",
-            headers=headers if isinstance(auth, dict) else {},
+            headers=delete_headers,
             auth=auth_obj,
             timeout=Config.TIMEOUT
         )
