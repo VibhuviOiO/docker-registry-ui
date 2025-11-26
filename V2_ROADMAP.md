@@ -98,8 +98,8 @@ templates/
 - ✅ Implement copy commands
 
 ### Phase 2: Core Features (Week 2)
-- ⏳ Tag sorting/filtering
-- ⏳ Manifest viewer
+- ✅ Tag sorting/filtering
+- ✅ Manifest viewer
 - ⏳ Bulk operations with rules
 
 ### Phase 3: Advanced Features (Week 3)
