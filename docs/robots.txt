@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://vibhuvioio.com/docker-registry-ui/sitemap.xml
