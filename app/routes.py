@@ -36,6 +36,7 @@ def api_registries():
             "api": reg["api"],
             "url": reg.get("api", "").replace("http://", "").replace("https://", ""),
             "isAuthEnabled": reg.get("isAuthEnabled", False),
+            "default": reg.get("default", False),
             "bulkOperationsEnabled": reg.get("bulkOperationsEnabled", False),
             "vulnerabilityScan": {
                 "enabled": vuln_scan.get("enabled", False),
@@ -304,12 +305,59 @@ def api_create_registry():
     if not registry.get("name") or not registry.get("api"):
         return jsonify({"success": False, "error": "Name and API URL required"}), 400
     
+    # If this is the first registry or marked as default, unset other defaults
+    if registry.get("default") or len(Config.REGISTRIES) == 0:
+        for reg in Config.REGISTRIES:
+            reg["default"] = False
+        registry["default"] = True
+    
     Config.REGISTRIES.append(registry)
     
     if Config.save_registries():
         return jsonify({"success": True, "message": "Registry created and saved to file"})
     else:
         return jsonify({"success": True, "message": "Registry created (in-memory only - using env config)"})
+
+@api_bp.route("/test-scanner", methods=["POST"])
+def api_test_scanner():
+    """Test scanner connection"""
+    data = request.json
+    url = data.get("url")
+    scanner_type = data.get("scanner", "trivy")
+    
+    if not url:
+        return jsonify({"success": False, "error": "Scanner URL required"}), 400
+    
+    try:
+        if scanner_type == "trivy":
+            response = requests.get(f"{url}/healthz", timeout=5)
+        else:
+            response = requests.get(f"{url}/health", timeout=5)
+        
+        if response.status_code == 200:
+            return jsonify({"success": True})
+        else:
+            return jsonify({"success": False, "error": f"HTTP {response.status_code}"})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+
+@api_bp.route("/registry/vuln-scan", methods=["POST"])
+def api_update_vuln_scan():
+    """Update vulnerability scanning configuration"""
+    if Config.READ_ONLY:
+        return jsonify({"success": False, "error": "Read-only mode"}), 403
+    
+    data = request.json
+    registry_name = data.get("registry")
+    vuln_config = data.get("vulnerabilityScan")
+    
+    from .data_store import update_registry_config
+    success = update_registry_config(registry_name, {"vulnerabilityScan": vuln_config})
+    
+    if success:
+        return jsonify({"success": True})
+    else:
+        return jsonify({"success": False, "error": "Failed to update registry"}), 500
 
 @api_bp.route("/scan-all/<registry_name>", methods=["POST"])
 def api_scan_all(registry_name):

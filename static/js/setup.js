@@ -17,7 +17,7 @@ function initSetupWizard() {
         });
     }
     
-    const formInputs = ['setup-name', 'setup-api', 'setup-user', 'setup-password', 'setup-bulk-ops', 'setup-scanner', 'setup-scanner-url'];
+    const formInputs = ['setup-name', 'setup-api', 'setup-user', 'setup-password', 'setup-default', 'setup-bulk-ops', 'setup-scanner', 'setup-scanner-url'];
     formInputs.forEach(id => {
         const el = document.getElementById(id);
         if (el) {
@@ -89,7 +89,7 @@ function createRegistry(e) {
         user: document.getElementById('setup-user').value || '',
         password: document.getElementById('setup-password').value || '',
         apiToken: '',
-        default: true,
+        default: document.getElementById('setup-default').checked,
         bulkOperationsEnabled: document.getElementById('setup-bulk-ops').checked,
         vulnerabilityScan: {
             enabled: document.getElementById('setup-vuln-enabled').checked,
@@ -108,15 +108,93 @@ function createRegistry(e) {
     .then(r => r.json())
     .then(data => {
         if (data.success) {
-            showAlert('Registry created successfully! Reloading...', 'success');
-            setTimeout(() => location.reload(), 1500);
+            showSetupSuccess(registry);
         } else {
             showAlert(data.error || 'Failed to create registry', 'danger');
         }
     });
 }
 
+function showSetupSuccess(registry) {
+    const wizardView = document.getElementById('setup-wizard-view');
+    wizardView.innerHTML = `
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow">
+                    <div class="card-header bg-success text-white">
+                        <h4 class="mb-0"><i class="bi bi-check-circle"></i> Registry Created Successfully!</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-success">
+                            <strong>Configuration Saved!</strong><br>
+                            Your registry has been saved to <code>registries.config.json</code>
+                        </div>
+                        
+                        <h5 class="mb-3">Next Steps:</h5>
+                        
+                        <div class="list-group mb-3">
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1"><i class="bi bi-download"></i> Download Backup</h6>
+                                        <small class="text-muted">Save a copy of your configuration</small>
+                                    </div>
+                                    <button class="btn btn-primary" onclick="downloadSetupConfig()">
+                                        <i class="bi bi-download"></i> Download
+                                    </button>
+                                </div>
+                            </div>
+                            
+
+                            
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1"><i class="bi bi-box-seam"></i> Start Using Registry UI</h6>
+                                        <small class="text-muted">Browse repositories and manage images</small>
+                                    </div>
+                                    <button class="btn btn-success" onclick="window.location.href='/?skipSetup=true'">
+                                        <i class="bi bi-arrow-right"></i> Continue
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info mb-0">
+                            <strong><i class="bi bi-info-circle"></i> Configuration Persisted:</strong><br>
+                            • File saved to <code>data/registries.config.json</code> (volume-mounted)<br>
+                            • Survives container restarts<br>
+                            • Download backup for extra safety
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function downloadSetupConfig() {
+    fetch('/api/registries')
+        .then(r => r.json())
+        .then(data => {
+            const json = JSON.stringify(data.registries, null, 2);
+            const blob = new Blob([json], {type: 'application/json'});
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'registries.config.json';
+            a.click();
+            window.URL.revokeObjectURL(url);
+            showAlert('Configuration downloaded! You can now continue to the UI.', 'success');
+        });
+}
+
 function checkFirstRun() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('skipSetup') === 'true') {
+        return;
+    }
+    
     fetch('/api/registries')
         .then(r => r.json())
         .then(data => {
@@ -141,7 +219,7 @@ function updateConfigPreview() {
         user: '',
         password: '',
         apiToken: '',
-        default: true,
+        default: document.getElementById('setup-default')?.checked !== false,
         bulkOperationsEnabled: document.getElementById('setup-bulk-ops')?.checked || false,
         vulnerabilityScan: {
             enabled: document.getElementById('setup-vuln-enabled')?.checked || false,

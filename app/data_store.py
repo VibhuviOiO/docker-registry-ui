@@ -42,8 +42,7 @@ def update_registry_config(registry_name, config):
                 reg["vulnerabilityScan"]["enabled"] = config["vulnerabilityScan"].get("enabled", False)
                 reg["vulnerabilityScan"]["scanner"] = config["vulnerabilityScan"].get("scanner", "trivy")
                 reg["vulnerabilityScan"]["scannerUrl"] = config["vulnerabilityScan"].get("scannerUrl", "")
-                reg["vulnerabilityScan"]["autoScanRules"] = config["vulnerabilityScan"].get("autoScanRules", [])
-                reg["vulnerabilityScan"]["scanLatestOnly"] = config["vulnerabilityScan"].get("scanLatestOnly", 1)
+                reg["vulnerabilityScan"]["autoScan"] = config["vulnerabilityScan"].get("autoScan", False)
             Config.save_registries()
             return True
     return False

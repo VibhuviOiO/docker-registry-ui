@@ -37,14 +37,7 @@ class Config:
         
         # If no registries configured, use legacy single registry
         if not Config.REGISTRIES:
-            Config.REGISTRIES = [{
-                "name": "Default Registry",
-                "api": Config.REGISTRY_URL,
-                "isAuthEnabled": False,
-                "user": "",
-                "password": "",
-                "apiToken": ""
-            }]
+            Config.REGISTRIES = []
         
         return Config.REGISTRIES
     

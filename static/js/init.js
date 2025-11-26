@@ -11,7 +11,7 @@ window.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    initDarkMode();
+
     
     document.getElementById('sortTags').addEventListener('change', sortAndFilterTags);
     document.getElementById('filterTags').addEventListener('keyup', sortAndFilterTags);
@@ -241,4 +241,10 @@ window.addEventListener('DOMContentLoaded', function() {
     if (downloadConfigBtn) {
         downloadConfigBtn.addEventListener('click', downloadConfig);
     }
+    
+    document.querySelectorAll('.vuln-scan-toggle').forEach(toggle => {
+        toggle.addEventListener('change', function() {
+            toggleVulnScan(this.dataset.registry, this.checked);
+        });
+    });
 });

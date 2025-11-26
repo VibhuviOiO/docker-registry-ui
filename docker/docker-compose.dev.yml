@@ -17,12 +17,13 @@ services:
     ports:
       - "8080:5000"
     environment:
-      - REGISTRIES=[{"name":"Local Registry","api":"http://registry:5000","isAuthEnabled":false,"user":"","password":"","apiToken":"","default":true}]
+      - CONFIG_FILE=/app/data/registries.config.json
       - READ_ONLY=false
     volumes:
       - ../app:/app/app
       - ../templates:/app/templates
       - ../static:/app/static
+      - ../data:/app/data
     depends_on:
       - registry
 

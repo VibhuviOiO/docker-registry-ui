@@ -233,7 +233,8 @@ function toggleBulkOperations(registryName, enabled) {
     .then(r => r.json())
     .then(data => {
         if (data.success) {
-            showAlert(`Bulk operations ${enabled ? 'enabled' : 'disabled'} for ${registryName}.`, 'success');
+            const msg = `Bulk operations ${enabled ? 'enabled' : 'disabled'} for ${registryName}. <button class="btn btn-sm btn-success ms-2" onclick="downloadConfig()"><i class="bi bi-download"></i> Download Backup</button>`;
+            showAlert(msg, 'success');
         } else {
             showAlert(data.error || 'Failed to update setting', 'danger');
         }
@@ -256,8 +257,7 @@ function showRegistryConfig(registryName) {
             document.getElementById('vuln-scan-config').style.display = vulnScan.enabled ? 'block' : 'none';
             document.getElementById('config-scanner').value = vulnScan.scanner || 'trivy';
             document.getElementById('config-scanner-url').value = vulnScan.scannerUrl || '';
-            document.getElementById('config-scan-rules').value = (vulnScan.autoScanRules || []).join('\n');
-            document.getElementById('config-scan-latest').value = vulnScan.scanLatestOnly || 1;
+            document.getElementById('config-autoscan').checked = vulnScan.autoScan || false;
             
             document.getElementById('registry-config-details').style.display = 'block';
             document.getElementById('registry-config-details').dataset.registry = registryName;
@@ -273,8 +273,7 @@ function saveRegistryConfig() {
             enabled: document.getElementById('config-vuln-enabled').checked,
             scanner: document.getElementById('config-scanner').value,
             scannerUrl: document.getElementById('config-scanner-url').value,
-            autoScanRules: document.getElementById('config-scan-rules').value.split('\n').filter(r => r.trim()),
-            scanLatestOnly: parseInt(document.getElementById('config-scan-latest').value) || 1
+            autoScan: document.getElementById('config-autoscan').checked
         }
     };
     
@@ -286,7 +285,8 @@ function saveRegistryConfig() {
     .then(r => r.json())
     .then(data => {
         if (data.success) {
-            showAlert(data.message || 'Configuration saved successfully.', 'success');
+            const msg = `${data.message || 'Configuration saved successfully.'} <button class="btn btn-sm btn-success ms-2" onclick="downloadConfig()"><i class="bi bi-download"></i> Download Backup</button>`;
+            showAlert(msg, 'success');
             document.getElementById('registry-config-details').style.display = 'none';
         } else {
             showAlert(data.error || 'Failed to save configuration', 'danger');

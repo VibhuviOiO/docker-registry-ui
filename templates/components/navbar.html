@@ -6,10 +6,6 @@
     <a class="navbar-brand ms-2" href="#">🐳 Docker Registry UI</a>
     
     <div class="ms-auto d-flex align-items-center">
-      <button class="btn btn-sm btn-outline-light me-2" id="themeToggle" title="Toggle dark mode">
-        <i class="bi bi-moon-fill" id="themeIcon"></i>
-      </button>
-      
       <select class="form-select form-select-sm me-2" id="registrySelector" style="width: auto;">
         <option value="">Select Registry...</option>
         {% for reg in registries %}
