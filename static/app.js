@@ -1,14 +1,18 @@
 let currentRegistry = null;
 let currentRepo = null;
 let loadedTags = new Set();
+let allTags = [];
+let tagDetailsCache = {};
 let deleteModal = null;
 let copyModal = null;
+let manifestModal = null;
 let pendingDelete = null;
 
 // Initialize modals and dark mode on page load
 window.addEventListener('DOMContentLoaded', function() {
     deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
     copyModal = new bootstrap.Modal(document.getElementById('copyModal'));
+    manifestModal = new bootstrap.Modal(document.getElementById('manifestModal'));
     
     document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
         if (pendingDelete) {
@@ -31,6 +35,16 @@ window.addEventListener('DOMContentLoaded', function() {
                 this.innerHTML = '<i class="bi bi-clipboard"></i> Copy';
             }, 2000);
         });
+    });
+    
+    // Tag sorting
+    document.getElementById('sortTags').addEventListener('change', function() {
+        sortAndFilterTags();
+    });
+    
+    // Tag filtering
+    document.getElementById('filterTags').addEventListener('keyup', function() {
+        sortAndFilterTags();
     });
 });
 
@@ -164,6 +178,7 @@ function loadRepositories(registryName, force = false) {
 
 function loadTags(registryName, repo) {
     currentRepo = repo;
+    tagDetailsCache = {};
     document.getElementById('repo-title').textContent = repo;
     document.getElementById('image-name-section').style.display = 'block';
     
@@ -173,6 +188,7 @@ function loadTags(registryName, repo) {
     }
     
     document.getElementById('stat-tags').style.display = 'none';
+    document.getElementById('tag-controls').style.display = 'none';
     showLoading('tags-list');
     
     fetch(`/api/tags/${encodeURIComponent(registryName)}/${encodeURIComponent(repo)}`)
@@ -185,11 +201,15 @@ function loadTags(registryName, repo) {
             }
             
             const tags = data.tags;
+            allTags = tags;
             
             // Update tag count badge
             const tagBadge = document.getElementById('stat-tags');
             tagBadge.textContent = tags.length;
             tagBadge.style.display = 'inline-block';
+            
+            // Show tag controls
+            document.getElementById('tag-controls').style.display = tags.length > 0 ? 'flex' : 'none';
             
             if (tags.length === 0) {
                 document.getElementById('tags-list').innerHTML = 
@@ -197,45 +217,49 @@ function loadTags(registryName, repo) {
                 return;
             }
             
-            let html = '';
-            tags.forEach(tag => {
-                html += `<div class="tag-item" data-tag="${tag}">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div class="flex-grow-1">
-                            <div class="d-flex align-items-center mb-1">
-                                <strong class="me-2">${tag}</strong>
-                                <span class="badge bg-light text-dark tag-digest" data-tag="${tag}"></span>
-                            </div>
-                            <div class="d-flex gap-3 text-muted small">
-                                <span class="tag-size" data-registry="${registryName}" data-repo="${repo}" data-tag="${tag}">
-                                    <i class="bi bi-hdd"></i> <span class="spinner-border spinner-border-sm"></span>
-                                </span>
-                                <span class="tag-created" data-tag="${tag}">
-                                    <i class="bi bi-clock"></i> <span class="spinner-border spinner-border-sm"></span>
-                                </span>
-                            </div>
-                        </div>
-                        <div class="btn-group btn-group-sm">
-                            <button class="btn btn-outline-secondary" onclick="copyPullCommand('${registryName}', '${repo}', '${tag}')" title="Copy pull command">
-                                <i class="bi bi-clipboard"></i>
-                            </button>
-                            ${!readOnly ? `<button class="btn btn-outline-danger" onclick="deleteTag('${registryName}', '${repo}', '${tag}')">
-                                <i class="bi bi-trash"></i>
-                            </button>` : ''}
-                        </div>
-                    </div>
-                </div>`;
-            });
-            
-            document.getElementById('tags-list').innerHTML = html;
-            
-            // Load tag sizes on-demand (lazy loading)
+            renderTags(tags);
             loadTagSizes(registryName, repo, tags);
         });
 }
 
+function renderTags(tags) {
+    let html = '';
+    tags.forEach(tag => {
+        html += `<div class="tag-item" data-tag="${tag}">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="flex-grow-1">
+                    <div class="d-flex align-items-center mb-1">
+                        <strong class="me-2">${tag}</strong>
+                        <span class="badge bg-light text-dark tag-digest" data-tag="${tag}"></span>
+                    </div>
+                    <div class="d-flex gap-3 text-muted small">
+                        <span class="tag-size" data-registry="${currentRegistry}" data-repo="${currentRepo}" data-tag="${tag}">
+                            <i class="bi bi-hdd"></i> <span class="spinner-border spinner-border-sm"></span>
+                        </span>
+                        <span class="tag-created" data-tag="${tag}">
+                            <i class="bi bi-clock"></i> <span class="spinner-border spinner-border-sm"></span>
+                        </span>
+                    </div>
+                </div>
+                <div class="btn-group btn-group-sm">
+                    <button class="btn btn-outline-secondary" onclick="viewManifest('${currentRegistry}', '${currentRepo}', '${tag}')" title="View manifest">
+                        <i class="bi bi-file-code"></i>
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="copyPullCommand('${currentRegistry}', '${currentRepo}', '${tag}')" title="Copy pull command">
+                        <i class="bi bi-clipboard"></i>
+                    </button>
+                    ${!readOnly ? `<button class="btn btn-outline-danger" onclick="deleteTag('${currentRegistry}', '${currentRepo}', '${tag}')">
+                        <i class="bi bi-trash"></i>
+                    </button>` : ''}
+                </div>
+            </div>
+        </div>`;
+    });
+    
+    document.getElementById('tags-list').innerHTML = html;
+}
+
 function loadTagSizes(registryName, repo, tags) {
-    // Load sizes in batches to avoid overwhelming the API
     const batchSize = 5;
     let index = 0;
     
@@ -246,14 +270,18 @@ function loadTagSizes(registryName, repo, tags) {
             fetch(`/api/tag-details/${encodeURIComponent(registryName)}/${encodeURIComponent(repo)}/${encodeURIComponent(tag)}`)
                 .then(r => r.json())
                 .then(data => {
+                    tagDetailsCache[tag] = data;
+                    
                     const sizeEl = document.querySelector(`.tag-size[data-tag="${tag}"]`);
                     if (sizeEl) {
                         sizeEl.innerHTML = `<i class="bi bi-hdd"></i> ${formatSize(data.size)}`;
+                        sizeEl.dataset.sizeBytes = data.size;
                     }
                     
                     const createdEl = document.querySelector(`.tag-created[data-tag="${tag}"]`);
                     if (createdEl && data.created) {
                         createdEl.innerHTML = `<i class="bi bi-clock"></i> ${formatTimeAgo(data.created)}`;
+                        createdEl.dataset.timestamp = new Date(data.created).getTime();
                     } else if (createdEl) {
                         createdEl.innerHTML = `<i class="bi bi-clock"></i> Unknown`;
                     }
@@ -277,11 +305,47 @@ function loadTagSizes(registryName, repo, tags) {
         
         index += batchSize;
         if (index < tags.length) {
-            setTimeout(loadBatch, 500); // Delay between batches
+            setTimeout(loadBatch, 500);
         }
     }
     
     loadBatch();
+}
+
+function sortAndFilterTags() {
+    const sortBy = document.getElementById('sortTags').value;
+    const filterText = document.getElementById('filterTags').value.toLowerCase();
+    
+    let filteredTags = allTags.filter(tag => tag.toLowerCase().includes(filterText));
+    
+    const tagItems = Array.from(document.querySelectorAll('.tag-item'));
+    
+    tagItems.sort((a, b) => {
+        const tagA = a.dataset.tag;
+        const tagB = b.dataset.tag;
+        
+        if (sortBy === 'name') {
+            return tagA.localeCompare(tagB);
+        } else if (sortBy === 'size') {
+            const sizeA = parseInt(a.querySelector('.tag-size').dataset.sizeBytes || 0);
+            const sizeB = parseInt(b.querySelector('.tag-size').dataset.sizeBytes || 0);
+            return sizeB - sizeA;
+        } else if (sortBy === 'date') {
+            const dateA = parseInt(a.querySelector('.tag-created').dataset.timestamp || 0);
+            const dateB = parseInt(b.querySelector('.tag-created').dataset.timestamp || 0);
+            return dateB - dateA;
+        }
+        return 0;
+    });
+    
+    const tagsList = document.getElementById('tags-list');
+    tagsList.innerHTML = '';
+    
+    tagItems.forEach(item => {
+        if (filteredTags.includes(item.dataset.tag)) {
+            tagsList.appendChild(item);
+        }
+    });
 }
 
 function deleteTag(registryName, repo, tag) {
@@ -392,7 +456,6 @@ function initDarkMode() {
     const themeIcon = document.getElementById('themeIcon');
     const html = document.documentElement;
     
-    // Load saved theme or detect system preference
     const savedTheme = localStorage.getItem('theme');
     const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     const currentTheme = savedTheme || systemTheme;
@@ -430,7 +493,34 @@ function copyPullCommand(registryName, repo, tag) {
         });
 }
 
-function copyDigest(digest) {
-    document.getElementById('copyCommandInput').value = digest;
-    copyModal.show();
+// Manifest viewer functionality
+function viewManifest(registryName, repo, tag) {
+    const details = tagDetailsCache[tag];
+    if (!details) {
+        showAlert('Loading tag details...', 'info');
+        return;
+    }
+    
+    // Display manifest JSON
+    document.getElementById('manifestJson').textContent = JSON.stringify(details.manifest || {}, null, 2);
+    
+    // Display layers
+    const layers = details.manifest?.layers || [];
+    let layersHtml = '<div class="list-group">';
+    layers.forEach((layer, idx) => {
+        layersHtml += `<div class="list-group-item">
+            <div class="d-flex justify-content-between">
+                <strong>Layer ${idx + 1}</strong>
+                <span class="badge bg-secondary">${formatSize(layer.size)}</span>
+            </div>
+            <small class="text-muted">${layer.digest}</small>
+        </div>`;
+    });
+    layersHtml += '</div>';
+    document.getElementById('layersList').innerHTML = layersHtml;
+    
+    // Display config
+    document.getElementById('configJson').textContent = JSON.stringify(details.config || {}, null, 2);
+    
+    manifestModal.show();
 }

@@ -93,9 +93,9 @@ templates/
 
 ### Phase 1: Foundation (Week 1)
 - ✅ Create v2.0 branch
-- ⏳ Restructure templates (modular HTML)
-- ⏳ Add dark mode toggle
-- ⏳ Implement copy commands
+- ✅ Restructure templates (modular HTML)
+- ✅ Add dark mode toggle
+- ✅ Implement copy commands
 
 ### Phase 2: Core Features (Week 2)
 - ⏳ Tag sorting/filtering

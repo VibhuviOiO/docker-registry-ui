@@ -1,5 +1,5 @@
 <div id="repositories-view">
-  <div class="mb-3">
+  <div class="mb-3 d-flex gap-2">
     <input type="text" id="searchBox" class="form-control" placeholder="Search repositories...">
   </div>
 
@@ -24,16 +24,26 @@
     
     <div class="col-md-8">
       <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <div>
-            <strong>Tags <span class="badge bg-secondary" id="stat-tags" style="display:none;">0</span></strong>
+        <div class="card-header">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div>
+              <strong>Tags <span class="badge bg-secondary" id="stat-tags" style="display:none;">0</span></strong>
+            </div>
+            <div>
+            {% if not read_only %}
+            <button class="btn btn-sm btn-danger" id="deleteRepoBtn" style="display:none;">
+              <i class="bi bi-trash"></i> Delete Repository
+            </button>
+            {% endif %}
+            </div>
           </div>
-          <div>
-          {% if not read_only %}
-          <button class="btn btn-sm btn-danger" id="deleteRepoBtn" style="display:none;">
-            <i class="bi bi-trash"></i> Delete Repository
-          </button>
-          {% endif %}
+          <div class="d-flex gap-2" id="tag-controls" style="display:none;">
+            <select class="form-select form-select-sm" id="sortTags" style="width:auto;">
+              <option value="name">Sort: Name</option>
+              <option value="size">Sort: Size</option>
+              <option value="date">Sort: Date</option>
+            </select>
+            <input type="text" class="form-control form-control-sm" id="filterTags" placeholder="Filter tags..." style="max-width:200px;">
           </div>
         </div>
         <div class="card-body" id="tags-container" style="max-height: 70vh; overflow-y: auto;">

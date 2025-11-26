@@ -36,3 +36,39 @@
     </div>
   </div>
 </div>
+
+<!-- Manifest Viewer Modal -->
+<div class="modal fade" id="manifestModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-file-code"></i> Manifest Viewer</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <ul class="nav nav-tabs mb-3" id="manifestTabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="manifest-tab" data-bs-toggle="tab" data-bs-target="#manifest-content" type="button">Manifest</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="layers-tab" data-bs-toggle="tab" data-bs-target="#layers-content" type="button">Layers</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="config-tab" data-bs-toggle="tab" data-bs-target="#config-content" type="button">Config</button>
+          </li>
+        </ul>
+        <div class="tab-content" id="manifestTabContent">
+          <div class="tab-pane fade show active" id="manifest-content" role="tabpanel">
+            <pre class="bg-light p-3 rounded" style="max-height:400px;overflow-y:auto;"><code id="manifestJson"></code></pre>
+          </div>
+          <div class="tab-pane fade" id="layers-content" role="tabpanel">
+            <div id="layersList"></div>
+          </div>
+          <div class="tab-pane fade" id="config-content" role="tabpanel">
+            <pre class="bg-light p-3 rounded" style="max-height:400px;overflow-y:auto;"><code id="configJson"></code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

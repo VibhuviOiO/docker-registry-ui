@@ -122,7 +122,7 @@ def fetch_tag_details(registry_api, repo, tag, auth=None):
                                 config = config_r.json()
                                 created = config.get("created")
                         
-                        return {"tag": tag, "size": size, "digest": manifest_digest, "created": created}
+                        return {"tag": tag, "size": size, "digest": manifest_digest, "created": created, "manifest": manifest, "config": config if config_digest else {}}
         
         # Fallback to Docker v2 manifest
         headers = {"Accept": "application/vnd.docker.distribution.manifest.v2+json"}
@@ -156,7 +156,7 @@ def fetch_tag_details(registry_api, repo, tag, auth=None):
                     config = config_r.json()
                     created = config.get("created")
             
-            return {"tag": tag, "size": size, "digest": digest, "created": created}
+            return {"tag": tag, "size": size, "digest": digest, "created": created, "manifest": manifest, "config": config if config_digest else {}}
         
         return {"tag": tag, "size": 0, "digest": "", "created": None}
     except:
