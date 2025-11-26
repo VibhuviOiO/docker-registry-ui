@@ -62,6 +62,15 @@ volumes:
 
 Access the UI at `http://localhost:5000`
 
+### Available Versions
+
+View all available versions and tags at [GitHub Container Registry](https://github.com/VibhuviOiO/docker-registry-ui/pkgs/container/docker-registry-ui)
+
+To use a specific version:
+```bash
+docker pull ghcr.io/vibhuvioio/docker-registry-ui:v1.0.0
+```
+
 ## 📖 Documentation
 
 Full documentation is available at [vibhuvioio.com/docker-registry-ui](https://vibhuvioio.com/docker-registry-ui/)
