@@ -4,16 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Getting Started - Docker Registry UI</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐳</text></svg>">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="docs.css">
 </head>
 <body>
     <nav class="navbar">
         <div class="container">
-            <div class="nav-brand">
+            <a href="index.html" class="nav-brand" style="text-decoration: none; color: inherit;">
                 <span class="logo">🐳</span>
                 <span class="brand-name">Docker Registry UI</span>
-            </div>
+            </a>
             <div class="nav-links">
                 <a href="index.html">Home</a>
                 <a href="getting-started.html">Docs</a>
@@ -115,19 +116,23 @@ pip install -r requirements.txt
 python app.py</code></pre>
 
             <h2>First Run Setup</h2>
+            <p><strong>No configuration file needed!</strong> The UI includes a setup wizard for easy first-time configuration.</p>
+            <img src="img/setup-wizard.png" alt="Setup Wizard" style="max-width: 100%; border: 1px solid #e3e8ef; border-radius: 5px; margin: 20px 0;">
             <ol>
                 <li>Access the UI at <code>http://localhost:5000</code></li>
-                <li>You'll see the setup wizard on first run</li>
+                <li>The setup wizard appears automatically on first run</li>
                 <li>Enter your Docker Registry details:
                     <ul>
-                        <li><strong>Name:</strong> A friendly name for your registry</li>
-                        <li><strong>API URL:</strong> Your registry URL (e.g., <code>http://localhost:5001</code>)</li>
-                        <li><strong>Authentication:</strong> Enable if your registry requires auth</li>
+                        <li><strong>Registry Name:</strong> Friendly name (e.g., "Local Registry")</li>
+                        <li><strong>Registry URL:</strong> API endpoint (e.g., <code>http://localhost:5001</code>)</li>
+                        <li><strong>Authentication:</strong> Enable if your registry requires credentials</li>
                     </ul>
                 </li>
-                <li>Click "Test Connection" to verify</li>
-                <li>Save and start managing your registry!</li>
+                <li>Click "Test Connection" to verify connectivity</li>
+                <li>Save configuration - it's automatically persisted to <code>/app/data/registries.config.json</code></li>
+                <li>Start managing your registry!</li>
             </ol>
+            <p><em>Note: For automated deployments, you can pre-create the config file. See <a href="configuration.html">Configuration Guide</a>.</em></p>
 
             <h2>Environment Variables</h2>
             <table>

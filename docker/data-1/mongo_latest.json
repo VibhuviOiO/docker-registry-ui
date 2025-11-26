@@ -1,0 +1,332 @@
+{
+  "scanner": "trivy",
+  "summary": {
+    "CRITICAL": 0,
+    "HIGH": 0,
+    "MEDIUM": 6,
+    "LOW": 10,
+    "UNKNOWN": 0
+  },
+  "total": 16,
+  "details": [
+    {
+      "id": "CVE-2016-2781",
+      "severity": "LOW",
+      "package": "coreutils",
+      "version": "9.4-3ubuntu6.1",
+      "fixedVersion": null,
+      "title": "coreutils: Non-privileged session can escape to the parent session in chroot",
+      "layer": "sha256:20043"
+    },
+    {
+      "id": "CVE-2022-3219",
+      "severity": "LOW",
+      "package": "gpgv",
+      "version": "2.4.4-2ubuntu17.3",
+      "fixedVersion": null,
+      "title": "gnupg: denial of service issue (resource consumption) using compressed packets",
+      "layer": "sha256:20043"
+    },
+    {
+      "id": "CVE-2025-0167",
+      "severity": "LOW",
+      "package": "libcurl4t64",
+      "version": "8.5.0-2ubuntu10.6",
+      "fixedVersion": null,
+      "title": "When asked to use a `.netrc` file for credentials **and** to follow HT ...",
+      "layer": "sha256:88373"
+    },
+    {
+      "id": "CVE-2025-10148",
+      "severity": "LOW",
+      "package": "libcurl4t64",
+      "version": "8.5.0-2ubuntu10.6",
+      "fixedVersion": null,
+      "title": "curl: predictable WebSocket mask",
+      "layer": "sha256:88373"
+    },
+    {
+      "id": "CVE-2025-9086",
+      "severity": "LOW",
+      "package": "libcurl4t64",
+      "version": "8.5.0-2ubuntu10.6",
+      "fixedVersion": null,
+      "title": "curl: libcurl: Curl out of bounds read for cookie path",
+      "layer": "sha256:88373"
+    },
+    {
+      "id": "CVE-2024-2236",
+      "severity": "LOW",
+      "package": "libgcrypt20",
+      "version": "1.10.3-2build1",
+      "fixedVersion": null,
+      "title": "libgcrypt: vulnerable to Marvin Attack",
+      "layer": "sha256:20043"
+    },
+    {
+      "id": "CVE-2025-8941",
+      "severity": "MEDIUM",
+      "package": "libpam-modules",
+      "version": "1.5.3-5ubuntu5.5",
+      "fixedVersion": null,
+      "title": "linux-pam: Incomplete fix for CVE-2025-6020",
+      "layer": "sha256:20043"
+    },
+    {
+      "id": "CVE-2025-8941",
+      "severity": "MEDIUM",
+      "package": "libpam-modules-bin",
+      "version": "1.5.3-5ubuntu5.5",
+      "fixedVersion": null,
+      "title": "linux-pam: Incomplete fix for CVE-2025-6020",
+      "layer": "sha256:20043"
+    },
+    {
+      "id": "CVE-2025-8941",
+      "severity": "MEDIUM",
+      "package": "libpam-runtime",
+      "version": "1.5.3-5ubuntu5.5",
+      "fixedVersion": null,
+      "title": "linux-pam: Incomplete fix for CVE-2025-6020",
+      "layer": "sha256:20043"
+    },
+    {
+      "id": "CVE-2025-8941",
+      "severity": "MEDIUM",
+      "package": "libpam0g",
+      "version": "1.5.3-5ubuntu5.5",
+      "fixedVersion": null,
+      "title": "linux-pam: Incomplete fix for CVE-2025-6020",
+      "layer": "sha256:20043"
+    },
+    {
+      "id": "CVE-2024-41996",
+      "severity": "LOW",
+      "package": "libssl3t64",
+      "version": "3.0.13-0ubuntu3.6",
+      "fixedVersion": null,
+      "title": "openssl: remote attackers (from the client side) to trigger unnecessarily expensive server-side DHE modular-exponentiation calculations",
+      "layer": "sha256:20043"
+    },
+    {
+      "id": "CVE-2024-56433",
+      "severity": "LOW",
+      "package": "login",
+      "version": "1:4.13+dfsg1-4ubuntu3.2",
+      "fixedVersion": null,
+      "title": "shadow-utils: Default subordinate ID configuration in /etc/login.defs could lead to compromise",
+      "layer": "sha256:20043"
+    },
+    {
+      "id": "CVE-2024-41996",
+      "severity": "LOW",
+      "package": "openssl",
+      "version": "3.0.13-0ubuntu3.6",
+      "fixedVersion": null,
+      "title": "openssl: remote attackers (from the client side) to trigger unnecessarily expensive server-side DHE modular-exponentiation calculations",
+      "layer": "sha256:8a630"
+    },
+    {
+      "id": "CVE-2024-56433",
+      "severity": "LOW",
+      "package": "passwd",
+      "version": "1:4.13+dfsg1-4ubuntu3.2",
+      "fixedVersion": null,
+      "title": "shadow-utils: Default subordinate ID configuration in /etc/login.defs could lead to compromise",
+      "layer": "sha256:20043"
+    },
+    {
+      "id": "CVE-2025-45582",
+      "severity": "MEDIUM",
+      "package": "tar",
+      "version": "1.35+dfsg-3build1",
+      "fixedVersion": null,
+      "title": "tar: Tar path traversal",
+      "layer": "sha256:20043"
+    },
+    {
+      "id": "CVE-2025-64718",
+      "severity": "MEDIUM",
+      "package": "js-yaml",
+      "version": "3.13.1",
+      "fixedVersion": "4.1.1, 3.14.2",
+      "title": "js-yaml is a JavaScript YAML parser and dumper. In js-yaml 4.1.0 and b ...",
+      "layer": "sha256:1732f"
+    }
+  ],
+  "layers": [
+    {
+      "target": "registry-1:5000/mongo:latest (ubuntu 24.04)",
+      "digest": "latest (ubun",
+      "summary": {
+        "CRITICAL": 0,
+        "HIGH": 0,
+        "MEDIUM": 5,
+        "LOW": 10
+      },
+      "total": 15,
+      "vulnerabilities": [
+        {
+          "id": "CVE-2016-2781",
+          "severity": "LOW",
+          "package": "coreutils",
+          "version": "9.4-3ubuntu6.1",
+          "fixedVersion": null,
+          "title": "coreutils: Non-privileged session can escape to the parent session in chroot",
+          "layer": "sha256:20043"
+        },
+        {
+          "id": "CVE-2022-3219",
+          "severity": "LOW",
+          "package": "gpgv",
+          "version": "2.4.4-2ubuntu17.3",
+          "fixedVersion": null,
+          "title": "gnupg: denial of service issue (resource consumption) using compressed packets",
+          "layer": "sha256:20043"
+        },
+        {
+          "id": "CVE-2025-0167",
+          "severity": "LOW",
+          "package": "libcurl4t64",
+          "version": "8.5.0-2ubuntu10.6",
+          "fixedVersion": null,
+          "title": "When asked to use a `.netrc` file for credentials **and** to follow HT ...",
+          "layer": "sha256:88373"
+        },
+        {
+          "id": "CVE-2025-10148",
+          "severity": "LOW",
+          "package": "libcurl4t64",
+          "version": "8.5.0-2ubuntu10.6",
+          "fixedVersion": null,
+          "title": "curl: predictable WebSocket mask",
+          "layer": "sha256:88373"
+        },
+        {
+          "id": "CVE-2025-9086",
+          "severity": "LOW",
+          "package": "libcurl4t64",
+          "version": "8.5.0-2ubuntu10.6",
+          "fixedVersion": null,
+          "title": "curl: libcurl: Curl out of bounds read for cookie path",
+          "layer": "sha256:88373"
+        },
+        {
+          "id": "CVE-2024-2236",
+          "severity": "LOW",
+          "package": "libgcrypt20",
+          "version": "1.10.3-2build1",
+          "fixedVersion": null,
+          "title": "libgcrypt: vulnerable to Marvin Attack",
+          "layer": "sha256:20043"
+        },
+        {
+          "id": "CVE-2025-8941",
+          "severity": "MEDIUM",
+          "package": "libpam-modules",
+          "version": "1.5.3-5ubuntu5.5",
+          "fixedVersion": null,
+          "title": "linux-pam: Incomplete fix for CVE-2025-6020",
+          "layer": "sha256:20043"
+        },
+        {
+          "id": "CVE-2025-8941",
+          "severity": "MEDIUM",
+          "package": "libpam-modules-bin",
+          "version": "1.5.3-5ubuntu5.5",
+          "fixedVersion": null,
+          "title": "linux-pam: Incomplete fix for CVE-2025-6020",
+          "layer": "sha256:20043"
+        },
+        {
+          "id": "CVE-2025-8941",
+          "severity": "MEDIUM",
+          "package": "libpam-runtime",
+          "version": "1.5.3-5ubuntu5.5",
+          "fixedVersion": null,
+          "title": "linux-pam: Incomplete fix for CVE-2025-6020",
+          "layer": "sha256:20043"
+        },
+        {
+          "id": "CVE-2025-8941",
+          "severity": "MEDIUM",
+          "package": "libpam0g",
+          "version": "1.5.3-5ubuntu5.5",
+          "fixedVersion": null,
+          "title": "linux-pam: Incomplete fix for CVE-2025-6020",
+          "layer": "sha256:20043"
+        },
+        {
+          "id": "CVE-2024-41996",
+          "severity": "LOW",
+          "package": "libssl3t64",
+          "version": "3.0.13-0ubuntu3.6",
+          "fixedVersion": null,
+          "title": "openssl: remote attackers (from the client side) to trigger unnecessarily expensive server-side DHE modular-exponentiation calculations",
+          "layer": "sha256:20043"
+        },
+        {
+          "id": "CVE-2024-56433",
+          "severity": "LOW",
+          "package": "login",
+          "version": "1:4.13+dfsg1-4ubuntu3.2",
+          "fixedVersion": null,
+          "title": "shadow-utils: Default subordinate ID configuration in /etc/login.defs could lead to compromise",
+          "layer": "sha256:20043"
+        },
+        {
+          "id": "CVE-2024-41996",
+          "severity": "LOW",
+          "package": "openssl",
+          "version": "3.0.13-0ubuntu3.6",
+          "fixedVersion": null,
+          "title": "openssl: remote attackers (from the client side) to trigger unnecessarily expensive server-side DHE modular-exponentiation calculations",
+          "layer": "sha256:8a630"
+        },
+        {
+          "id": "CVE-2024-56433",
+          "severity": "LOW",
+          "package": "passwd",
+          "version": "1:4.13+dfsg1-4ubuntu3.2",
+          "fixedVersion": null,
+          "title": "shadow-utils: Default subordinate ID configuration in /etc/login.defs could lead to compromise",
+          "layer": "sha256:20043"
+        },
+        {
+          "id": "CVE-2025-45582",
+          "severity": "MEDIUM",
+          "package": "tar",
+          "version": "1.35+dfsg-3build1",
+          "fixedVersion": null,
+          "title": "tar: Tar path traversal",
+          "layer": "sha256:20043"
+        }
+      ]
+    },
+    {
+      "target": "Node.js",
+      "digest": "",
+      "summary": {
+        "CRITICAL": 0,
+        "HIGH": 0,
+        "MEDIUM": 1,
+        "LOW": 0
+      },
+      "total": 1,
+      "vulnerabilities": [
+        {
+          "id": "CVE-2025-64718",
+          "severity": "MEDIUM",
+          "package": "js-yaml",
+          "version": "3.13.1",
+          "fixedVersion": "4.1.1, 3.14.2",
+          "title": "js-yaml is a JavaScript YAML parser and dumper. In js-yaml 4.1.0 and b ...",
+          "layer": "sha256:1732f"
+        }
+      ]
+    }
+  ],
+  "repo": "mongo",
+  "tag": "latest",
+  "scannedAt": "2025-11-26T18:08:36.930108"
+}

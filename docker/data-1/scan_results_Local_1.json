@@ -1,0 +1,1080 @@
+{
+  "mongo:latest": {
+    "scanner": "trivy",
+    "summary": {
+      "CRITICAL": 0,
+      "HIGH": 0,
+      "MEDIUM": 6,
+      "LOW": 10,
+      "UNKNOWN": 0
+    },
+    "total": 16,
+    "details": [
+      {
+        "id": "CVE-2016-2781",
+        "severity": "LOW",
+        "package": "coreutils",
+        "version": "9.4-3ubuntu6.1",
+        "fixedVersion": null,
+        "title": "coreutils: Non-privileged session can escape to the parent session in chroot",
+        "layer": "sha256:20043"
+      },
+      {
+        "id": "CVE-2022-3219",
+        "severity": "LOW",
+        "package": "gpgv",
+        "version": "2.4.4-2ubuntu17.3",
+        "fixedVersion": null,
+        "title": "gnupg: denial of service issue (resource consumption) using compressed packets",
+        "layer": "sha256:20043"
+      },
+      {
+        "id": "CVE-2025-0167",
+        "severity": "LOW",
+        "package": "libcurl4t64",
+        "version": "8.5.0-2ubuntu10.6",
+        "fixedVersion": null,
+        "title": "When asked to use a `.netrc` file for credentials **and** to follow HT ...",
+        "layer": "sha256:88373"
+      },
+      {
+        "id": "CVE-2025-10148",
+        "severity": "LOW",
+        "package": "libcurl4t64",
+        "version": "8.5.0-2ubuntu10.6",
+        "fixedVersion": null,
+        "title": "curl: predictable WebSocket mask",
+        "layer": "sha256:88373"
+      },
+      {
+        "id": "CVE-2025-9086",
+        "severity": "LOW",
+        "package": "libcurl4t64",
+        "version": "8.5.0-2ubuntu10.6",
+        "fixedVersion": null,
+        "title": "curl: libcurl: Curl out of bounds read for cookie path",
+        "layer": "sha256:88373"
+      },
+      {
+        "id": "CVE-2024-2236",
+        "severity": "LOW",
+        "package": "libgcrypt20",
+        "version": "1.10.3-2build1",
+        "fixedVersion": null,
+        "title": "libgcrypt: vulnerable to Marvin Attack",
+        "layer": "sha256:20043"
+      },
+      {
+        "id": "CVE-2025-8941",
+        "severity": "MEDIUM",
+        "package": "libpam-modules",
+        "version": "1.5.3-5ubuntu5.5",
+        "fixedVersion": null,
+        "title": "linux-pam: Incomplete fix for CVE-2025-6020",
+        "layer": "sha256:20043"
+      },
+      {
+        "id": "CVE-2025-8941",
+        "severity": "MEDIUM",
+        "package": "libpam-modules-bin",
+        "version": "1.5.3-5ubuntu5.5",
+        "fixedVersion": null,
+        "title": "linux-pam: Incomplete fix for CVE-2025-6020",
+        "layer": "sha256:20043"
+      },
+      {
+        "id": "CVE-2025-8941",
+        "severity": "MEDIUM",
+        "package": "libpam-runtime",
+        "version": "1.5.3-5ubuntu5.5",
+        "fixedVersion": null,
+        "title": "linux-pam: Incomplete fix for CVE-2025-6020",
+        "layer": "sha256:20043"
+      },
+      {
+        "id": "CVE-2025-8941",
+        "severity": "MEDIUM",
+        "package": "libpam0g",
+        "version": "1.5.3-5ubuntu5.5",
+        "fixedVersion": null,
+        "title": "linux-pam: Incomplete fix for CVE-2025-6020",
+        "layer": "sha256:20043"
+      },
+      {
+        "id": "CVE-2024-41996",
+        "severity": "LOW",
+        "package": "libssl3t64",
+        "version": "3.0.13-0ubuntu3.6",
+        "fixedVersion": null,
+        "title": "openssl: remote attackers (from the client side) to trigger unnecessarily expensive server-side DHE modular-exponentiation calculations",
+        "layer": "sha256:20043"
+      },
+      {
+        "id": "CVE-2024-56433",
+        "severity": "LOW",
+        "package": "login",
+        "version": "1:4.13+dfsg1-4ubuntu3.2",
+        "fixedVersion": null,
+        "title": "shadow-utils: Default subordinate ID configuration in /etc/login.defs could lead to compromise",
+        "layer": "sha256:20043"
+      },
+      {
+        "id": "CVE-2024-41996",
+        "severity": "LOW",
+        "package": "openssl",
+        "version": "3.0.13-0ubuntu3.6",
+        "fixedVersion": null,
+        "title": "openssl: remote attackers (from the client side) to trigger unnecessarily expensive server-side DHE modular-exponentiation calculations",
+        "layer": "sha256:8a630"
+      },
+      {
+        "id": "CVE-2024-56433",
+        "severity": "LOW",
+        "package": "passwd",
+        "version": "1:4.13+dfsg1-4ubuntu3.2",
+        "fixedVersion": null,
+        "title": "shadow-utils: Default subordinate ID configuration in /etc/login.defs could lead to compromise",
+        "layer": "sha256:20043"
+      },
+      {
+        "id": "CVE-2025-45582",
+        "severity": "MEDIUM",
+        "package": "tar",
+        "version": "1.35+dfsg-3build1",
+        "fixedVersion": null,
+        "title": "tar: Tar path traversal",
+        "layer": "sha256:20043"
+      },
+      {
+        "id": "CVE-2025-64718",
+        "severity": "MEDIUM",
+        "package": "js-yaml",
+        "version": "3.13.1",
+        "fixedVersion": "4.1.1, 3.14.2",
+        "title": "js-yaml is a JavaScript YAML parser and dumper. In js-yaml 4.1.0 and b ...",
+        "layer": "sha256:1732f"
+      }
+    ],
+    "layers": [
+      {
+        "target": "registry-1:5000/mongo:latest (ubuntu 24.04)",
+        "digest": "latest (ubun",
+        "summary": {
+          "CRITICAL": 0,
+          "HIGH": 0,
+          "MEDIUM": 5,
+          "LOW": 10
+        },
+        "total": 15,
+        "vulnerabilities": [
+          {
+            "id": "CVE-2016-2781",
+            "severity": "LOW",
+            "package": "coreutils",
+            "version": "9.4-3ubuntu6.1",
+            "fixedVersion": null,
+            "title": "coreutils: Non-privileged session can escape to the parent session in chroot",
+            "layer": "sha256:20043"
+          },
+          {
+            "id": "CVE-2022-3219",
+            "severity": "LOW",
+            "package": "gpgv",
+            "version": "2.4.4-2ubuntu17.3",
+            "fixedVersion": null,
+            "title": "gnupg: denial of service issue (resource consumption) using compressed packets",
+            "layer": "sha256:20043"
+          },
+          {
+            "id": "CVE-2025-0167",
+            "severity": "LOW",
+            "package": "libcurl4t64",
+            "version": "8.5.0-2ubuntu10.6",
+            "fixedVersion": null,
+            "title": "When asked to use a `.netrc` file for credentials **and** to follow HT ...",
+            "layer": "sha256:88373"
+          },
+          {
+            "id": "CVE-2025-10148",
+            "severity": "LOW",
+            "package": "libcurl4t64",
+            "version": "8.5.0-2ubuntu10.6",
+            "fixedVersion": null,
+            "title": "curl: predictable WebSocket mask",
+            "layer": "sha256:88373"
+          },
+          {
+            "id": "CVE-2025-9086",
+            "severity": "LOW",
+            "package": "libcurl4t64",
+            "version": "8.5.0-2ubuntu10.6",
+            "fixedVersion": null,
+            "title": "curl: libcurl: Curl out of bounds read for cookie path",
+            "layer": "sha256:88373"
+          },
+          {
+            "id": "CVE-2024-2236",
+            "severity": "LOW",
+            "package": "libgcrypt20",
+            "version": "1.10.3-2build1",
+            "fixedVersion": null,
+            "title": "libgcrypt: vulnerable to Marvin Attack",
+            "layer": "sha256:20043"
+          },
+          {
+            "id": "CVE-2025-8941",
+            "severity": "MEDIUM",
+            "package": "libpam-modules",
+            "version": "1.5.3-5ubuntu5.5",
+            "fixedVersion": null,
+            "title": "linux-pam: Incomplete fix for CVE-2025-6020",
+            "layer": "sha256:20043"
+          },
+          {
+            "id": "CVE-2025-8941",
+            "severity": "MEDIUM",
+            "package": "libpam-modules-bin",
+            "version": "1.5.3-5ubuntu5.5",
+            "fixedVersion": null,
+            "title": "linux-pam: Incomplete fix for CVE-2025-6020",
+            "layer": "sha256:20043"
+          },
+          {
+            "id": "CVE-2025-8941",
+            "severity": "MEDIUM",
+            "package": "libpam-runtime",
+            "version": "1.5.3-5ubuntu5.5",
+            "fixedVersion": null,
+            "title": "linux-pam: Incomplete fix for CVE-2025-6020",
+            "layer": "sha256:20043"
+          },
+          {
+            "id": "CVE-2025-8941",
+            "severity": "MEDIUM",
+            "package": "libpam0g",
+            "version": "1.5.3-5ubuntu5.5",
+            "fixedVersion": null,
+            "title": "linux-pam: Incomplete fix for CVE-2025-6020",
+            "layer": "sha256:20043"
+          },
+          {
+            "id": "CVE-2024-41996",
+            "severity": "LOW",
+            "package": "libssl3t64",
+            "version": "3.0.13-0ubuntu3.6",
+            "fixedVersion": null,
+            "title": "openssl: remote attackers (from the client side) to trigger unnecessarily expensive server-side DHE modular-exponentiation calculations",
+            "layer": "sha256:20043"
+          },
+          {
+            "id": "CVE-2024-56433",
+            "severity": "LOW",
+            "package": "login",
+            "version": "1:4.13+dfsg1-4ubuntu3.2",
+            "fixedVersion": null,
+            "title": "shadow-utils: Default subordinate ID configuration in /etc/login.defs could lead to compromise",
+            "layer": "sha256:20043"
+          },
+          {
+            "id": "CVE-2024-41996",
+            "severity": "LOW",
+            "package": "openssl",
+            "version": "3.0.13-0ubuntu3.6",
+            "fixedVersion": null,
+            "title": "openssl: remote attackers (from the client side) to trigger unnecessarily expensive server-side DHE modular-exponentiation calculations",
+            "layer": "sha256:8a630"
+          },
+          {
+            "id": "CVE-2024-56433",
+            "severity": "LOW",
+            "package": "passwd",
+            "version": "1:4.13+dfsg1-4ubuntu3.2",
+            "fixedVersion": null,
+            "title": "shadow-utils: Default subordinate ID configuration in /etc/login.defs could lead to compromise",
+            "layer": "sha256:20043"
+          },
+          {
+            "id": "CVE-2025-45582",
+            "severity": "MEDIUM",
+            "package": "tar",
+            "version": "1.35+dfsg-3build1",
+            "fixedVersion": null,
+            "title": "tar: Tar path traversal",
+            "layer": "sha256:20043"
+          }
+        ]
+      },
+      {
+        "target": "Node.js",
+        "digest": "",
+        "summary": {
+          "CRITICAL": 0,
+          "HIGH": 0,
+          "MEDIUM": 1,
+          "LOW": 0
+        },
+        "total": 1,
+        "vulnerabilities": [
+          {
+            "id": "CVE-2025-64718",
+            "severity": "MEDIUM",
+            "package": "js-yaml",
+            "version": "3.13.1",
+            "fixedVersion": "4.1.1, 3.14.2",
+            "title": "js-yaml is a JavaScript YAML parser and dumper. In js-yaml 4.1.0 and b ...",
+            "layer": "sha256:1732f"
+          }
+        ]
+      }
+    ],
+    "repo": "mongo",
+    "tag": "latest",
+    "scannedAt": "2025-11-26T18:08:36.930108"
+  },
+  "mongo:5.0": {
+    "scanner": "trivy",
+    "summary": {
+      "CRITICAL": 0,
+      "HIGH": 0,
+      "MEDIUM": 25,
+      "LOW": 14,
+      "UNKNOWN": 0
+    },
+    "total": 39,
+    "details": [
+      {
+        "id": "CVE-2025-30258",
+        "severity": "MEDIUM",
+        "package": "gpgv",
+        "version": "2.2.19-3ubuntu2.2",
+        "fixedVersion": "2.2.19-3ubuntu2.4",
+        "title": "gnupg: verification DoS due to a malicious subkey in the keyring",
+        "layer": "sha256:d9802"
+      },
+      {
+        "id": "CVE-2024-3596",
+        "severity": "MEDIUM",
+        "package": "krb5-locales",
+        "version": "1.17-6ubuntu4.7",
+        "fixedVersion": "1.17-6ubuntu4.8",
+        "title": "freeradius: forgery attack",
+        "layer": "sha256:a7a1a"
+      },
+      {
+        "id": "CVE-2025-24528",
+        "severity": "MEDIUM",
+        "package": "krb5-locales",
+        "version": "1.17-6ubuntu4.7",
+        "fixedVersion": "1.17-6ubuntu4.9",
+        "title": "krb5: overflow when calculating ulog block size",
+        "layer": "sha256:a7a1a"
+      },
+      {
+        "id": "CVE-2025-3576",
+        "severity": "MEDIUM",
+        "package": "krb5-locales",
+        "version": "1.17-6ubuntu4.7",
+        "fixedVersion": "1.17-6ubuntu4.11",
+        "title": "krb5: Kerberos RC4-HMAC-MD5 Checksum Vulnerability Enabling Message Spoofing via MD5 Collisions",
+        "layer": "sha256:a7a1a"
+      },
+      {
+        "id": "CVE-2024-26458",
+        "severity": "LOW",
+        "package": "krb5-locales",
+        "version": "1.17-6ubuntu4.7",
+        "fixedVersion": "1.17-6ubuntu4.9",
+        "title": "krb5: Memory leak at /krb5/src/lib/rpc/pmap_rmt.c",
+        "layer": "sha256:a7a1a"
+      },
+      {
+        "id": "CVE-2024-26461",
+        "severity": "LOW",
+        "package": "krb5-locales",
+        "version": "1.17-6ubuntu4.7",
+        "fixedVersion": "1.17-6ubuntu4.9",
+        "title": "krb5: Memory leak at /krb5/src/lib/gssapi/krb5/k5sealv3.c",
+        "layer": "sha256:a7a1a"
+      },
+      {
+        "id": "CVE-2025-0395",
+        "severity": "MEDIUM",
+        "package": "libc-bin",
+        "version": "2.31-0ubuntu9.16",
+        "fixedVersion": "2.31-0ubuntu9.17",
+        "title": "glibc: buffer overflow in the GNU C Library's assert()",
+        "layer": "sha256:d9802"
+      },
+      {
+        "id": "CVE-2025-4802",
+        "severity": "MEDIUM",
+        "package": "libc-bin",
+        "version": "2.31-0ubuntu9.16",
+        "fixedVersion": "2.31-0ubuntu9.18",
+        "title": "glibc: static setuid binary dlopen may incorrectly search LD_LIBRARY_PATH",
+        "layer": "sha256:d9802"
+      },
+      {
+        "id": "CVE-2025-0395",
+        "severity": "MEDIUM",
+        "package": "libc6",
+        "version": "2.31-0ubuntu9.16",
+        "fixedVersion": "2.31-0ubuntu9.17",
+        "title": "glibc: buffer overflow in the GNU C Library's assert()",
+        "layer": "sha256:d9802"
+      },
+      {
+        "id": "CVE-2025-4802",
+        "severity": "MEDIUM",
+        "package": "libc6",
+        "version": "2.31-0ubuntu9.16",
+        "fixedVersion": "2.31-0ubuntu9.18",
+        "title": "glibc: static setuid binary dlopen may incorrectly search LD_LIBRARY_PATH",
+        "layer": "sha256:d9802"
+      },
+      {
+        "id": "CVE-2024-12243",
+        "severity": "MEDIUM",
+        "package": "libgnutls30",
+        "version": "3.6.13-2ubuntu1.11",
+        "fixedVersion": "3.6.13-2ubuntu1.12",
+        "title": "gnutls: GnuTLS Impacted by Inefficient DER Decoding in libtasn1 Leading to Remote DoS",
+        "layer": "sha256:d9802"
+      },
+      {
+        "id": "CVE-2024-3596",
+        "severity": "MEDIUM",
+        "package": "libgssapi-krb5-2",
+        "version": "1.17-6ubuntu4.7",
+        "fixedVersion": "1.17-6ubuntu4.8",
+        "title": "freeradius: forgery attack",
+        "layer": "sha256:a7a1a"
+      },
+      {
+        "id": "CVE-2025-24528",
+        "severity": "MEDIUM",
+        "package": "libgssapi-krb5-2",
+        "version": "1.17-6ubuntu4.7",
+        "fixedVersion": "1.17-6ubuntu4.9",
+        "title": "krb5: overflow when calculating ulog block size",
+        "layer": "sha256:a7a1a"
+      },
+      {
+        "id": "CVE-2025-3576",
+        "severity": "MEDIUM",
+        "package": "libgssapi-krb5-2",
+        "version": "1.17-6ubuntu4.7",
+        "fixedVersion": "1.17-6ubuntu4.11",
+        "title": "krb5: Kerberos RC4-HMAC-MD5 Checksum Vulnerability Enabling Message Spoofing via MD5 Collisions",
+        "layer": "sha256:a7a1a"
+      },
+      {
+        "id": "CVE-2024-26458",
+        "severity": "LOW",
+        "package": "libgssapi-krb5-2",
+        "version": "1.17-6ubuntu4.7",
+        "fixedVersion": "1.17-6ubuntu4.9",
+        "title": "krb5: Memory leak at /krb5/src/lib/rpc/pmap_rmt.c",
+        "layer": "sha256:a7a1a"
+      },
+      {
+        "id": "CVE-2024-26461",
+        "severity": "LOW",
+        "package": "libgssapi-krb5-2",
+        "version": "1.17-6ubuntu4.7",
+        "fixedVersion": "1.17-6ubuntu4.9",
+        "title": "krb5: Memory leak at /krb5/src/lib/gssapi/krb5/k5sealv3.c",
+        "layer": "sha256:a7a1a"
+      },
+      {
+        "id": "CVE-2024-3596",
+        "severity": "MEDIUM",
+        "package": "libk5crypto3",
+        "version": "1.17-6ubuntu4.7",
+        "fixedVersion": "1.17-6ubuntu4.8",
+        "title": "freeradius: forgery attack",
+        "layer": "sha256:a7a1a"
+      },
+      {
+        "id": "CVE-2025-24528",
+        "severity": "MEDIUM",
+        "package": "libk5crypto3",
+        "version": "1.17-6ubuntu4.7",
+        "fixedVersion": "1.17-6ubuntu4.9",
+        "title": "krb5: overflow when calculating ulog block size",
+        "layer": "sha256:a7a1a"
+      },
+      {
+        "id": "CVE-2025-3576",
+        "severity": "MEDIUM",
+        "package": "libk5crypto3",
+        "version": "1.17-6ubuntu4.7",
+        "fixedVersion": "1.17-6ubuntu4.11",
+        "title": "krb5: Kerberos RC4-HMAC-MD5 Checksum Vulnerability Enabling Message Spoofing via MD5 Collisions",
+        "layer": "sha256:a7a1a"
+      },
+      {
+        "id": "CVE-2024-26458",
+        "severity": "LOW",
+        "package": "libk5crypto3",
+        "version": "1.17-6ubuntu4.7",
+        "fixedVersion": "1.17-6ubuntu4.9",
+        "title": "krb5: Memory leak at /krb5/src/lib/rpc/pmap_rmt.c",
+        "layer": "sha256:a7a1a"
+      },
+      {
+        "id": "CVE-2024-26461",
+        "severity": "LOW",
+        "package": "libk5crypto3",
+        "version": "1.17-6ubuntu4.7",
+        "fixedVersion": "1.17-6ubuntu4.9",
+        "title": "krb5: Memory leak at /krb5/src/lib/gssapi/krb5/k5sealv3.c",
+        "layer": "sha256:a7a1a"
+      },
+      {
+        "id": "CVE-2024-3596",
+        "severity": "MEDIUM",
+        "package": "libkrb5-3",
+        "version": "1.17-6ubuntu4.7",
+        "fixedVersion": "1.17-6ubuntu4.8",
+        "title": "freeradius: forgery attack",
+        "layer": "sha256:a7a1a"
+      },
+      {
+        "id": "CVE-2025-24528",
+        "severity": "MEDIUM",
+        "package": "libkrb5-3",
+        "version": "1.17-6ubuntu4.7",
+        "fixedVersion": "1.17-6ubuntu4.9",
+        "title": "krb5: overflow when calculating ulog block size",
+        "layer": "sha256:a7a1a"
+      },
+      {
+        "id": "CVE-2025-3576",
+        "severity": "MEDIUM",
+        "package": "libkrb5-3",
+        "version": "1.17-6ubuntu4.7",
+        "fixedVersion": "1.17-6ubuntu4.11",
+        "title": "krb5: Kerberos RC4-HMAC-MD5 Checksum Vulnerability Enabling Message Spoofing via MD5 Collisions",
+        "layer": "sha256:a7a1a"
+      },
+      {
+        "id": "CVE-2024-26458",
+        "severity": "LOW",
+        "package": "libkrb5-3",
+        "version": "1.17-6ubuntu4.7",
+        "fixedVersion": "1.17-6ubuntu4.9",
+        "title": "krb5: Memory leak at /krb5/src/lib/rpc/pmap_rmt.c",
+        "layer": "sha256:a7a1a"
+      },
+      {
+        "id": "CVE-2024-26461",
+        "severity": "LOW",
+        "package": "libkrb5-3",
+        "version": "1.17-6ubuntu4.7",
+        "fixedVersion": "1.17-6ubuntu4.9",
+        "title": "krb5: Memory leak at /krb5/src/lib/gssapi/krb5/k5sealv3.c",
+        "layer": "sha256:a7a1a"
+      },
+      {
+        "id": "CVE-2024-3596",
+        "severity": "MEDIUM",
+        "package": "libkrb5support0",
+        "version": "1.17-6ubuntu4.7",
+        "fixedVersion": "1.17-6ubuntu4.8",
+        "title": "freeradius: forgery attack",
+        "layer": "sha256:a7a1a"
+      },
+      {
+        "id": "CVE-2025-24528",
+        "severity": "MEDIUM",
+        "package": "libkrb5support0",
+        "version": "1.17-6ubuntu4.7",
+        "fixedVersion": "1.17-6ubuntu4.9",
+        "title": "krb5: overflow when calculating ulog block size",
+        "layer": "sha256:a7a1a"
+      },
+      {
+        "id": "CVE-2025-3576",
+        "severity": "MEDIUM",
+        "package": "libkrb5support0",
+        "version": "1.17-6ubuntu4.7",
+        "fixedVersion": "1.17-6ubuntu4.11",
+        "title": "krb5: Kerberos RC4-HMAC-MD5 Checksum Vulnerability Enabling Message Spoofing via MD5 Collisions",
+        "layer": "sha256:a7a1a"
+      },
+      {
+        "id": "CVE-2024-26458",
+        "severity": "LOW",
+        "package": "libkrb5support0",
+        "version": "1.17-6ubuntu4.7",
+        "fixedVersion": "1.17-6ubuntu4.9",
+        "title": "krb5: Memory leak at /krb5/src/lib/rpc/pmap_rmt.c",
+        "layer": "sha256:a7a1a"
+      },
+      {
+        "id": "CVE-2024-26461",
+        "severity": "LOW",
+        "package": "libkrb5support0",
+        "version": "1.17-6ubuntu4.7",
+        "fixedVersion": "1.17-6ubuntu4.9",
+        "title": "krb5: Memory leak at /krb5/src/lib/gssapi/krb5/k5sealv3.c",
+        "layer": "sha256:a7a1a"
+      },
+      {
+        "id": "CVE-2025-29088",
+        "severity": "MEDIUM",
+        "package": "libsqlite3-0",
+        "version": "3.31.1-4ubuntu0.6",
+        "fixedVersion": "3.31.1-4ubuntu0.7",
+        "title": "sqlite: Denial of Service in SQLite",
+        "layer": "sha256:a7a1a"
+      },
+      {
+        "id": "CVE-2025-52099",
+        "severity": "MEDIUM",
+        "package": "libsqlite3-0",
+        "version": "3.31.1-4ubuntu0.6",
+        "fixedVersion": "3.31.1-4ubuntu0.7",
+        "title": "sqlite: SQLite integer overflow",
+        "layer": "sha256:a7a1a"
+      },
+      {
+        "id": "CVE-2024-13176",
+        "severity": "LOW",
+        "package": "libssl1.1",
+        "version": "1.1.1f-1ubuntu2.23",
+        "fixedVersion": "1.1.1f-1ubuntu2.24",
+        "title": "openssl: Timing side-channel in ECDSA signature computation",
+        "layer": "sha256:04561"
+      },
+      {
+        "id": "CVE-2024-9143",
+        "severity": "LOW",
+        "package": "libssl1.1",
+        "version": "1.1.1f-1ubuntu2.23",
+        "fixedVersion": "1.1.1f-1ubuntu2.24",
+        "title": "openssl: Low-level invalid GF(2^m) parameters lead to OOB memory access",
+        "layer": "sha256:04561"
+      },
+      {
+        "id": "CVE-2024-12133",
+        "severity": "MEDIUM",
+        "package": "libtasn1-6",
+        "version": "4.16.0-2",
+        "fixedVersion": "4.16.0-2ubuntu0.1",
+        "title": "libtasn1: Inefficient DER Decoding in libtasn1 Leading to Potential Remote DoS",
+        "layer": "sha256:d9802"
+      },
+      {
+        "id": "CVE-2024-13176",
+        "severity": "LOW",
+        "package": "openssl",
+        "version": "1.1.1f-1ubuntu2.23",
+        "fixedVersion": "1.1.1f-1ubuntu2.24",
+        "title": "openssl: Timing side-channel in ECDSA signature computation",
+        "layer": "sha256:04561"
+      },
+      {
+        "id": "CVE-2024-9143",
+        "severity": "LOW",
+        "package": "openssl",
+        "version": "1.1.1f-1ubuntu2.23",
+        "fixedVersion": "1.1.1f-1ubuntu2.24",
+        "title": "openssl: Low-level invalid GF(2^m) parameters lead to OOB memory access",
+        "layer": "sha256:04561"
+      },
+      {
+        "id": "CVE-2025-64718",
+        "severity": "MEDIUM",
+        "package": "js-yaml",
+        "version": "3.13.1",
+        "fixedVersion": "4.1.1, 3.14.2",
+        "title": "js-yaml is a JavaScript YAML parser and dumper. In js-yaml 4.1.0 and b ...",
+        "layer": "sha256:16e97"
+      }
+    ],
+    "layers": [
+      {
+        "target": "registry-1:5000/mongo:5.0 (ubuntu 20.04)",
+        "digest": "5.0 (ubuntu ",
+        "summary": {
+          "CRITICAL": 0,
+          "HIGH": 0,
+          "MEDIUM": 24,
+          "LOW": 14
+        },
+        "total": 38,
+        "vulnerabilities": [
+          {
+            "id": "CVE-2025-30258",
+            "severity": "MEDIUM",
+            "package": "gpgv",
+            "version": "2.2.19-3ubuntu2.2",
+            "fixedVersion": "2.2.19-3ubuntu2.4",
+            "title": "gnupg: verification DoS due to a malicious subkey in the keyring",
+            "layer": "sha256:d9802"
+          },
+          {
+            "id": "CVE-2024-3596",
+            "severity": "MEDIUM",
+            "package": "krb5-locales",
+            "version": "1.17-6ubuntu4.7",
+            "fixedVersion": "1.17-6ubuntu4.8",
+            "title": "freeradius: forgery attack",
+            "layer": "sha256:a7a1a"
+          },
+          {
+            "id": "CVE-2025-24528",
+            "severity": "MEDIUM",
+            "package": "krb5-locales",
+            "version": "1.17-6ubuntu4.7",
+            "fixedVersion": "1.17-6ubuntu4.9",
+            "title": "krb5: overflow when calculating ulog block size",
+            "layer": "sha256:a7a1a"
+          },
+          {
+            "id": "CVE-2025-3576",
+            "severity": "MEDIUM",
+            "package": "krb5-locales",
+            "version": "1.17-6ubuntu4.7",
+            "fixedVersion": "1.17-6ubuntu4.11",
+            "title": "krb5: Kerberos RC4-HMAC-MD5 Checksum Vulnerability Enabling Message Spoofing via MD5 Collisions",
+            "layer": "sha256:a7a1a"
+          },
+          {
+            "id": "CVE-2024-26458",
+            "severity": "LOW",
+            "package": "krb5-locales",
+            "version": "1.17-6ubuntu4.7",
+            "fixedVersion": "1.17-6ubuntu4.9",
+            "title": "krb5: Memory leak at /krb5/src/lib/rpc/pmap_rmt.c",
+            "layer": "sha256:a7a1a"
+          },
+          {
+            "id": "CVE-2024-26461",
+            "severity": "LOW",
+            "package": "krb5-locales",
+            "version": "1.17-6ubuntu4.7",
+            "fixedVersion": "1.17-6ubuntu4.9",
+            "title": "krb5: Memory leak at /krb5/src/lib/gssapi/krb5/k5sealv3.c",
+            "layer": "sha256:a7a1a"
+          },
+          {
+            "id": "CVE-2025-0395",
+            "severity": "MEDIUM",
+            "package": "libc-bin",
+            "version": "2.31-0ubuntu9.16",
+            "fixedVersion": "2.31-0ubuntu9.17",
+            "title": "glibc: buffer overflow in the GNU C Library's assert()",
+            "layer": "sha256:d9802"
+          },
+          {
+            "id": "CVE-2025-4802",
+            "severity": "MEDIUM",
+            "package": "libc-bin",
+            "version": "2.31-0ubuntu9.16",
+            "fixedVersion": "2.31-0ubuntu9.18",
+            "title": "glibc: static setuid binary dlopen may incorrectly search LD_LIBRARY_PATH",
+            "layer": "sha256:d9802"
+          },
+          {
+            "id": "CVE-2025-0395",
+            "severity": "MEDIUM",
+            "package": "libc6",
+            "version": "2.31-0ubuntu9.16",
+            "fixedVersion": "2.31-0ubuntu9.17",
+            "title": "glibc: buffer overflow in the GNU C Library's assert()",
+            "layer": "sha256:d9802"
+          },
+          {
+            "id": "CVE-2025-4802",
+            "severity": "MEDIUM",
+            "package": "libc6",
+            "version": "2.31-0ubuntu9.16",
+            "fixedVersion": "2.31-0ubuntu9.18",
+            "title": "glibc: static setuid binary dlopen may incorrectly search LD_LIBRARY_PATH",
+            "layer": "sha256:d9802"
+          },
+          {
+            "id": "CVE-2024-12243",
+            "severity": "MEDIUM",
+            "package": "libgnutls30",
+            "version": "3.6.13-2ubuntu1.11",
+            "fixedVersion": "3.6.13-2ubuntu1.12",
+            "title": "gnutls: GnuTLS Impacted by Inefficient DER Decoding in libtasn1 Leading to Remote DoS",
+            "layer": "sha256:d9802"
+          },
+          {
+            "id": "CVE-2024-3596",
+            "severity": "MEDIUM",
+            "package": "libgssapi-krb5-2",
+            "version": "1.17-6ubuntu4.7",
+            "fixedVersion": "1.17-6ubuntu4.8",
+            "title": "freeradius: forgery attack",
+            "layer": "sha256:a7a1a"
+          },
+          {
+            "id": "CVE-2025-24528",
+            "severity": "MEDIUM",
+            "package": "libgssapi-krb5-2",
+            "version": "1.17-6ubuntu4.7",
+            "fixedVersion": "1.17-6ubuntu4.9",
+            "title": "krb5: overflow when calculating ulog block size",
+            "layer": "sha256:a7a1a"
+          },
+          {
+            "id": "CVE-2025-3576",
+            "severity": "MEDIUM",
+            "package": "libgssapi-krb5-2",
+            "version": "1.17-6ubuntu4.7",
+            "fixedVersion": "1.17-6ubuntu4.11",
+            "title": "krb5: Kerberos RC4-HMAC-MD5 Checksum Vulnerability Enabling Message Spoofing via MD5 Collisions",
+            "layer": "sha256:a7a1a"
+          },
+          {
+            "id": "CVE-2024-26458",
+            "severity": "LOW",
+            "package": "libgssapi-krb5-2",
+            "version": "1.17-6ubuntu4.7",
+            "fixedVersion": "1.17-6ubuntu4.9",
+            "title": "krb5: Memory leak at /krb5/src/lib/rpc/pmap_rmt.c",
+            "layer": "sha256:a7a1a"
+          },
+          {
+            "id": "CVE-2024-26461",
+            "severity": "LOW",
+            "package": "libgssapi-krb5-2",
+            "version": "1.17-6ubuntu4.7",
+            "fixedVersion": "1.17-6ubuntu4.9",
+            "title": "krb5: Memory leak at /krb5/src/lib/gssapi/krb5/k5sealv3.c",
+            "layer": "sha256:a7a1a"
+          },
+          {
+            "id": "CVE-2024-3596",
+            "severity": "MEDIUM",
+            "package": "libk5crypto3",
+            "version": "1.17-6ubuntu4.7",
+            "fixedVersion": "1.17-6ubuntu4.8",
+            "title": "freeradius: forgery attack",
+            "layer": "sha256:a7a1a"
+          },
+          {
+            "id": "CVE-2025-24528",
+            "severity": "MEDIUM",
+            "package": "libk5crypto3",
+            "version": "1.17-6ubuntu4.7",
+            "fixedVersion": "1.17-6ubuntu4.9",
+            "title": "krb5: overflow when calculating ulog block size",
+            "layer": "sha256:a7a1a"
+          },
+          {
+            "id": "CVE-2025-3576",
+            "severity": "MEDIUM",
+            "package": "libk5crypto3",
+            "version": "1.17-6ubuntu4.7",
+            "fixedVersion": "1.17-6ubuntu4.11",
+            "title": "krb5: Kerberos RC4-HMAC-MD5 Checksum Vulnerability Enabling Message Spoofing via MD5 Collisions",
+            "layer": "sha256:a7a1a"
+          },
+          {
+            "id": "CVE-2024-26458",
+            "severity": "LOW",
+            "package": "libk5crypto3",
+            "version": "1.17-6ubuntu4.7",
+            "fixedVersion": "1.17-6ubuntu4.9",
+            "title": "krb5: Memory leak at /krb5/src/lib/rpc/pmap_rmt.c",
+            "layer": "sha256:a7a1a"
+          },
+          {
+            "id": "CVE-2024-26461",
+            "severity": "LOW",
+            "package": "libk5crypto3",
+            "version": "1.17-6ubuntu4.7",
+            "fixedVersion": "1.17-6ubuntu4.9",
+            "title": "krb5: Memory leak at /krb5/src/lib/gssapi/krb5/k5sealv3.c",
+            "layer": "sha256:a7a1a"
+          },
+          {
+            "id": "CVE-2024-3596",
+            "severity": "MEDIUM",
+            "package": "libkrb5-3",
+            "version": "1.17-6ubuntu4.7",
+            "fixedVersion": "1.17-6ubuntu4.8",
+            "title": "freeradius: forgery attack",
+            "layer": "sha256:a7a1a"
+          },
+          {
+            "id": "CVE-2025-24528",
+            "severity": "MEDIUM",
+            "package": "libkrb5-3",
+            "version": "1.17-6ubuntu4.7",
+            "fixedVersion": "1.17-6ubuntu4.9",
+            "title": "krb5: overflow when calculating ulog block size",
+            "layer": "sha256:a7a1a"
+          },
+          {
+            "id": "CVE-2025-3576",
+            "severity": "MEDIUM",
+            "package": "libkrb5-3",
+            "version": "1.17-6ubuntu4.7",
+            "fixedVersion": "1.17-6ubuntu4.11",
+            "title": "krb5: Kerberos RC4-HMAC-MD5 Checksum Vulnerability Enabling Message Spoofing via MD5 Collisions",
+            "layer": "sha256:a7a1a"
+          },
+          {
+            "id": "CVE-2024-26458",
+            "severity": "LOW",
+            "package": "libkrb5-3",
+            "version": "1.17-6ubuntu4.7",
+            "fixedVersion": "1.17-6ubuntu4.9",
+            "title": "krb5: Memory leak at /krb5/src/lib/rpc/pmap_rmt.c",
+            "layer": "sha256:a7a1a"
+          },
+          {
+            "id": "CVE-2024-26461",
+            "severity": "LOW",
+            "package": "libkrb5-3",
+            "version": "1.17-6ubuntu4.7",
+            "fixedVersion": "1.17-6ubuntu4.9",
+            "title": "krb5: Memory leak at /krb5/src/lib/gssapi/krb5/k5sealv3.c",
+            "layer": "sha256:a7a1a"
+          },
+          {
+            "id": "CVE-2024-3596",
+            "severity": "MEDIUM",
+            "package": "libkrb5support0",
+            "version": "1.17-6ubuntu4.7",
+            "fixedVersion": "1.17-6ubuntu4.8",
+            "title": "freeradius: forgery attack",
+            "layer": "sha256:a7a1a"
+          },
+          {
+            "id": "CVE-2025-24528",
+            "severity": "MEDIUM",
+            "package": "libkrb5support0",
+            "version": "1.17-6ubuntu4.7",
+            "fixedVersion": "1.17-6ubuntu4.9",
+            "title": "krb5: overflow when calculating ulog block size",
+            "layer": "sha256:a7a1a"
+          },
+          {
+            "id": "CVE-2025-3576",
+            "severity": "MEDIUM",
+            "package": "libkrb5support0",
+            "version": "1.17-6ubuntu4.7",
+            "fixedVersion": "1.17-6ubuntu4.11",
+            "title": "krb5: Kerberos RC4-HMAC-MD5 Checksum Vulnerability Enabling Message Spoofing via MD5 Collisions",
+            "layer": "sha256:a7a1a"
+          },
+          {
+            "id": "CVE-2024-26458",
+            "severity": "LOW",
+            "package": "libkrb5support0",
+            "version": "1.17-6ubuntu4.7",
+            "fixedVersion": "1.17-6ubuntu4.9",
+            "title": "krb5: Memory leak at /krb5/src/lib/rpc/pmap_rmt.c",
+            "layer": "sha256:a7a1a"
+          },
+          {
+            "id": "CVE-2024-26461",
+            "severity": "LOW",
+            "package": "libkrb5support0",
+            "version": "1.17-6ubuntu4.7",
+            "fixedVersion": "1.17-6ubuntu4.9",
+            "title": "krb5: Memory leak at /krb5/src/lib/gssapi/krb5/k5sealv3.c",
+            "layer": "sha256:a7a1a"
+          },
+          {
+            "id": "CVE-2025-29088",
+            "severity": "MEDIUM",
+            "package": "libsqlite3-0",
+            "version": "3.31.1-4ubuntu0.6",
+            "fixedVersion": "3.31.1-4ubuntu0.7",
+            "title": "sqlite: Denial of Service in SQLite",
+            "layer": "sha256:a7a1a"
+          },
+          {
+            "id": "CVE-2025-52099",
+            "severity": "MEDIUM",
+            "package": "libsqlite3-0",
+            "version": "3.31.1-4ubuntu0.6",
+            "fixedVersion": "3.31.1-4ubuntu0.7",
+            "title": "sqlite: SQLite integer overflow",
+            "layer": "sha256:a7a1a"
+          },
+          {
+            "id": "CVE-2024-13176",
+            "severity": "LOW",
+            "package": "libssl1.1",
+            "version": "1.1.1f-1ubuntu2.23",
+            "fixedVersion": "1.1.1f-1ubuntu2.24",
+            "title": "openssl: Timing side-channel in ECDSA signature computation",
+            "layer": "sha256:04561"
+          },
+          {
+            "id": "CVE-2024-9143",
+            "severity": "LOW",
+            "package": "libssl1.1",
+            "version": "1.1.1f-1ubuntu2.23",
+            "fixedVersion": "1.1.1f-1ubuntu2.24",
+            "title": "openssl: Low-level invalid GF(2^m) parameters lead to OOB memory access",
+            "layer": "sha256:04561"
+          },
+          {
+            "id": "CVE-2024-12133",
+            "severity": "MEDIUM",
+            "package": "libtasn1-6",
+            "version": "4.16.0-2",
+            "fixedVersion": "4.16.0-2ubuntu0.1",
+            "title": "libtasn1: Inefficient DER Decoding in libtasn1 Leading to Potential Remote DoS",
+            "layer": "sha256:d9802"
+          },
+          {
+            "id": "CVE-2024-13176",
+            "severity": "LOW",
+            "package": "openssl",
+            "version": "1.1.1f-1ubuntu2.23",
+            "fixedVersion": "1.1.1f-1ubuntu2.24",
+            "title": "openssl: Timing side-channel in ECDSA signature computation",
+            "layer": "sha256:04561"
+          },
+          {
+            "id": "CVE-2024-9143",
+            "severity": "LOW",
+            "package": "openssl",
+            "version": "1.1.1f-1ubuntu2.23",
+            "fixedVersion": "1.1.1f-1ubuntu2.24",
+            "title": "openssl: Low-level invalid GF(2^m) parameters lead to OOB memory access",
+            "layer": "sha256:04561"
+          }
+        ]
+      },
+      {
+        "target": "Node.js",
+        "digest": "",
+        "summary": {
+          "CRITICAL": 0,
+          "HIGH": 0,
+          "MEDIUM": 1,
+          "LOW": 0
+        },
+        "total": 1,
+        "vulnerabilities": [
+          {
+            "id": "CVE-2025-64718",
+            "severity": "MEDIUM",
+            "package": "js-yaml",
+            "version": "3.13.1",
+            "fixedVersion": "4.1.1, 3.14.2",
+            "title": "js-yaml is a JavaScript YAML parser and dumper. In js-yaml 4.1.0 and b ...",
+            "layer": "sha256:16e97"
+          }
+        ]
+      }
+    ],
+    "repo": "mongo",
+    "tag": "5.0",
+    "scannedAt": "2025-11-26T18:08:48.612927"
+  }
+}

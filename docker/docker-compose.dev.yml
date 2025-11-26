@@ -1,4 +1,5 @@
 services:
+  # Docker Registry
   registry:
     image: registry:2
     container_name: docker-registry-dev
@@ -8,24 +9,45 @@ services:
       REGISTRY_STORAGE_DELETE_ENABLED: "true"
     volumes:
       - registry-data:/var/lib/registry
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:5000/v2/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
+  # Registry UI (Development Mode)
   registry-ui:
     build:
       context: ..
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
     container_name: registry-ui-dev
     ports:
-      - "8080:5000"
+      - "5003:5000"
     environment:
       - CONFIG_FILE=/app/data/registries.config.json
       - READ_ONLY=false
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
     volumes:
       - ../app:/app/app
       - ../templates:/app/templates
       - ../static:/app/static
-      - ../data:/app/data
+      - ./data:/app/data
     depends_on:
       - registry
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:5000/health/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
 volumes:
   registry-data:

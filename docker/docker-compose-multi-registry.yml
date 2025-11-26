@@ -43,7 +43,7 @@ services:
       - "5003:5000"
     environment:
       - CONFIG_FILE=/app/data/registries.config.json
-      - READ_ONLY=false
+      - READ_ONLY=true
     volumes:
       - ./data:/app/data
     depends_on:

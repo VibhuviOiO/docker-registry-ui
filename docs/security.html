@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Scanning - Docker Registry UI</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐳</text></svg>">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="docs.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="nav-brand" style="text-decoration: none; color: inherit;">
+                <span class="logo">🐳</span>
+                <span class="brand-name">Docker Registry UI</span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="getting-started.html">Docs</a>
+                <a href="https://github.com/vibhuvi/docker-registry-ui" target="_blank">GitHub</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="docs-layout">
+        <aside class="sidebar">
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <h3>Getting Started</h3>
+                    <a href="getting-started.html">Installation</a>
+                    <a href="configuration.html">Configuration</a>
+                </div>
+                <div class="nav-section">
+                    <h3>Features</h3>
+                    <a href="features.html">Overview</a>
+                    <a href="security.html" class="active">Security Scanning</a>
+                    <a href="bulk-operations.html">Bulk Operations</a>
+                </div>
+                <div class="nav-section">
+                    <h3>Reference</h3>
+                    <a href="api.html">API Integration</a>
+                    <a href="development.html">Development</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="docs-content">
+            <h1>Security Scanning</h1>
+
+            <h2>Overview</h2>
+            <p>Docker Registry UI includes built-in vulnerability scanning powered by Trivy, providing comprehensive security analysis of your container images.</p>
+
+            <h2>Quick Start with Trivy</h2>
+            <p>Trivy is built into the Docker Registry UI container. No additional setup required!</p>
+
+            <h3>Scanning Images</h3>
+            <ol>
+                <li>Navigate to the repository</li>
+                <li>Find the tag you want to scan</li>
+                <li>Click the "Scan" button (shield icon 🛡️) next to the tag</li>
+                <li>Wait for the scan to complete (usually 10-30 seconds)</li>
+                <li>View vulnerability badges showing counts by severity</li>
+            </ol>
+
+            <h2>What Trivy Detects</h2>
+            <ul>
+                <li><strong>OS Packages</strong>: Alpine, RHEL, CentOS, Ubuntu, Debian, Amazon Linux, etc.</li>
+                <li><strong>Application Dependencies</strong>: npm, pip, gem, composer, maven, etc.</li>
+                <li><strong>Known CVEs</strong>: From National Vulnerability Database and other sources</li>
+                <li><strong>Severity Levels</strong>: Critical, High, Medium, Low, Unknown</li>
+            </ul>
+
+            <h2>Vulnerability Display</h2>
+            <p>Scan results are displayed as color-coded badges:</p>
+            <ul>
+                <li><strong>Critical</strong>: Red badge - Immediate action required</li>
+                <li><strong>High</strong>: Orange badge - High priority fixes</li>
+                <li><strong>Medium</strong>: Yellow badge - Medium priority</li>
+                <li><strong>Low</strong>: Blue badge - Low priority</li>
+                <li><strong>Unknown</strong>: Gray badge - Severity not determined</li>
+            </ul>
+
+            <h2>CVE Details</h2>
+            <p>Click on any vulnerability badge to view detailed information:</p>
+            <img src="img/cves.png" alt="CVE Details View" style="max-width: 100%; border: 1px solid #e3e8ef; border-radius: 5px; margin: 20px 0;">
+            <ul>
+                <li><strong>CVE ID</strong>: Clickable link to National Vulnerability Database</li>
+                <li><strong>Package</strong>: Affected package name and version</li>
+                <li><strong>Severity</strong>: Vulnerability severity level</li>
+                <li><strong>Fixed Version</strong>: Version that fixes the vulnerability</li>
+                <li><strong>Description</strong>: Detailed vulnerability description</li>
+                <li><strong>Layer</strong>: Which image layer introduced the vulnerability</li>
+            </ul>
+
+            <h2>Layer-by-Layer Analysis</h2>
+            <p>View which layer introduced each vulnerability:</p>
+            <ol>
+                <li>Click "View Layers" for any tag</li>
+                <li>See vulnerability counts per layer</li>
+                <li>Identify which Dockerfile commands introduced vulnerabilities</li>
+                <li>Optimize your Dockerfile to reduce vulnerabilities</li>
+            </ol>
+
+            <h2>Scan Results Storage</h2>
+            <p>Scan results are persisted to disk:</p>
+            <ul>
+                <li>Stored in <code>/app/data/scan_results/</code></li>
+                <li>One JSON file per image tag: <code>repository_tag.json</code></li>
+                <li>Results remain available after UI restart</li>
+                <li>Re-scanning overwrites previous results</li>
+            </ul>
+
+            <h2>Troubleshooting</h2>
+            <h3>Scanner Not Responding</h3>
+            <ul>
+                <li>Verify Trivy is installed in container</li>
+                <li>Check network connectivity to registry</li>
+                <li>Verify image exists and is accessible</li>
+                <li>Check container logs for errors</li>
+            </ul>
+
+            <h3>Scan Takes Too Long</h3>
+            <ul>
+                <li>First scan downloads vulnerability database (slower)</li>
+                <li>Subsequent scans use cached database (faster)</li>
+                <li>Large images take longer to scan</li>
+                <li>Network speed affects download time</li>
+            </ul>
+
+            <h2>Best Practices</h2>
+            <ul>
+                <li><strong>Scan Regularly</strong>: New vulnerabilities are discovered daily</li>
+                <li><strong>Fix Critical First</strong>: Prioritize critical and high severity issues</li>
+                <li><strong>Update Base Images</strong>: Use latest stable base images</li>
+                <li><strong>Minimize Layers</strong>: Fewer layers = smaller attack surface</li>
+                <li><strong>Remove Unnecessary Packages</strong>: Only install what you need</li>
+                <li><strong>Use Specific Versions</strong>: Avoid <code>latest</code> tags in production</li>
+            </ul>
+        </main>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>Developed by <a href="https://vibhuvioio.com" target="_blank">Vibhuvi OiO</a></p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

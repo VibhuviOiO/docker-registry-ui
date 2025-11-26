@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Integration - Docker Registry UI</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐳</text></svg>">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="docs.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="nav-brand" style="text-decoration: none; color: inherit;">
+                <span class="logo">🐳</span>
+                <span class="brand-name">Docker Registry UI</span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="getting-started.html">Docs</a>
+                <a href="https://github.com/vibhuvi/docker-registry-ui" target="_blank">GitHub</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="docs-layout">
+        <aside class="sidebar">
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <h3>Getting Started</h3>
+                    <a href="getting-started.html">Installation</a>
+                    <a href="configuration.html">Configuration</a>
+                </div>
+                <div class="nav-section">
+                    <h3>Features</h3>
+                    <a href="features.html">Overview</a>
+                    <a href="security.html">Security Scanning</a>
+                    <a href="bulk-operations.html">Bulk Operations</a>
+                </div>
+                <div class="nav-section">
+                    <h3>Reference</h3>
+                    <a href="api.html" class="active">API Integration</a>
+                    <a href="development.html">Development</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="docs-content">
+            <h1>API Integration</h1>
+
+            <h2>Setting Up Docker Registry</h2>
+            <p>Before using the UI, you need a running Docker Registry. Here are two methods:</p>
+
+            <h3>Method 1: Docker Run</h3>
+            <pre><code>docker run -d \
+  --name docker-registry \
+  -p 5001:5000 \
+  -e REGISTRY_STORAGE_DELETE_ENABLED=true \
+  -v registry-data:/var/lib/registry \
+  registry:2</code></pre>
+
+            <h3>Method 2: Docker Compose</h3>
+            <p>Create a <code>docker-compose.yml</code> file:</p>
+            <pre><code>version: '3.8'
+
+services:
+  registry:
+    image: registry:2
+    container_name: docker-registry
+    ports:
+      - "5001:5000"
+    environment:
+      REGISTRY_STORAGE_DELETE_ENABLED: "true"
+    volumes:
+      - registry-data:/var/lib/registry
+    restart: unless-stopped
+
+volumes:
+  registry-data:</code></pre>
+
+            <p>Start the registry:</p>
+            <pre><code>docker-compose up -d</code></pre>
+
+            <h3>Verify Registry is Running</h3>
+            <pre><code># Check registry health
+curl http://localhost:5001/v2/
+
+# Should return: {}</code></pre>
+
+            <h2>Docker Registry v2 API</h2>
+            <p>The UI integrates with Docker Registry v2 API endpoints to display repository and image information.</p>
+
+            <h2>Complete Flow: Pull to UI Display</h2>
+            <h3>Example: nginx image</h3>
+            <pre><code># 1. Pull image from Docker Hub
+docker pull nginx:latest
+
+# 2. Tag for local registry
+docker tag nginx:latest localhost:5001/nginx:latest
+
+# 3. Push to local registry
+docker push localhost:5001/nginx:latest</code></pre>
+
+            <h3>List Repositories</h3>
+            <pre><code>GET /v2/_catalog
+
+Response:
+{
+  "repositories": [
+    "nginx",
+    "myapp",
+    "postgres"
+  ]
+}</code></pre>
+
+            <h3>List Tags</h3>
+            <pre><code>GET /v2/&lt;repository&gt;/tags/list
+
+Response:
+{
+  "name": "myapp",
+  "tags": [
+    "latest",
+    "1.0",
+    "1.1"
+  ]
+}</code></pre>
+
+            <h3>Get Manifest (OCI Index - Multi-platform)</h3>
+            <pre><code>GET /v2/&lt;repository&gt;/manifests/&lt;tag&gt;
+Accept: application/vnd.oci.image.index.v1+json
+
+Response:
+{
+  "schemaVersion": 2,
+  "mediaType": "application/vnd.oci.image.index.v1+json",
+  "manifests": [
+    {
+      "mediaType": "application/vnd.oci.image.manifest.v1+json",
+      "digest": "sha256:abc123...",
+      "size": 1234,
+      "platform": {
+        "architecture": "amd64",
+        "os": "linux"
+      }
+    }
+  ]
+}</code></pre>
+
+            <h3>Get Actual Manifest Using Digest</h3>
+            <pre><code>GET /v2/&lt;repository&gt;/manifests/&lt;digest&gt;
+Accept: application/vnd.oci.image.manifest.v1+json
+
+Response:
+{
+  "schemaVersion": 2,
+  "mediaType": "application/vnd.oci.image.manifest.v1+json",
+  "config": {
+    "mediaType": "application/vnd.oci.image.config.v1+json",
+    "digest": "sha256:config123...",
+    "size": 7234
+  },
+  "layers": [
+    {
+      "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+      "digest": "sha256:layer1...",
+      "size": 29123456
+    },
+    {
+      "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+      "digest": "sha256:layer2...",
+      "size": 3456789
+    }
+  ]
+}</code></pre>
+
+            <h3>Delete Image</h3>
+            <pre><code>DELETE /v2/&lt;repository&gt;/manifests/&lt;digest&gt;
+
+Response:
+202 Accepted</code></pre>
+
+            <h2>Size Calculation</h2>
+            <p>The UI calculates image size by summing all layer sizes plus config size:</p>
+            <pre><code># Calculate total size
+curl -s -H "Accept: application/vnd.oci.image.manifest.v1+json" \
+  http://localhost:5001/v2/nginx/manifests/sha256:abc123... \
+  | jq '([.layers[].size] | add) + .config.size'
+
+# Result: 32587479 bytes = 31.08 MB (compressed)</code></pre>
+
+            <h2>UI Backend API</h2>
+            <p>The UI provides additional endpoints:</p>
+
+            <h3>Scan Image</h3>
+            <pre><code>POST /api/scan
+Content-Type: application/json
+
+{
+  "registry_id": 1,
+  "repository": "myapp",
+  "tag": "1.0"
+}
+
+Response:
+{
+  "status": "success",
+  "vulnerabilities": {...}
+}</code></pre>
+
+            <h3>Get Scan Results</h3>
+            <pre><code>GET /api/scan-results?registry_id=1&repository=myapp&tag=1.0
+
+Response:
+{
+  "total": 42,
+  "critical": 2,
+  "high": 10,
+  "medium": 20,
+  "low": 10,
+  "layers": [...]
+}</code></pre>
+
+            <h2>Authentication</h2>
+            <p>Basic authentication is supported:</p>
+            <pre><code>Authorization: Basic base64(username:password)</code></pre>
+
+            <h2>Using the Registry</h2>
+            <h3>Push an Image</h3>
+            <pre><code># Tag an image for your registry
+docker tag nginx:latest localhost:5001/nginx:latest
+
+# Push to registry
+docker push localhost:5001/nginx:latest</code></pre>
+
+            <h3>Pull an Image</h3>
+            <pre><code># Pull from registry
+docker pull localhost:5001/nginx:latest</code></pre>
+
+            <h3>List Repositories via API</h3>
+            <pre><code># List all repositories
+curl http://localhost:5001/v2/_catalog
+
+# List tags for a repository
+curl http://localhost:5001/v2/nginx/tags/list</code></pre>
+
+            <h2>Garbage Collection</h2>
+            <p>Deleting tags only removes manifest references. To free disk space, run garbage collection:</p>
+            <pre><code># Run garbage collection
+docker exec docker-registry bin/registry garbage-collect /etc/docker/registry/config.yml
+
+# Or with dry-run to preview
+docker exec docker-registry bin/registry garbage-collect --dry-run /etc/docker/registry/config.yml</code></pre>
+
+            <h2>Registry Configuration for Delete Operations</h2>
+            <p>To enable delete operations, the registry must have <code>REGISTRY_STORAGE_DELETE_ENABLED=true</code>. This is required for:</p>
+            <ul>
+                <li>Deleting individual tags</li>
+                <li>Bulk delete operations</li>
+                <li>Cleanup workflows</li>
+            </ul>
+
+            <h2>Important Notes</h2>
+            <ul>
+                <li><strong>Compressed vs Uncompressed</strong>: Registry stores compressed layers, so sizes shown are compressed (smaller than <code>docker images</code> shows)</li>
+                <li><strong>Multi-platform</strong>: OCI indexes contain multiple platform manifests (amd64, arm64, etc.)</li>
+                <li><strong>Attestations</strong>: Skip manifests with <code>vnd.docker.reference.type: attestation-manifest</code></li>
+                <li><strong>Size Accuracy</strong>: Sizes are exact bytes from registry, not estimates</li>
+                <li><strong>Delete Enabled</strong>: Must set <code>REGISTRY_STORAGE_DELETE_ENABLED=true</code> for delete operations</li>
+            </ul>
+        </main>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>Developed by <a href="https://vibhuvioio.com" target="_blank">Vibhuvi OiO</a></p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

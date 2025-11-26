@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Development - Docker Registry UI</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐳</text></svg>">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="docs.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="nav-brand" style="text-decoration: none; color: inherit;">
+                <span class="logo">🐳</span>
+                <span class="brand-name">Docker Registry UI</span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="getting-started.html">Docs</a>
+                <a href="https://github.com/vibhuvi/docker-registry-ui" target="_blank">GitHub</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="docs-layout">
+        <aside class="sidebar">
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <h3>Getting Started</h3>
+                    <a href="getting-started.html">Installation</a>
+                    <a href="configuration.html">Configuration</a>
+                </div>
+                <div class="nav-section">
+                    <h3>Features</h3>
+                    <a href="features.html">Overview</a>
+                    <a href="security.html">Security Scanning</a>
+                    <a href="bulk-operations.html">Bulk Operations</a>
+                </div>
+                <div class="nav-section">
+                    <h3>Reference</h3>
+                    <a href="api.html">API Integration</a>
+                    <a href="development.html" class="active">Development</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="docs-content">
+            <h1>Development Guide</h1>
+
+            <h2>Docker-Based Development (Recommended)</h2>
+            <p>Develop without installing Python or dependencies locally. All you need is Docker and a code editor.</p>
+
+            <h3>Setup</h3>
+            <pre><code># Clone repository
+git clone https://github.com/VibhuviOiO/docker-registry-ui.git
+cd docker-registry-ui</code></pre>
+
+            <h3>Development Workflow</h3>
+            <pre><code># Build the development environment
+docker-compose -f docker/docker-compose.dev.yml build
+
+# Start registry and UI in development mode
+docker-compose -f docker/docker-compose.dev.yml up -d
+
+# View logs
+docker-compose -f docker/docker-compose.dev.yml logs -f registry-ui
+
+# Stop services
+docker-compose -f docker/docker-compose.dev.yml down</code></pre>
+
+            <h3>Live Reload</h3>
+            <p>The development compose file mounts your local code directories:</p>
+            <ul>
+                <li><code>app/</code> - Python backend code</li>
+                <li><code>templates/</code> - HTML templates</li>
+                <li><code>static/</code> - CSS and JavaScript</li>
+            </ul>
+            <p>Changes to these files are reflected immediately. For Python changes, restart the container:</p>
+            <pre><code>docker-compose -f docker/docker-compose.dev.yml restart registry-ui</code></pre>
+
+            <h3>Access Points</h3>
+            <ul>
+                <li><strong>UI</strong>: http://localhost:5003</li>
+                <li><strong>Registry</strong>: http://localhost:5001</li>
+            </ul>
+
+            <h2>Local Python Development (Alternative)</h2>
+            <p>If you prefer running Python locally:</p>
+            <pre><code># Create virtual environment
+python3 -m venv venv
+source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run application
+python app.py</code></pre>
+
+            <h2>Project Structure</h2>
+            <pre><code>docker-registry-ui/
+├── app.py                 # Main Flask application
+├── app/
+│   ├── data_store.py     # Scan results storage
+│   ├── registry.py       # Registry API client
+│   └── scanners/
+│       └── trivy.py      # Trivy scanner integration
+├── static/
+│   ├── css/              # Stylesheets
+│   └── js/               # JavaScript files
+├── templates/            # HTML templates
+├── docker/               # Docker configuration
+└── docs/                 # Documentation</code></pre>
+
+            <h2>Technology Stack</h2>
+            <ul>
+                <li><strong>Backend</strong>: Python 3.9+, Flask</li>
+                <li><strong>Frontend</strong>: Vanilla JavaScript, Bootstrap 5</li>
+                <li><strong>Scanner</strong>: Trivy</li>
+                <li><strong>API</strong>: Docker Registry v2 API</li>
+            </ul>
+
+            <h2>Running Tests</h2>
+            <pre><code># Run unit tests
+python -m pytest tests/
+
+# Run with coverage
+python -m pytest --cov=app tests/</code></pre>
+
+            <h2>Building Production Image</h2>
+            <pre><code># Build production image
+docker build -t docker-registry-ui:latest .
+
+# Test production image
+docker run -d -p 5000:5000 \
+  -v $(pwd)/data:/app/data \
+  docker-registry-ui:latest</code></pre>
+
+            <h2>Development Tips</h2>
+            <ul>
+                <li><strong>Code Editor</strong>: Use any editor (VS Code, PyCharm, etc.)</li>
+                <li><strong>Debugging</strong>: Check logs with <code>docker-compose logs -f</code></li>
+                <li><strong>Database</strong>: No database required - stateless design</li>
+                <li><strong>Hot Reload</strong>: Frontend changes (HTML/CSS/JS) reflect immediately</li>
+                <li><strong>Backend Changes</strong>: Restart container for Python changes</li>
+            </ul>
+
+            <h2>Contributing</h2>
+            <ol>
+                <li>Fork the repository</li>
+                <li>Create a feature branch</li>
+                <li>Make your changes</li>
+                <li>Write tests</li>
+                <li>Submit a pull request</li>
+            </ol>
+
+            <h2>Code Style</h2>
+            <ul>
+                <li>Follow PEP 8 for Python code</li>
+                <li>Use ESLint for JavaScript</li>
+                <li>Write descriptive commit messages</li>
+                <li>Add comments for complex logic</li>
+            </ul>
+        </main>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>Developed by <a href="https://vibhuvioio.com" target="_blank">Vibhuvi OiO</a></p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

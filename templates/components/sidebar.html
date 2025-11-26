@@ -8,26 +8,31 @@
           <i class="bi bi-box-seam"></i> Repositories
         </a>
       </li>
-      {% if not read_only %}
       <li class="nav-item">
         <a class="nav-link" href="#" data-view="registries">
           <i class="bi bi-server"></i> Registry Config
         </a>
       </li>
-      <li class="nav-item">
-        <a class="nav-link" href="#" data-view="cleanup">
-          <i class="bi bi-trash3"></i> Cleanup Instructions
-        </a>
-      </li>
-      {% endif %}
+      {% if not read_only %}
       <li class="nav-item">
         <a class="nav-link" href="#" data-view="bulk">
           <i class="bi bi-trash3-fill"></i> Bulk Operations
         </a>
       </li>
+      {% endif %}
+      <li class="nav-item">
+        <a class="nav-link" href="#" data-view="cleanup">
+          <i class="bi bi-trash3"></i> Cleanup Instructions
+        </a>
+      </li>
       <li class="nav-item">
         <a class="nav-link" href="#" data-view="analytics">
           <i class="bi bi-graph-up"></i> Analytics
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="https://vibhuvioio.com/docker-registry-ui/" target="_blank">
+          <i class="bi bi-book"></i> Documentation
         </a>
       </li>
 

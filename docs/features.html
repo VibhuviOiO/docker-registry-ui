@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Features - Docker Registry UI</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐳</text></svg>">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="docs.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="nav-brand" style="text-decoration: none; color: inherit;">
+                <span class="logo">🐳</span>
+                <span class="brand-name">Docker Registry UI</span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="getting-started.html">Docs</a>
+                <a href="https://github.com/vibhuvi/docker-registry-ui" target="_blank">GitHub</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="docs-layout">
+        <aside class="sidebar">
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <h3>Getting Started</h3>
+                    <a href="getting-started.html">Installation</a>
+                    <a href="configuration.html">Configuration</a>
+                </div>
+                <div class="nav-section">
+                    <h3>Features</h3>
+                    <a href="features.html" class="active">Overview</a>
+                    <a href="security.html">Security Scanning</a>
+                    <a href="bulk-operations.html">Bulk Operations</a>
+                </div>
+                <div class="nav-section">
+                    <h3>Reference</h3>
+                    <a href="api.html">API Integration</a>
+                    <a href="development.html">Development</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="docs-content">
+            <h1>Features Overview</h1>
+
+            <h2>Repository Management</h2>
+            <p>Browse and manage Docker repositories with an intuitive interface:</p>
+            <img src="img/repositories.png" alt="Repository Management Interface" style="max-width: 100%; border: 1px solid #e3e8ef; border-radius: 5px; margin: 20px 0;">
+            <ul>
+                <li><strong>Repository List</strong>: View all repositories in your registry</li>
+                <li><strong>Search</strong>: Quickly find repositories by name</li>
+                <li><strong>Tags View</strong>: See all tags for each repository</li>
+                <li><strong>Tag Details</strong>: View manifest, layers, and metadata</li>
+                <li><strong>Delete Tags</strong>: Remove individual tags (when not in read-only mode)</li>
+            </ul>
+
+            <h2>Multi-Registry Support</h2>
+            <p>Manage multiple Docker registries from a single interface:</p>
+            <img src="img/registry-configuration-for-multi-registry-support.png" alt="Multi-Registry Configuration" style="max-width: 100%; border: 1px solid #e3e8ef; border-radius: 5px; margin: 20px 0;">
+            <ul>
+                <li>Switch between registries using the dropdown selector</li>
+                <li>Support for local and remote registries</li>
+                <li>Basic authentication support</li>
+                <li>Independent configuration per registry</li>
+            </ul>
+
+            <h2>Image Information</h2>
+            <p>Detailed information about each image tag:</p>
+            <ul>
+                <li><strong>Size</strong>: Total image size</li>
+                <li><strong>Created</strong>: Image creation timestamp</li>
+                <li><strong>Digest</strong>: SHA256 digest for verification</li>
+                <li><strong>Architecture</strong>: Platform architecture (amd64, arm64, etc.)</li>
+                <li><strong>OS</strong>: Operating system</li>
+                <li><strong>Layers</strong>: Layer-by-layer breakdown with sizes</li>
+            </ul>
+
+            <h2>Layer Inspection</h2>
+            <p>View detailed layer information:</p>
+            <img src="img/layer-inspection.png" alt="Layer Inspection View" style="max-width: 100%; border: 1px solid #e3e8ef; border-radius: 5px; margin: 20px 0;">
+            <ul>
+                <li>Layer digest and size</li>
+                <li>Command that created the layer</li>
+                <li>Vulnerability count per layer</li>
+                <li>Layer order and hierarchy</li>
+            </ul>
+
+            <h2>Vulnerability Scanning</h2>
+            <p>Built-in Trivy integration for security scanning:</p>
+            <img src="img/cves.png" alt="Vulnerability Scanning with CVE Details" style="max-width: 100%; border: 1px solid #e3e8ef; border-radius: 5px; margin: 20px 0;">
+            <ul>
+                <li><strong>On-Demand Scanning</strong>: Scan any image tag</li>
+                <li><strong>Severity Levels</strong>: Critical, High, Medium, Low, Unknown</li>
+                <li><strong>CVE Details</strong>: View detailed vulnerability information</li>
+                <li><strong>NVD Links</strong>: Direct links to National Vulnerability Database</li>
+                <li><strong>Layer Attribution</strong>: See which layer introduced each vulnerability</li>
+                <li><strong>Persistent Results</strong>: Scan results saved for future reference</li>
+            </ul>
+
+            <h2>Bulk Operations</h2>
+            <p>Efficiently manage multiple images:</p>
+            <ul>
+                <li><strong>Pattern Matching</strong>: Delete tags matching wildcards (e.g., <code>dev-*</code>)</li>
+                <li><strong>Age-Based Cleanup</strong>: Remove tags older than specified days</li>
+                <li><strong>Retention Policies</strong>: Keep minimum number of recent tags</li>
+                <li><strong>Dry Run Mode</strong>: Preview deletions before executing</li>
+                <li><strong>Batch Processing</strong>: Delete multiple tags in one operation</li>
+            </ul>
+
+            <h2>Read/Write Modes</h2>
+            <p>Control access levels:</p>
+            <ul>
+                <li><strong>Read-Only Mode</strong>: Browse and scan without modification</li>
+                <li><strong>Read-Write Mode</strong>: Full access including delete operations</li>
+                <li>Toggle via environment variable or UI</li>
+                <li>Ideal for production environments</li>
+            </ul>
+
+            <h2>User Interface</h2>
+            <p>Modern, responsive design:</p>
+            <ul>
+                <li>Clean, intuitive layout inspired by Jira/Bitbucket</li>
+                <li>Responsive design for mobile and desktop</li>
+                <li>Dark mode support</li>
+                <li>Fast, client-side rendering</li>
+                <li>Real-time updates</li>
+            </ul>
+
+            <h2>API Integration</h2>
+            <p>Full Docker Registry v2 API support:</p>
+            <ul>
+                <li>List repositories and tags</li>
+                <li>Get image manifests</li>
+                <li>Delete images by digest</li>
+                <li>CORS support for browser access</li>
+            </ul>
+
+            <h2>Storage Analytics</h2>
+            <p>Understand registry storage usage:</p>
+            <img src="img/analytics-understand-disk-usage.png" alt="Storage Analytics Dashboard" style="max-width: 100%; border: 1px solid #e3e8ef; border-radius: 5px; margin: 20px 0;">
+            <ul>
+                <li>Total repository size</li>
+                <li>Per-tag storage breakdown</li>
+                <li>Layer deduplication visibility</li>
+                <li>Storage trends over time</li>
+            </ul>
+
+            <h2>Search and Filter</h2>
+            <p>Find what you need quickly:</p>
+            <ul>
+                <li>Repository name search</li>
+                <li>Tag filtering</li>
+                <li>Vulnerability severity filtering</li>
+                <li>Sort by name, date, or size</li>
+            </ul>
+        </main>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>Developed by <a href="https://vibhuvioio.com" target="_blank">Vibhuvi OiO</a></p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

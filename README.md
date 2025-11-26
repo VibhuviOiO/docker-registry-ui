@@ -64,14 +64,14 @@ Access the UI at `http://localhost:5000`
 
 ## 📖 Documentation
 
-Full documentation is available at [docker-registry-ui.vibhuvioio.com](https://docker-registry-ui.vibhuvioio.com)
+Full documentation is available at [vibhuvioio.com/docker-registry-ui](https://vibhuvioio.com/docker-registry-ui/)
 
-- [Getting Started](https://docker-registry-ui.vibhuvioio.com/getting-started.html)
-- [Configuration Guide](https://docker-registry-ui.vibhuvioio.com/configuration.html)
-- [Features Overview](https://docker-registry-ui.vibhuvioio.com/features.html)
-- [Security Scanning](https://docker-registry-ui.vibhuvioio.com/security.html)
-- [API Reference](https://docker-registry-ui.vibhuvioio.com/api.html)
-- [Development Guide](https://docker-registry-ui.vibhuvioio.com/development.html)
+- [Getting Started](https://vibhuvioio.com/docker-registry-ui/getting-started.html)
+- [Configuration Guide](https://vibhuvioio.com/docker-registry-ui/configuration.html)
+- [Features Overview](https://vibhuvioio.com/docker-registry-ui/features.html)
+- [Security Scanning](https://vibhuvioio.com/docker-registry-ui/security.html)
+- [API Reference](https://vibhuvioio.com/docker-registry-ui/api.html)
+- [Development Guide](https://vibhuvioio.com/docker-registry-ui/development.html)
 
 ## 🛡️ Vulnerability Scanning
 
@@ -132,7 +132,7 @@ This project exists because of the countless open source contributors who helped
 
 ## 🔗 Links
 
-- [Documentation](https://docker-registry-ui.vibhuvioio.com)
+- [Documentation](https://vibhuvioio.com/docker-registry-ui/)
 - [Docker Hub](https://hub.docker.com/r/vibhuvi/docker-registry-ui)
 - [GitHub](https://github.com/vibhuvi/docker-registry-ui)
 - [National Vulnerability Database](https://nvd.nist.gov/)

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bulk Operations - Docker Registry UI</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐳</text></svg>">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="docs.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="nav-brand" style="text-decoration: none; color: inherit;">
+                <span class="logo">🐳</span>
+                <span class="brand-name">Docker Registry UI</span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="getting-started.html">Docs</a>
+                <a href="https://github.com/vibhuvi/docker-registry-ui" target="_blank">GitHub</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="docs-layout">
+        <aside class="sidebar">
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <h3>Getting Started</h3>
+                    <a href="getting-started.html">Installation</a>
+                    <a href="configuration.html">Configuration</a>
+                </div>
+                <div class="nav-section">
+                    <h3>Features</h3>
+                    <a href="features.html">Overview</a>
+                    <a href="security.html">Security Scanning</a>
+                    <a href="bulk-operations.html" class="active">Bulk Operations</a>
+                </div>
+                <div class="nav-section">
+                    <h3>Reference</h3>
+                    <a href="api.html">API Integration</a>
+                    <a href="development.html">Development</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="docs-content">
+            <h1>Bulk Operations</h1>
+
+            <h2>Overview</h2>
+            <p>Bulk operations allow you to delete multiple image tags efficiently based on patterns, age, or retention policies.</p>
+            <img src="img/bulk-operations.png" alt="Bulk Operations Interface" style="max-width: 100%; border: 1px solid #e3e8ef; border-radius: 5px; margin: 20px 0;">
+            <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0;">
+                <strong>⚠️ WARNING: Expert-Only Activity</strong>
+                <p>This is a dangerous operation that <strong>cannot be undone</strong>. Deleted tags cannot be recovered. The system has no knowledge of which images are in use or deployed.</p>
+            </div>
+
+            <h2>Pattern-Based Deletion</h2>
+            <p>Delete tags matching wildcard patterns:</p>
+            <pre><code># Delete all dev tags
+Pattern: dev-*
+
+# Delete all feature branch tags
+Pattern: feature-*
+
+# Delete all tags with specific suffix
+Pattern: *-snapshot</code></pre>
+
+            <h2>Age-Based Cleanup</h2>
+            <p>Remove tags older than specified days:</p>
+            <ul>
+                <li>Delete tags older than 30 days</li>
+                <li>Delete tags older than 90 days</li>
+                <li>Custom age threshold</li>
+            </ul>
+
+            <h2>Retention Policies</h2>
+            <p>Keep minimum number of recent tags:</p>
+            <ul>
+                <li>Keep last 5 tags, delete older ones</li>
+                <li>Keep last 10 tags, delete older ones</li>
+                <li>Custom retention count</li>
+            </ul>
+
+            <h2>Dry Run Mode</h2>
+            <p>Preview deletions before executing:</p>
+            <ol>
+                <li>Enable dry run mode</li>
+                <li>Configure deletion criteria</li>
+                <li>Review list of tags to be deleted</li>
+                <li>Execute if satisfied</li>
+            </ol>
+
+            <h2>Safety Features</h2>
+            <ul>
+                <li><strong>Mandatory Keep Minimum</strong>: Required field when using age-based deletion</li>
+                <li><strong>Dry Run by Default</strong>: Preview results before actual deletion</li>
+                <li><strong>Confirmation Checkbox</strong>: Must acknowledge danger before running</li>
+                <li><strong>Operation Summary</strong>: AWS-style summary showing exactly what will happen</li>
+                <li><strong>Visual Warnings</strong>: Red danger buttons and prominent alerts</li>
+                <li><strong>Input Validation</strong>: Frontend and backend validation of parameters</li>
+            </ul>
+
+            <h2>Recommended Keep Minimum Values</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Repository Type</th>
+                        <th>Keep Minimum</th>
+                        <th>Reason</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Development</td>
+                        <td>5-10 tags</td>
+                        <td>Recent builds for debugging</td>
+                    </tr>
+                    <tr>
+                        <td>Staging</td>
+                        <td>10-20 tags</td>
+                        <td>Testing and rollback capability</td>
+                    </tr>
+                    <tr>
+                        <td>Production</td>
+                        <td>20-50 tags</td>
+                        <td>Multiple rollback options</td>
+                    </tr>
+                    <tr>
+                        <td>Base Images</td>
+                        <td>50+ or avoid</td>
+                        <td>May be used by many other images</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>When NOT to Use Bulk Operations</h2>
+            <ul>
+                <li>Production base images (company-wide base images)</li>
+                <li>Images with unknown usage</li>
+                <li>Repositories you don't fully understand</li>
+                <li>When unsure about deployment dependencies</li>
+            </ul>
+
+            <h2>Limitations (By Design)</h2>
+            <h3>No Usage History</h3>
+            <ul>
+                <li>System does <strong>NOT track</strong> which images are in use</li>
+                <li>Cannot detect if image is deployed in production</li>
+                <li>Cannot identify base images used by other images</li>
+                <li>User must know their deployment architecture</li>
+            </ul>
+
+            <h3>Manual Garbage Collection Required</h3>
+            <ul>
+                <li>Deleting tags only removes manifest references</li>
+                <li>Actual image layers remain on disk</li>
+                <li>Must run garbage collection manually to free space</li>
+                <li>See "Cleanup Instructions" menu for commands</li>
+            </ul>
+
+            <h2>Example Workflows</h2>
+            <h3>Clean Up Development Tags</h3>
+            <pre><code>1. Navigate to repository
+2. Click "Bulk Delete"
+3. Pattern: dev-*
+4. Enable dry run
+5. Review tags to delete
+6. Execute deletion</code></pre>
+
+            <h3>Implement Retention Policy</h3>
+            <pre><code>1. Navigate to repository
+2. Click "Bulk Delete"
+3. Select "Keep last N tags"
+4. Set retention count: 10
+5. Enable dry run
+6. Review tags to delete
+7. Execute deletion</code></pre>
+
+            <h2>Recovery Options</h2>
+            <p>If you accidentally delete important tags:</p>
+            <ol>
+                <li><strong>Check CI/CD pipeline</strong>: May have build artifacts</li>
+                <li><strong>Rebuild from source</strong>: If you have Dockerfile and code</li>
+                <li><strong>Restore from backup</strong>: If you backup your registry</li>
+                <li><strong>Pull from other environments</strong>: Dev/staging may have copies</li>
+            </ol>
+            <p><strong>Prevention is key</strong>: Always use dry run, keep higher minimum than needed, and document critical images before cleanup.</p>
+        </main>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>Developed by <a href="https://vibhuvioio.com" target="_blank">Vibhuvi OiO</a></p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
