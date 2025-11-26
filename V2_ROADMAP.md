@@ -100,16 +100,16 @@ templates/
 ### Phase 2: Core Features (Week 2)
 - ✅ Tag sorting/filtering
 - ✅ Manifest viewer
-- ⏳ Bulk operations with rules
+- ✅ Bulk operations with rules
 
 ### Phase 3: Advanced Features (Week 3)
 - ⏳ Trivy integration
 - ⏳ Vulnerability scanning UI
-- ⏳ Usage analytics
+- ✅ Usage analytics
 
 ### Phase 4: Polish (Week 4)
-- ⏳ Export/Import
-- ⏳ Performance optimization
+- ✅ Export/Import (CSV export)
+- ✅ Performance optimization (caching, lazy loading)
 - ⏳ Documentation
 - ⏳ Testing
 

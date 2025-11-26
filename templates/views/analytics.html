@@ -1,0 +1,93 @@
+<div id="analytics-view" style="display: none;">
+  <h4><i class="bi bi-graph-up"></i> Usage Analytics</h4>
+  
+  <div class="row mt-3">
+    <div class="col-md-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <h6 class="text-muted">Total Repositories</h6>
+          <h2 id="stat-total-repos">0</h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <h6 class="text-muted">Total Tags</h6>
+          <h2 id="stat-total-tags">0</h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <h6 class="text-muted">Total Storage</h6>
+          <h2 id="stat-total-storage">0 MB</h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <h6 class="text-muted">Avg Tag Size</h6>
+          <h2 id="stat-avg-size">0 MB</h2>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="row mt-3">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <strong>Top 10 Repositories by Size</strong>
+        </div>
+        <div class="card-body">
+          <canvas id="repoSizeChart"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <strong>Top 10 Repositories by Tag Count</strong>
+        </div>
+        <div class="card-body">
+          <canvas id="repoTagChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="row mt-3">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between">
+          <strong>Repository Details</strong>
+          <button class="btn btn-sm btn-primary" id="exportAnalytics">
+            <i class="bi bi-download"></i> Export CSV
+          </button>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-sm" id="analyticsTable">
+              <thead>
+                <tr>
+                  <th>Repository</th>
+                  <th>Tags</th>
+                  <th>Total Size</th>
+                  <th>Avg Size</th>
+                </tr>
+              </thead>
+              <tbody id="analyticsTableBody">
+                <tr>
+                  <td colspan="4" class="text-center text-muted">Loading...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

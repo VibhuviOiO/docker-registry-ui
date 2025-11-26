@@ -1,5 +1,37 @@
 # Release Notes
 
+## v2.0.0 (2024-01-20)
+
+### Features
+- Modular template architecture with reusable components
+- Dark mode with localStorage persistence and system theme detection
+- Docker Hub-style inline copy-to-clipboard for pull commands
+- Tag sorting by name, size, and date
+- Real-time tag filtering
+- Manifest viewer with tabs for manifest, layers, and config JSON
+- Bulk operations with cleanup rules (age-based, pattern-based, keep minimum)
+- Dry-run mode for bulk operations
+- Usage analytics with Chart.js visualizations
+- Top 10 repositories by size and tag count charts
+- CSV export for analytics data
+- Performance improvements with tag details caching
+
+### UI Improvements
+- Restructured templates into components and views
+- Added bulk operations view with rule configuration
+- Added analytics dashboard with statistics and charts
+- Improved tag display with inline pull commands
+- Enhanced dark mode support across all components
+
+### API Additions
+- POST /api/bulk-operation - Execute bulk cleanup operations
+- GET /api/analytics/<registry> - Get registry analytics
+
+### Technical
+- Chart.js 4.4.0 for data visualization
+- Modular JavaScript with feature separation
+- Enhanced caching for better performance
+
 ## v1.0.0 (2024-01-15)
 
 ### Features

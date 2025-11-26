@@ -15,7 +15,7 @@ from datetime import datetime
 from flask import Flask, render_template_string, jsonify, request
 
 # ---------------- Config ----------------
-REGISTRY_URL = os.getenv("REGISTRY_URL", "http://docker-repo.vibhuvioio.com")
+REGISTRY_URL = os.getenv("REGISTRY_URL", "http://registry.vibhuvioio.com")
 READ_ONLY = os.getenv("READ_ONLY", "true").lower() == "true"
 CHECK_INTERVAL = 300
 TIMEOUT = 10

@@ -1,0 +1,95 @@
+<div id="bulk-operations-view" style="display: none;">
+  <h4><i class="bi bi-trash3-fill"></i> Bulk Operations</h4>
+  
+  <div class="alert alert-danger mt-3" role="alert">
+    <h5 class="alert-heading"><i class="bi bi-exclamation-triangle-fill"></i> DANGER: Expert Activity Only</h5>
+    <p><strong>WARNING:</strong> Bulk operations can permanently delete images that may still be in use. This is a <strong>static rule-based system with NO usage history tracking</strong>.</p>
+    <hr>
+    <p class="mb-0"><strong>Critical Considerations:</strong></p>
+    <ul class="mb-0">
+      <li>Images older than 2 years might be <strong>base images</strong> for other containers still in production</li>
+      <li>Deleted tags <strong>cannot be recovered</strong> - they must be rebuilt and re-pushed</li>
+      <li>This tool has <strong>no knowledge</strong> of which images are actively used in deployments</li>
+      <li>Always use <strong>Dry Run mode first</strong> to preview what will be deleted</li>
+      <li><strong>"Keep minimum tags" is MANDATORY</strong> when using age-based deletion to prevent losing all images</li>
+      <li>Garbage collection must be run manually after deletion - <strong>deleted tags are NOT automatically cleaned</strong></li>
+    </ul>
+  </div>
+  
+  <div class="alert alert-info" role="alert">
+    <strong><i class="bi bi-info-circle"></i> Note:</strong> Deleting tags only removes manifest references. To free disk space, you must manually run garbage collection on your registry. See <a href="#" class="alert-link" onclick="switchToCleanupView(); return false;">Cleanup Instructions</a> for commands.
+  </div>
+  
+  <div class="row mt-3">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <strong>Cleanup Rules</strong>
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <label class="form-label">Repository Pattern</label>
+            <select class="form-select" id="bulkRepoPattern" data-live-search="true">
+              <option value="*">* (All repositories)</option>
+            </select>
+            <div class="form-text">Select repositories or use * for all. Supports wildcards like myapp/*</div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Delete tags older than (days) <span class="text-danger">*</span></label>
+            <input type="number" class="form-control" id="bulkOlderThan" placeholder="30" min="1">
+            <div class="form-text">Only tags older than this many days will be considered for deletion</div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Keep minimum tags <span class="text-danger">* REQUIRED when using age filter</span></label>
+            <input type="number" class="form-control" id="bulkKeepMin" placeholder="5" min="1" value="5">
+            <div class="form-text text-danger"><strong>MANDATORY:</strong> Always keep at least this many tags per repository to prevent losing all images. Recommended: 5 or more.</div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Tag name pattern (regex)</label>
+            <input type="text" class="form-control" id="bulkTagPattern" placeholder="^v.*">
+          </div>
+          <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" id="bulkDryRun" checked>
+            <label class="form-check-label" for="bulkDryRun">
+              <strong>Dry run (preview only) - ALWAYS TEST FIRST</strong>
+            </label>
+            <div class="form-text">Uncheck only after verifying dry run results</div>
+          </div>
+          <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" id="bulkConfirm">
+            <label class="form-check-label text-danger" for="bulkConfirm">
+              <strong>I understand this is a dangerous operation and have reviewed the warnings above</strong>
+            </label>
+          </div>
+          <button class="btn btn-danger" id="runBulkOperation" disabled>
+            <i class="bi bi-exclamation-triangle"></i> Run Bulk Operation
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-6">
+      <div class="card mb-3">
+        <div class="card-header bg-info text-white">
+          <strong><i class="bi bi-info-circle"></i> Operation Summary</strong>
+        </div>
+        <div class="card-body">
+          <div id="bulkSummary">
+            <p class="text-muted">Configure rules to see operation summary</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-header">
+          <strong>Results</strong>
+        </div>
+        <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+          <div id="bulkResults">
+            <p class="text-muted">Run operation to see results</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

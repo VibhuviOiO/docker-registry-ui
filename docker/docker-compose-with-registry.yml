@@ -31,8 +31,10 @@ services:
     ports:
       - "5003:5000"
     environment:
-      - REGISTRIES=[{"name":"Local Registry","api":"http://registry:5000","isAuthEnabled":false,"user":"","password":"","apiToken":"","default":true}]
+      - CONFIG_FILE=/app/data/registries.config.json
       - READ_ONLY=false
+    volumes:
+      - ./data:/app/data
     logging:
       driver: "json-file"
       options:

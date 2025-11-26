@@ -1,0 +1,19 @@
+[
+  {
+    "name": "Local Registry",
+    "api": "http://registry:5000",
+    "isAuthEnabled": false,
+    "user": "",
+    "password": "",
+    "apiToken": "",
+    "default": true,
+    "bulkOperationsEnabled": false,
+    "vulnerabilityScan": {
+      "enabled": false,
+      "scanner": "trivy",
+      "scannerUrl": "http://trivy-server:8080",
+      "autoScanRules": [],
+      "scanLatestOnly": 1
+    }
+  }
+]

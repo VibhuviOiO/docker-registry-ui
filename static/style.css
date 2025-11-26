@@ -53,13 +53,24 @@ body {
 }
 
 .tag-item {
-    padding: 0.75rem 1rem;
+    padding: 1rem;
     border-bottom: 1px solid #dee2e6;
     transition: background-color 0.2s;
 }
 
 .tag-item:hover {
     background-color: #f8f9fa;
+}
+
+.tag-item .input-group input {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+}
+
+[data-bs-theme="dark"] .tag-item .input-group input {
+    background-color: #212529;
+    border-color: #495057;
+    color: #adb5bd;
 }
 
 .footer {

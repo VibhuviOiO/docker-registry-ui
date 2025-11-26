@@ -34,7 +34,14 @@
 const readOnly = {{ read_only|tojson }};
 const version = "{{ version }}";
 </script>
-<script src="{{ url_for('static', filename='app.js') }}"></script>
+<script src="{{ url_for('static', filename='js/core.js') }}"></script>
+<script src="{{ url_for('static', filename='js/repositories.js') }}"></script>
+<script src="{{ url_for('static', filename='js/bulk-operations.js') }}"></script>
+<script src="{{ url_for('static', filename='js/analytics.js') }}"></script>
+<script src="{{ url_for('static', filename='js/vulnerabilities.js') }}"></script>
+<script src="{{ url_for('static', filename='js/setup.js') }}"></script>
+<script src="{{ url_for('static', filename='js/ui.js') }}"></script>
+<script src="{{ url_for('static', filename='js/init.js') }}"></script>
 {% block extra_js %}{% endblock %}
 </body>
 </html>

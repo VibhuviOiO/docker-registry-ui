@@ -6,8 +6,11 @@
         <tr>
           <th>Name</th>
           <th>API URL</th>
-          <th>Auth Enabled</th>
+          <th>Auth</th>
+          <th>Bulk Ops</th>
+          <th>Vuln Scan</th>
           <th>Status</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody id="registry-config-table">
@@ -22,10 +25,97 @@
             <span class="badge bg-secondary">No</span>
             {% endif %}
           </td>
+          <td>
+            <div class="form-check form-switch">
+              <input class="form-check-input bulk-ops-toggle" type="checkbox" 
+                     data-registry="{{ reg.name }}" 
+                     {% if reg.bulkOperationsEnabled %}checked{% endif %}
+                     {% if read_only %}disabled{% endif %}>
+            </div>
+          </td>
+          <td>
+            {% if reg.vulnerabilityScan and reg.vulnerabilityScan.enabled %}
+            <span class="badge bg-info">{{ reg.vulnerabilityScan.scanner|upper }}</span>
+            {% else %}
+            <span class="badge bg-secondary">Disabled</span>
+            {% endif %}
+          </td>
           <td id="registry-status-{{ loop.index0 }}"><span class="badge bg-secondary">Not checked</span></td>
+          <td>
+            <button class="btn btn-sm btn-outline-primary config-details-btn" data-registry="{{ reg.name }}">
+              <i class="bi bi-gear"></i>
+            </button>
+          </td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
+  </div>
+  
+  <div id="registry-config-details" class="mt-4" style="display: none;">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="bi bi-gear"></i> <span id="config-registry-name"></span> Configuration</h5>
+        <div>
+          <button class="btn btn-sm btn-success" id="download-config-btn">
+            <i class="bi bi-download"></i> Backup
+          </button>
+          <button class="btn btn-sm btn-secondary" onclick="document.getElementById('registry-config-details').style.display='none'">
+            <i class="bi bi-x"></i> Close
+          </button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <h6 class="text-secondary">Bulk Operations</h6>
+            <div class="form-check form-switch mb-3">
+              <input class="form-check-input" type="checkbox" id="config-bulk-ops" {% if read_only %}disabled{% endif %}>
+              <label class="form-check-label" for="config-bulk-ops">Enable Bulk Operations</label>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <h6 class="text-secondary">Vulnerability Scanning</h6>
+            <div class="form-check form-switch mb-2">
+              <input class="form-check-input" type="checkbox" id="config-vuln-enabled" {% if read_only %}disabled{% endif %}>
+              <label class="form-check-label" for="config-vuln-enabled">Enable Vulnerability Scanning</label>
+            </div>
+            <div id="vuln-scan-config" style="display: none;">
+              <div class="mb-2">
+                <label class="form-label small">Scanner</label>
+                <select class="form-select form-select-sm" id="config-scanner" {% if read_only %}disabled{% endif %}>
+                  <option value="trivy">Trivy</option>
+                  <option value="clair">Clair</option>
+                </select>
+              </div>
+              <div class="mb-2">
+                <label class="form-label small">Scanner URL</label>
+                <input type="text" class="form-control form-control-sm" id="config-scanner-url" placeholder="http://trivy-server:8080" {% if read_only %}disabled{% endif %}>
+              </div>
+              <div class="mb-2">
+                <label class="form-label small">Auto-Scan Rules (Optional)</label>
+                <textarea class="form-control form-control-sm" id="config-scan-rules" rows="3" placeholder="production/*&#10;staging/*" {% if read_only %}disabled{% endif %}></textarea>
+                <small class="text-muted">Repository patterns to auto-scan (one per line). Leave empty for manual scan only.</small>
+              </div>
+              <div class="mb-2">
+                <label class="form-label small">Scan Latest Tags Only</label>
+                <input type="number" class="form-control form-control-sm" id="config-scan-latest" value="1" min="1" max="10" {% if read_only %}disabled{% endif %}>
+                <small class="text-muted">Number of latest tags to scan per repository (1-10)</small>
+              </div>
+            </div>
+          </div>
+        </div>
+        <hr>
+        <button class="btn btn-primary" id="save-registry-config" {% if read_only %}disabled{% endif %}>
+          <i class="bi bi-save"></i> Save Configuration
+        </button>
+        <div class="alert alert-info mt-3 mb-0">
+          <strong><i class="bi bi-info-circle"></i> Auto-Saved:</strong><br>
+          • Saves to <code>registries.config.json</code> (volume-mounted on host)<br>
+          • Persists across container restarts<br>
+          • Click "Backup" button above to download a copy
+        </div>
+      </div>
+    </div>
   </div>
 </div>

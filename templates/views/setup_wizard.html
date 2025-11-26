@@ -1,0 +1,120 @@
+<div id="setup-wizard-view" style="display: none;">
+  <div class="row">
+    <div class="col-lg-6">
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+          <h4 class="mb-0"><i class="bi bi-rocket"></i> Welcome to Docker Registry UI</h4>
+        </div>
+        <div class="card-body">
+          <div class="alert alert-info">
+            <strong><i class="bi bi-info-circle"></i> First Time Setup</strong><br>
+            No registries configured. Let's add your first Docker registry.
+          </div>
+          
+          <form id="setup-form">
+            <h5 class="text-primary mb-3">Registry Details</h5>
+            
+            <div class="mb-3">
+              <label class="form-label">Registry Name <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="setup-name" placeholder="Production Registry" required>
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label">Registry API URL <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="setup-api" placeholder="http://registry.example.com:5000" required>
+              <small class="text-muted">Include protocol (http:// or https://)</small>
+            </div>
+            
+            <div class="mb-3">
+              <button type="button" class="btn btn-sm btn-outline-secondary" id="test-connection-btn">
+                <i class="bi bi-plug"></i> Test Connection
+              </button>
+              <span id="test-result" class="ms-2"></span>
+            </div>
+            
+            <hr>
+            <h5 class="text-primary mb-3">Authentication (Optional)</h5>
+            
+            <div class="form-check form-switch mb-3">
+              <input class="form-check-input" type="checkbox" id="setup-auth-enabled">
+              <label class="form-check-label" for="setup-auth-enabled">Enable Authentication</label>
+            </div>
+            
+            <div id="auth-fields" style="display: none;">
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Username</label>
+                  <input type="text" class="form-control" id="setup-user">
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Password</label>
+                  <input type="password" class="form-control" id="setup-password">
+                </div>
+              </div>
+            </div>
+            
+            <hr>
+            <h5 class="text-primary mb-3">Features (Optional)</h5>
+            
+            <div class="form-check form-switch mb-3">
+              <input class="form-check-input" type="checkbox" id="setup-bulk-ops">
+              <label class="form-check-label" for="setup-bulk-ops">Enable Bulk Operations</label>
+              <small class="d-block text-muted">Delete multiple tags at once</small>
+            </div>
+            
+            <div class="form-check form-switch mb-3">
+              <input class="form-check-input" type="checkbox" id="setup-vuln-enabled">
+              <label class="form-check-label" for="setup-vuln-enabled">Enable Vulnerability Scanning</label>
+            </div>
+            
+            <div id="vuln-fields" style="display: none;">
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Scanner</label>
+                  <select class="form-select" id="setup-scanner">
+                    <option value="trivy">Trivy</option>
+                    <option value="clair">Clair</option>
+                  </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Scanner URL</label>
+                  <input type="text" class="form-control" id="setup-scanner-url" placeholder="http://trivy-server:8080">
+                </div>
+              </div>
+            </div>
+            
+            <hr>
+            <div class="d-flex justify-content-between align-items-center">
+              <button type="submit" class="btn btn-primary btn-lg">
+                <i class="bi bi-check-circle"></i> Create Registry
+              </button>
+              <small class="text-muted">Config auto-saves to <code>registries.config.json</code></small>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-lg-6">
+      <div class="card shadow">
+        <div class="card-header bg-dark text-white">
+          <h5 class="mb-0"><i class="bi bi-file-code"></i> Live Preview</h5>
+        </div>
+        <div class="card-body bg-dark text-light">
+          <pre id="config-preview" style="max-height: 600px; overflow-y: auto;"><code class="language-json">{
+  "name": "Your Registry Name",
+  "api": "http://registry.example.com:5000",
+  "isAuthEnabled": false,
+  "bulkOperationsEnabled": false,
+  "vulnerabilityScan": {
+    "enabled": false
+  }
+}</code></pre>
+        </div>
+        <div class="card-footer bg-dark text-light">
+          <small><i class="bi bi-info-circle"></i> This JSON will be saved to <code>registries.config.json</code></small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
