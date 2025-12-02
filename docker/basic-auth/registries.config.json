@@ -1,0 +1,17 @@
+{
+  "registries": [
+    {
+      "name": "Dev Registry",
+      "api": "http://registry-dev:5000"
+    },
+    {
+      "name": "Auth Registry",
+      "api": "http://nginx-proxy:5004",
+      "auth": {
+        "type": "basic",
+        "username": "admin",
+        "password": "secret"
+      }
+    }
+  ]
+}

@@ -31,6 +31,8 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    max-width: none;
+    padding: 0 20px;
 }
 
 .nav-brand {

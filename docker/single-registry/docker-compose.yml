@@ -1,0 +1,37 @@
+services:
+  # Docker Registry
+  registry:
+    image: registry:2
+    ports:
+      - "5001:5000"
+    environment:
+      REGISTRY_STORAGE_DELETE_ENABLED: "true"
+    volumes:
+      - registry-data:/var/lib/registry
+    networks:
+      - registry-net
+    restart: unless-stopped
+
+  # Registry UI
+  registry-ui:
+    image: ghcr.io/vibhuvioio/docker-registry-ui:latest
+    ports:
+      - "5000:5000"
+    environment:
+      # Set to DEBUG for detailed logging, INFO for normal, WARNING for minimal
+      LOG_LEVEL: "INFO"
+    volumes:
+      - ./registries.config.json:/app/registries.config.json:ro
+      - ./data:/app/data
+    depends_on:
+      - registry
+    networks:
+      - registry-net
+    restart: unless-stopped
+
+volumes:
+  registry-data:
+
+networks:
+  registry-net:
+    driver: bridge

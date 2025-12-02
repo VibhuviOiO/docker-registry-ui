@@ -100,11 +100,7 @@
                         <td>Port for the web interface</td>
                         <td><code>5000</code></td>
                     </tr>
-                    <tr>
-                        <td><code>TRIVY_ENABLED</code></td>
-                        <td>Enable vulnerability scanning</td>
-                        <td><code>true</code></td>
-                    </tr>
+
                 </tbody>
             </table>
 
@@ -136,7 +132,7 @@ cat > ./data/registries.config.json <<'JSON'
   "registries": [
     {
       "name": "Local Registry",
-      "url": "http://localhost:5001",
+      "api": "http://localhost:5001",
       "auth": { "type": "none" }
     }
   ]
@@ -150,7 +146,7 @@ JSON</code></pre>
   "registries": [
     {
       "name": "Local Registry",
-      "url": "http://localhost:5001",
+      "api": "http://localhost:5001",
       "auth": {
         "type": "none"
       }
@@ -163,7 +159,7 @@ JSON</code></pre>
   "registries": [
     {
       "name": "Private Registry",
-      "url": "https://registry.example.com",
+      "api": "https://registry.example.com",
       "auth": {
         "type": "basic",
         "username": "admin",
@@ -178,14 +174,14 @@ JSON</code></pre>
   "registries": [
     {
       "name": "Local Registry",
-      "url": "http://localhost:5001",
+      "api": "http://localhost:5001",
       "auth": {
         "type": "none"
       }
     },
     {
       "name": "Production Registry",
-      "url": "https://registry.prod.example.com",
+      "api": "https://registry.prod.example.com",
       "auth": {
         "type": "basic",
         "username": "admin",

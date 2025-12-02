@@ -1,6 +1,7 @@
 import logging
 import sys
 import json
+import os
 from datetime import datetime
 
 class JSONFormatter(logging.Formatter):
@@ -19,7 +20,17 @@ class JSONFormatter(logging.Formatter):
 
 def setup_logging():
     logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
+    
+    # Get log level from environment variable, default to WARNING
+    log_level = os.getenv('LOG_LEVEL', 'WARNING').upper()
+    level_map = {
+        'DEBUG': logging.DEBUG,
+        'INFO': logging.INFO,
+        'WARNING': logging.WARNING,
+        'ERROR': logging.ERROR,
+        'CRITICAL': logging.CRITICAL
+    }
+    logger.setLevel(level_map.get(log_level, logging.WARNING))
     
     handler = logging.StreamHandler(sys.stdout)
     handler.setFormatter(JSONFormatter())

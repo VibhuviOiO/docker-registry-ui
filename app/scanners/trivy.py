@@ -1,5 +1,8 @@
 import requests
+import logging
 from .base import VulnerabilityScanner
+
+logger = logging.getLogger(__name__)
 
 class TrivyScanner(VulnerabilityScanner):
     """Trivy vulnerability scanner integration"""
@@ -13,7 +16,7 @@ class TrivyScanner(VulnerabilityScanner):
             registry_host = registry_url.replace('http://', '').replace('https://', '')
             image_ref = f"{registry_host}/{repository}:{tag}"
             
-            print(f"[TRIVY] Scanning image: {image_ref}")
+            logger.debug(f"[TRIVY] Scanning image: {image_ref}")
             
             # Run trivy client to scan the image
             cmd = [
@@ -26,19 +29,19 @@ class TrivyScanner(VulnerabilityScanner):
             
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
             
-            print(f"[TRIVY] Exit code: {result.returncode}")
+            logger.debug(f"[TRIVY] Exit code: {result.returncode}")
             
             if result.returncode == 0 and result.stdout:
                 report = json.loads(result.stdout)
                 return self._parse_trivy_report(report)
             else:
                 error_msg = result.stderr if result.stderr else "No output"
-                print(f"[TRIVY] Error: {error_msg[:500]}")
+                logger.error(f"[TRIVY] Error: {error_msg[:200]}")
                 return {"error": f"Scan failed: {error_msg[:200]}"}
         except subprocess.TimeoutExpired:
             return {"error": "Scan timeout after 5 minutes"}
         except Exception as e:
-            print(f"[TRIVY] Exception: {str(e)}")
+            logger.error(f"[TRIVY] Exception: {str(e)}")
             return {"error": str(e)}
     
     def _parse_trivy_report(self, report):

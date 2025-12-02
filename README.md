@@ -36,8 +36,18 @@ docker-compose -f docker-compose-multi-registry.yml up -d
 ## 📦 Quick Start (Production)
 
 ```bash
+# Simple setup (setup wizard will guide you)
 docker run -d \
   -p 5000:5000 \
+  -v $(pwd)/data:/app/data \
+  ghcr.io/vibhuvioio/docker-registry-ui:latest
+
+# With test registry (using Docker network)
+docker network create registry-net
+docker run -d --name test-registry --network registry-net -p 5001:5000 \
+  -e REGISTRY_STORAGE_DELETE_ENABLED=true registry:2
+docker run -d --name registry-ui --network registry-net -p 5000:5000 \
+  -e 'REGISTRIES=[{"name":"Local Registry","api":"http://test-registry:5000"}]' \
   -v $(pwd)/data:/app/data \
   ghcr.io/vibhuvioio/docker-registry-ui:latest
 ```
@@ -46,17 +56,33 @@ Access at `http://localhost:5000` - Setup wizard will guide you.
 
 ## 🧭 Run Locally (Developer)
 
-If you want to run the Python application locally (outside the official container) use one of the following:
-
+### Docker Development
 ```bash
-# Run with the Flask factory entrypoint
-python run.py
+# Clone repository
+git clone https://github.com/vibhuvi/docker-registry-ui.git
+cd docker-registry-ui
 
-# Or run the ASGI app (matches production image)
-uvicorn asgi:app --host 0.0.0.0 --port 5000
+# Start development environment
+docker-compose -f docker-compose.dev.yml up -d
+
+# Access UI at http://localhost:5005
 ```
 
-Note: The official Docker image includes the `trivy` binary so vulnerability scanning works out-of-the-box. If you run locally (not using the container) install the `trivy` CLI separately to enable scanning.
+### Python Development
+If you want to run the Python application locally (outside Docker):
+
+```bash
+# Setup Python environment
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
+# Run application
+python run.py
+# Or: uvicorn asgi:app --host 0.0.0.0 --port 5000
+```
+
+Note: The Docker development environment includes the `trivy` binary for vulnerability scanning. For local Python development, install `trivy` CLI separately.
 
 ## 📖 Documentation
 
