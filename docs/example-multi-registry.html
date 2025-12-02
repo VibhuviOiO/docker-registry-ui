@@ -119,18 +119,15 @@ cat <<'EOF' > registries.config.json
   "registries": [
     {
       "name": "Development",
-      "api": "http://registry-dev:5000",
-      "ui": "http://localhost:5001"
+      "api": "http://registry-dev:5000"
     },
     {
       "name": "Staging",
-      "api": "http://registry-staging:5000",
-      "ui": "http://localhost:5002"
+      "api": "http://registry-staging:5000"
     },
     {
       "name": "Production",
-      "api": "http://registry-prod:5000",
-      "ui": "http://localhost:5003"
+      "api": "http://registry-prod:5000"
     }
   ]
 }
@@ -141,6 +138,13 @@ docker run -d --name registry-ui --network registry-net -p 5000:5000 \
   -v $(pwd)/registries.config.json:/app/registries.config.json:ro \
   -v $(pwd)/data:/app/data \
   ghcr.io/vibhuvioio/docker-registry-ui:latest</code></pre>
+
+            <h2>Alternative: Docker Compose</h2>
+            <pre><code># Download multi-registry compose
+wget https://raw.githubusercontent.com/VibhuviOiO/docker-registry-ui/refs/heads/main/docker/docker-compose-multi-registry.yml
+
+# Start all services
+docker-compose -f docker-compose-multi-registry.yml up -d</code></pre>
 
             <h2>Access</h2>
             <ul>
