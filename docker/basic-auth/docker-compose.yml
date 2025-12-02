@@ -46,23 +46,19 @@ services:
     command: >
       sh -c "while [ ! -f /etc/nginx/htpasswd ]; do sleep 1; done && nginx -g 'daemon off;'"
 
-  # Registry UI (development version)
+  # Registry UI
   registry-ui:
-    build:
-      context: ..
-      dockerfile: Dockerfile
+    image: ghcr.io/vibhuvioio/docker-registry-ui:latest
     ports:
       - "5003:5000"
     volumes:
-      - ../registries.config-basic-auth.json:/app/registries.config.json:ro
-      - ../data:/app/data
+      - ./registries.config.json:/app/registries.config.json:ro
+      - ./data:/app/data
     depends_on:
       - registry-dev
       - nginx-proxy
     networks:
       - registry-net
-    environment:
-      - PYTHONPATH=/app
 
 volumes:
   registry-dev-data:

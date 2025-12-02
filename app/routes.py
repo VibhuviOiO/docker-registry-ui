@@ -276,7 +276,7 @@ def api_scan_image(registry_name, repo, tag):
         registry_url = registry["api"]
         logger.info(f"Scanning {registry_url}/{repo}:{tag}")
         result = scanner.scan_image(registry_url, repo, tag)
-        logger.info(f"Scan result: {result}")
+        logger.debug(f"Scan result: {result}")
         
         store_scan_results(registry_name, repo, tag, result)
         
@@ -420,7 +420,7 @@ def api_scan_all(registry_name):
             for tag in tags[:scan_latest_only]:
                 logger.info(f"Scanning {repo}:{tag}")
                 result = scanner.scan_image(registry_url, repo, tag)
-                logger.info(f"Scan result for {repo}:{tag}: {result}")
+                logger.debug(f"Scan result for {repo}:{tag}: {result}")
                 store_scan_results(registry_name, repo, tag, result)
                 scanned += 1
         

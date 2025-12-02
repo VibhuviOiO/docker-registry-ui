@@ -1,0 +1,12 @@
+{
+  "registries": [
+    {
+      "name": "Registry 1",
+      "api": "http://registry-1:5000"
+    },
+    {
+      "name": "Registry 2", 
+      "api": "http://registry-2:5000"
+    }
+  ]
+}
