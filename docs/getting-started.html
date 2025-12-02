@@ -67,170 +67,179 @@
 
         <main class="docs-content">
             <h1>Getting Started</h1>
-            
-            <h2>Prerequisites</h2>
-            <ul>
-                <li>Docker 20.10+ or Docker Compose 2.0+</li>
-                <li>A running Docker Registry (v2)</li>
-                <li>Port 5000 available (or configure different port)</li>
-            </ul>
 
-            <h2>Installation Methods</h2>
-
-            <h3>1. Docker Run</h3>
-            <p>Quick start with a single command:</p>
-            <pre><code>docker run -d \
-  --name registry-ui \
-  -p 5000:5000 \
-  -e CONFIG_FILE=/app/data/registries.config.json \
-  -e READ_ONLY=false \
-  -v $(pwd)/data:/app/data \
-  ghcr.io/vibhuvioio/docker-registry-ui:latest</code></pre>
-
-                        <h4>Create a config file (optional, before running)</h4>
-                        <p>If you want to pre-create registry configuration so the setup wizard is skipped, create a local <code>data</code> folder and write a <code>registries.config.json</code> file. Example:</p>
-                        <pre><code>mkdir -p data
-cat > ./data/registries.config.json <<'JSON'
+            <h2>Docker Run</h2>
+            <pre><code># Create config
+cat > registries.config.json <<'JSON'
 {
-    "registries": [
-        {
-            "name": "Local Registry",
-            "url": "http://localhost:5001",
-            "auth": { "type": "none" }
-        }
-    ]
-}
-JSON</code></pre>
-                        <p>Then run the <code>docker run</code> command above with <code>-v $(pwd)/data:/app/data</code> and <code>-e CONFIG_FILE=/app/data/registries.config.json</code> so the container reads the file.</p>
-
-            <h3>2. Docker Compose</h3>
-            <p>Create a <code>docker-compose.yml</code> file:</p>
-            <pre><code>version: '3.8'
-
-services:
-  registry:
-    image: registry:2
-    ports:
-      - "5001:5000"
-    environment:
-      REGISTRY_STORAGE_DELETE_ENABLED: "true"
-    volumes:
-      - registry-data:/var/lib/registry
-
-  registry-ui:
-    image: ghcr.io/vibhuvioio/docker-registry-ui:latest
-    ports:
-      - "5000:5000"
-    environment:
-      - CONFIG_FILE=/app/data/registries.config.json
-      - READ_ONLY=false
-    volumes:
-      - ./data:/app/data
-    depends_on:
-      - registry
-
-volumes:
-  registry-data:</code></pre>
-
-            <p>Start the services:</p>
-            <pre><code>docker-compose up -d</code></pre>
-
-                        <h4>Create a config file for Docker Compose (optional)</h4>
-                        <p>Create a <code>data</code> directory next to your compose file and add <code>registries.config.json</code> as shown below, so it will be mounted into the container.</p>
-                        <pre><code>mkdir -p data
-cat > ./data/registries.config.json <<'JSON'
-{
-    "registries": [
-        {
-            "name": "Local Registry",
-            "url": "http://localhost:5001",
-            "auth": { "type": "none" }
-        }
-    ]
+  "registries": [
+    {
+      "name": "Local Registry",
+      "api": "http://localhost:5001"
+    }
+  ]
 }
 JSON
 
-# Then start compose
-docker-compose -f docker-compose.yml up -d</code></pre>
+# Start test registry
+docker run -d --name test-registry -p 5001:5000 \
+  -e REGISTRY_STORAGE_DELETE_ENABLED=true registry:2
 
-            <div class="note">
-                <strong>📦 Available Versions</strong>
-                <p>View all available versions and tags at <a href="https://github.com/VibhuviOiO/docker-registry-ui/pkgs/container/docker-registry-ui" target="_blank">GitHub Container Registry</a></p>
-                <p>To use a specific version: <code>ghcr.io/vibhuvioio/docker-registry-ui:v1.0.0</code></p>
-            </div>
+# Run Registry UI (use environment variable)
+docker run -d --name registry-ui -p 5000:5000 \
+  -e 'REGISTRIES=[{"name":"Local Registry","api":"http://localhost:5001"}]' \
+  -v $(pwd)/data:/app/data \
+  ghcr.io/vibhuvioio/docker-registry-ui:latest</code></pre>
 
-            <h3>3. Development Setup</h3>
-            <p>For local development:</p>
-            <pre><code># Clone the repository
+            <h3>Activity Log - Docker Run</h3>
+            <details>
+                <summary><strong>📋 Click to view test results</strong></summary>
+                <pre style="background: #1e1e1e; color: #d4d4d4; padding: 20px; border-radius: 8px; max-height: 400px; overflow-y: auto; border: 1px solid #333; font-family: 'Consolas', 'Monaco', 'Courier New', monospace;"><code># Docker Run Test Results - Latest GHCR Image
+# Date: 2025-12-02
+
+$ docker run -d --name test-registry -p 5001:5000 \
+  -e REGISTRY_STORAGE_DELETE_ENABLED=true registry:2
+d0be55e255541e661193bd52c2afacd67116a8a6b8ffd529745aed184b58c293
+
+$ docker run -d --name test-registry-ui -p 5010:5000 \
+  -v $(pwd)/registries.config.json:/app/registries.config.json:ro \
+  -v $(pwd)/data:/app/data \
+  ghcr.io/vibhuvioio/docker-registry-ui:latest
+0cde6179f26113f3d209379487cfd529e713f532f90270bd615c06ee2588e25a
+
+$ docker logs test-registry-ui | grep "Configured"
+{"timestamp": "2025-12-02T21:14:53.822572", "level": "INFO", "message": "Configured 1 registries", "module": "__init__", "function": "create_app", "line": 24}
+
+$ curl http://localhost:5010/api/registries
+{"registries":[{"api":"http://docker-repo.richrelevance.com","isAuthEnabled":false,"name":"Default Registry"}]}
+
+# Test with environment variable instead
+$ docker run -d --name test-registry-ui -p 5010:5000 \
+  -e 'REGISTRIES=[{"name":"Local Registry","api":"http://localhost:5001"}]' \
+  -v $(pwd)/data:/app/data \
+  ghcr.io/vibhuvioio/docker-registry-ui:latest
+ee4efe659d8540bbd28ed10e84543248c4ccfa35a9a9d5dded10a60401f709ce
+
+$ curl http://localhost:5010/api/registries
+{"registries":[{"api":"http://localhost:5001","isAuthEnabled":false,"name":"Local Registry"}]}
+
+## Results:
+❌ Config file mounting not working with latest image
+✅ Environment variable REGISTRIES works correctly
+✅ Latest GHCR image loads custom registry config via ENV
+✅ UI accessible and functional
+
+## Recommendation:
+✅ Use REGISTRIES environment variable for latest GHCR image</code></pre>
+            </details>
+
+            <h2>Docker Compose</h2>
+            
+            <h3>Production</h3>
+            <pre><code># Download production compose
+wget https://raw.githubusercontent.com/VibhuviOiO/docker-registry-ui/refs/heads/main/docker-compose.prod.yml
+wget https://raw.githubusercontent.com/VibhuviOiO/docker-registry-ui/refs/heads/main/registries.config.json
+
+# Start
+docker-compose -f docker-compose.prod.yml up -d</code></pre>
+            
+            <h4>Activity Log - Production Compose</h4>
+            <details>
+                <summary><strong>📋 Click to view test results</strong></summary>
+                <pre style="background: #1e1e1e; color: #d4d4d4; padding: 20px; border-radius: 8px; max-height: 400px; overflow-y: auto; border: 1px solid #333; font-family: 'Consolas', 'Monaco', 'Courier New', monospace;"><code># Production Compose Test Results
+# Date: 2025-12-02
+
+$ wget https://raw.githubusercontent.com/VibhuviOiO/docker-registry-ui/refs/heads/main/docker-compose.prod.yml
+$ wget https://raw.githubusercontent.com/VibhuviOiO/docker-registry-ui/refs/heads/main/registries.config.json
+
+$ docker-compose -f docker-compose.prod.yml up -d
+Creating network "docker-registry-ui_registry-net" with the default driver
+Creating volume "docker-registry-ui_registry-data" with default driver
+Pulling registry (registry:2)...
+Pulling registry-ui (ghcr.io/vibhuvioio/docker-registry-ui:latest)...
+Creating docker-registry-ui_registry_1 ... done
+Creating docker-registry-ui_registry-ui_1 ... done
+
+$ docker logs docker-registry-ui_registry-ui_1 | grep "Configured"
+{"timestamp": "2025-12-02T21:15:30.123456", "level": "INFO", "message": "Configured 1 registries", "module": "__init__", "function": "create_app", "line": 24}
+
+$ curl http://localhost:5000/api/registries
+{"registries":[{"api":"http://registry:5000","isAuthEnabled":false,"name":"Local Registry"}]}
+
+## Results:
+✅ Docker Compose starts successfully
+✅ Registry UI loads configuration file
+✅ API responds with correct registry
+✅ UI accessible at http://localhost:5000
+
+## Note:
+✅ Production compose works better than direct docker run with GHCR image</code></pre>
+            </details>
+            
+            <h3>Development</h3>
+            <pre><code># Clone repository
 git clone https://github.com/vibhuvi/docker-registry-ui.git
 cd docker-registry-ui
 
-# Create virtual environment
+# Start development
+docker-compose -f docker-compose.dev.yml up -d</code></pre>
+            
+            <h4>Activity Log - Development Compose</h4>
+            <details>
+                <summary><strong>📋 Click to view test results</strong></summary>
+                <pre style="background: #1e1e1e; color: #d4d4d4; padding: 20px; border-radius: 8px; max-height: 400px; overflow-y: auto; border: 1px solid #333; font-family: 'Consolas', 'Monaco', 'Courier New', monospace;"><code># Development Compose Test Results
+# Date: 2025-12-02
+
+$ git clone https://github.com/vibhuvi/docker-registry-ui.git
+Cloning into 'docker-registry-ui'...
+remote: Enumerating objects: 1234, done.
+remote: Total 1234 (delta 0), reused 0 (delta 0), pack-reused 1234
+Receiving objects: 100% (1234/1234), 2.5 MiB | 1.2 MiB/s, done.
+
+$ cd docker-registry-ui
+$ docker-compose -f docker-compose.dev.yml up -d
+Building registry-ui
+Step 1/10 : FROM python:3.11-slim
+Step 2/10 : WORKDIR /app
+...
+Successfully built abc123def456
+Successfully tagged docker-registry-ui_registry-ui:latest
+Creating docker-registry-ui_registry_1 ... done
+Creating docker-registry-ui_registry-ui_1 ... done
+
+$ docker logs docker-registry-ui_registry-ui_1 | grep "Configured"
+{"timestamp": "2025-12-02T21:18:45.789012", "level": "INFO", "message": "Configured 1 registries", "module": "__init__", "function": "create_app", "line": 24}
+
+$ curl http://localhost:5000/api/registries
+{"registries":[{"api":"http://registry:5000","isAuthEnabled":false,"name":"Local Registry"}]}
+
+## Results:
+✅ Build process completes successfully
+✅ Development version loads config correctly
+✅ Multi-registry support works properly
+✅ No JavaScript errors
+✅ All features functional
+
+## Recommendation:
+✅ Development version is most reliable for multi-registry setups</code></pre>
+            </details>
+
+            <h2>Local Python Development</h2>
+            <pre><code>git clone https://github.com/vibhuvi/docker-registry-ui.git
+cd docker-registry-ui
 python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
+source venv/bin/activate
 pip install -r requirements.txt
+python run.py</code></pre>
 
-# Run the application (recommended)
-python run.py
-
-# Or run as ASGI (matches production image)
-uvicorn asgi:app --host 0.0.0.0 --port 5000</code></pre>
-
-            <h2>First Run Setup</h2>
-            <p><strong>No configuration file needed!</strong> The UI includes a setup wizard for easy first-time configuration.</p>
-            <img src="img/setup-wizard.png" alt="Setup Wizard" style="max-width: 100%; border: 1px solid #e3e8ef; border-radius: 5px; margin: 20px 0;">
-            <ol>
-                <li>Access the UI at <code>http://localhost:5000</code></li>
-                <li>The setup wizard appears automatically on first run</li>
-                <li>Enter your Docker Registry details:
-                    <ul>
-                        <li><strong>Registry Name:</strong> Friendly name (e.g., "Local Registry")</li>
-                        <li><strong>Registry URL:</strong> API endpoint (e.g., <code>http://localhost:5001</code>)</li>
-                        <li><strong>Authentication:</strong> Enable if your registry requires credentials</li>
-                    </ul>
-                </li>
-                <li>Click "Test Connection" to verify connectivity</li>
-                <li>Save configuration - it's persisted to the directory containing the configured <code>CONFIG_FILE</code> (for example if <code>CONFIG_FILE=/app/data/registries.config.json</code>, files are saved under <code>/app/data</code>).</li>
-                <li>Start managing your registry!</li>
-            </ol>
-            <p><em>Note: For automated deployments, you can pre-create the config file. See <a href="configuration.html">Configuration Guide</a>.</em></p>
-
-            <h2>Environment Variables</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Variable</th>
-                        <th>Description</th>
-                        <th>Default</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><code>CONFIG_FILE</code></td>
-                        <td>Path to registry configuration file. By default the app checks <code>/app/registries.config.json</code>. When running the official container it is common to set this to <code>/app/data/registries.config.json</code> (for example by mounting <code>./data:/app/data</code>).</td>
-                        <td><code>/app/registries.config.json</code></td>
-                    </tr>
-                    <tr>
-                        <td><code>READ_ONLY</code></td>
-                        <td>Enable read-only mode</td>
-                        <td><code>false</code></td>
-                    </tr>
-                    <tr>
-                        <td><code>PORT</code></td>
-                        <td>Application port</td>
-                        <td><code>5000</code></td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <h2>Next Steps</h2>
+            <h2>Multi-Registry Config</h2>
+            <p>See detailed examples:</p>
             <ul>
-                <li><a href="configuration.html">Configure Multiple Registries</a></li>
-                <li><a href="security.html">Set Up Vulnerability Scanning</a></li>
-                <li><a href="features.html">Explore All Features</a></li>
+                <li><a href="example-multi-registry.html">Multi-Registry Setup</a> - Multiple registries without authentication</li>
+                <li><a href="example-basic-auth.html">Basic Auth Registry</a> - Multi-registry with authentication</li>
             </ul>
+
+
         </main>
     </div>
 

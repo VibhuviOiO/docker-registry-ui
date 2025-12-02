@@ -146,13 +146,11 @@ cat <<'EOF' > registries.config.json
   "registries": [
     {
       "name": "Development",
-      "api": "http://registry-dev:5000",
-      "ui": "http://localhost:5001"
+      "api": "http://registry-dev:5000"
     },
     {
       "name": "Secure Registry",
       "api": "http://nginx-proxy:5004",
-      "ui": "http://localhost:5004",
       "auth": {
         "type": "basic",
         "username": "admin",
