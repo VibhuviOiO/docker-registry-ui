@@ -11,8 +11,19 @@ def get_registries():
 def get_registry_by_name(name):
     """Get registry config by name"""
     for reg in Config.REGISTRIES:
-        if reg["name"] == name:
-            return reg
+        # Handle both string and dictionary formats
+        if isinstance(reg, str):
+            if reg == name:
+                return {
+                    "name": reg,
+                    "api": "http://registry:5000",  # Default for development
+                    "isAuthEnabled": False,
+                    "default": True,
+                    "bulkOperationsEnabled": False
+                }
+        else:
+            if reg["name"] == name:
+                return reg
     return None
 
 def cache_repositories(registry_name, repos):

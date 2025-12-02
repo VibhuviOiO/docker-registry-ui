@@ -48,16 +48,24 @@ function loadRepositories(registryName, force = false) {
 function loadTags(registryName, repo) {
     currentRepo = repo;
     tagDetailsCache = {};
-    document.getElementById('repo-title').textContent = repo;
-    document.getElementById('image-name-section').style.display = 'block';
+    
+    const repoTitle = document.getElementById('repo-title');
+    if (repoTitle) repoTitle.textContent = repo;
+    
+    const imageNameSection = document.getElementById('image-name-section');
+    if (imageNameSection) imageNameSection.style.display = 'block';
     
     const deleteBtn = document.getElementById('deleteRepoBtn');
     if (deleteBtn) {
         deleteBtn.style.display = (typeof readOnly !== 'undefined' && readOnly) ? 'none' : 'block';
     }
     
-    document.getElementById('stat-tags').style.display = 'none';
-    document.getElementById('tag-controls').style.display = 'none';
+    const statTags = document.getElementById('stat-tags');
+    if (statTags) statTags.style.display = 'none';
+    
+    const tagControls = document.getElementById('tag-controls');
+    if (tagControls) tagControls.style.display = 'none';
+    
     showLoading('tags-list');
     
     fetch(`/api/tags/${encodeURIComponent(registryName)}/${encodeURIComponent(repo)}`)
@@ -73,14 +81,19 @@ function loadTags(registryName, repo) {
             allTags = tags;
             
             const tagBadge = document.getElementById('stat-tags');
-            tagBadge.textContent = tags.length;
-            tagBadge.style.display = 'inline-block';
+            if (tagBadge) {
+                tagBadge.textContent = tags.length;
+                tagBadge.style.display = 'inline-block';
+            }
             
-            document.getElementById('tag-controls').style.display = tags.length > 0 ? 'flex' : 'none';
+            const tagControls = document.getElementById('tag-controls');
+            if (tagControls) tagControls.style.display = tags.length > 0 ? 'flex' : 'none';
             
             if (tags.length === 0) {
-                document.getElementById('tags-list').innerHTML = 
-                    '<p class="text-muted text-center p-4">No tags found</p>';
+                const tagsList = document.getElementById('tags-list');
+                if (tagsList) {
+                    tagsList.innerHTML = '<p class="text-muted text-center p-4">No tags found</p>';
+                }
                 return;
             }
             
@@ -147,7 +160,8 @@ function renderTags(tags) {
         </div>`;
     });
     
-    document.getElementById('tags-list').innerHTML = html;
+    const tagsList = document.getElementById('tags-list');
+    if (tagsList) tagsList.innerHTML = html;
     loadTagVulnerabilities(tags);
 }
 
@@ -502,5 +516,8 @@ function checkRegistryHealth() {
                         statusCell.innerHTML = '<span class="badge bg-danger"><i class="bi bi-x-circle"></i> Offline</span>';
                     });
             });
+        })
+        .catch(err => {
+            console.error('Failed to fetch registries:', err);
         });
 }

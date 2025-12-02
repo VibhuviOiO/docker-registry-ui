@@ -9,7 +9,7 @@
       <select class="form-select form-select-sm me-2" id="registrySelector" style="width: auto;">
         <option value="">Select Registry...</option>
         {% for reg in registries %}
-        <option value="{{ reg.name }}" {% if reg.get('default') %}data-default="true"{% endif %}>{{ reg.name }}</option>
+        <option value="{{ reg.name if reg is mapping else reg }}" {% if reg is mapping and reg.get('default') %}data-default="true"{% endif %}>{{ reg.name if reg is mapping else reg }}</option>
         {% endfor %}
       </select>
       

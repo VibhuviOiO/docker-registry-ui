@@ -134,6 +134,10 @@ services:
                 <p>Access the UI at <code>http://localhost:5000</code></p>
                 <p><strong>📦 Available Versions:</strong> <a href="https://github.com/VibhuviOiO/docker-registry-ui/pkgs/container/docker-registry-ui" target="_blank">View all versions on GitHub Container Registry</a></p>
             </div>
+
+            <div class="install-note">
+                <p><strong>Config file note:</strong> By default the application checks for <code>/app/registries.config.json</code>. When running the official container it's common to set <code>CONFIG_FILE=/app/data/registries.config.json</code> and mount <code>./data:/app/data</code> so configuration and scan results persist.</p>
+            </div>
         </div>
     </section>
 

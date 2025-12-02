@@ -30,9 +30,17 @@ class Config:
         if not Config.REGISTRIES and os.path.exists(Config.CONFIG_FILE):
             try:
                 with open(Config.CONFIG_FILE, 'r') as f:
-                    Config.REGISTRIES = json.load(f)
+                    data = json.load(f)
+                    # Handle both formats: {"registries": [...]} and [...]
+                    if isinstance(data, dict) and "registries" in data:
+                        Config.REGISTRIES = data["registries"]
+                    elif isinstance(data, list):
+                        Config.REGISTRIES = data
+                    else:
+                        Config.REGISTRIES = []
                 Config.USE_ENV_CONFIG = False
-            except:
+            except Exception as e:
+                print(f"Failed to load config: {e}")
                 pass
         
         # If no registries configured, use legacy single registry

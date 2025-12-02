@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-PX6NFGMV');</script>
+    <!-- End Google Tag Manager -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Registry Setup - Docker Registry UI</title>
+    <meta name="description" content="Example: Set up multiple Docker registries with and without authentication.">
+    <meta name="keywords" content="docker multi registry, multiple registries, registry management">
+    <link rel="canonical" href="https://vibhuvioio.com/docker-registry-ui/example-multi-registry.html">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐳</text></svg>">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="docs.css">
+</head>
+<body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PX6NFGMV"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="https://vibhuvioio.com/docker-registry-ui/" class="nav-brand" style="text-decoration: none; color: inherit;">
+                <span class="logo">🐳</span>
+                <span class="brand-name">Docker Registry UI</span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="getting-started.html">Docs</a>
+                <a href="https://github.com/vibhuvi/docker-registry-ui" target="_blank">GitHub</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="docs-layout">
+        <aside class="sidebar">
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <h3>Getting Started</h3>
+                    <a href="getting-started.html">Installation</a>
+                    <a href="configuration.html">Configuration</a>
+                </div>
+                <div class="nav-section">
+                    <h3>Features</h3>
+                    <a href="features.html">Overview</a>
+                    <a href="security.html">Security Scanning</a>
+                    <a href="bulk-operations.html">Bulk Operations</a>
+                </div>
+                <div class="nav-section">
+                    <h3>Examples</h3>
+                    <a href="example-multi-registry.html" class="active">Multi-Registry Setup</a>
+                    <a href="example-basic-auth.html">Basic Auth Registry</a>
+                </div>
+                <div class="nav-section">
+                    <h3>Reference</h3>
+                    <a href="api.html">API Integration</a>
+                    <a href="development.html">Development</a>
+                    <a href="testing.html">Testing Guide</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="docs-content">
+            <h1>Example: Multi-Registry Setup</h1>
+            
+            <h2>Overview</h2>
+            <p>Set up multiple Docker registries with different configurations using docker run commands.</p>
+
+            <h2>Step 1: Create Network</h2>
+            <pre><code># Create Docker network
+docker network create registry-net</code></pre>
+
+            <h2>Step 2: Start Multiple Registries</h2>
+            <pre><code># Development registry (no auth)
+docker run -d --name registry-dev --network registry-net -p 5001:5000 \
+  -e REGISTRY_STORAGE_DELETE_ENABLED=true \
+  registry:2
+
+# Staging registry (no auth)
+docker run -d --name registry-staging --network registry-net -p 5002:5000 \
+  -e REGISTRY_STORAGE_DELETE_ENABLED=true \
+  registry:2
+
+# Production registry (no auth)
+docker run -d --name registry-prod --network registry-net -p 5003:5000 \
+  -e REGISTRY_STORAGE_DELETE_ENABLED=true \
+  registry:2</code></pre>
+
+            <h2>Step 3: Test Registries</h2>
+            <pre><code># Test all registries
+curl http://localhost:5001/v2/_catalog
+curl http://localhost:5002/v2/_catalog
+curl http://localhost:5003/v2/_catalog
+
+# Push test images
+docker pull alpine:3.18
+
+# Push to development
+docker tag alpine:3.18 localhost:5001/dev/alpine:test
+docker push localhost:5001/dev/alpine:test
+
+# Push to staging
+docker tag alpine:3.18 localhost:5002/staging/alpine:test
+docker push localhost:5002/staging/alpine:test
+
+# Push to production
+docker tag alpine:3.18 localhost:5003/prod/alpine:test
+docker push localhost:5003/prod/alpine:test</code></pre>
+
+            <h2>Step 4: Start Registry UI</h2>
+            <pre><code># Create multi-registry config
+cat <<'EOF' > registries.config.json
+{
+  "registries": [
+    {
+      "name": "Development",
+      "api": "http://registry-dev:5000",
+      "ui": "http://localhost:5001"
+    },
+    {
+      "name": "Staging",
+      "api": "http://registry-staging:5000",
+      "ui": "http://localhost:5002"
+    },
+    {
+      "name": "Production",
+      "api": "http://registry-prod:5000",
+      "ui": "http://localhost:5003"
+    }
+  ]
+}
+EOF
+
+# Start Registry UI
+docker run -d --name registry-ui --network registry-net -p 5000:5000 \
+  -v $(pwd)/registries.config.json:/app/registries.config.json:ro \
+  -v $(pwd)/data:/app/data \
+  ghcr.io/vibhuvioio/docker-registry-ui:latest</code></pre>
+
+            <h2>Access</h2>
+            <ul>
+                <li><strong>Registry UI:</strong> http://localhost:5000</li>
+                <li><strong>Development Registry:</strong> http://localhost:5001</li>
+                <li><strong>Staging Registry:</strong> http://localhost:5002</li>
+                <li><strong>Production Registry:</strong> http://localhost:5003</li>
+            </ul>
+
+            <h2>Cleanup</h2>
+            <pre><code># Stop and remove containers
+docker stop registry-ui registry-dev registry-staging registry-prod
+docker rm registry-ui registry-dev registry-staging registry-prod
+docker network rm registry-net
+rm -f registries.config.json</code></pre>
+
+            <h2>Next Steps</h2>
+            <ul>
+                <li><a href="example-basic-auth.html">Add Authentication to Registries</a></li>
+                <li><a href="configuration.html">Advanced Configuration Options</a></li>
+                <li><a href="security.html">Security Best Practices</a></li>
+            </ul>
+        </main>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>Developed by <a href="https://vibhuvioio.com" target="_blank">Vibhuvi OiO</a> • Founded by <a href="https://jinnabalu.com" target="_blank">Jinna Baalu</a></p>
+                <p class="footer-message">Giving back through open source</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

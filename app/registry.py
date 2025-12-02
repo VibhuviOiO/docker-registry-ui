@@ -4,13 +4,27 @@ from .config import Config
 
 def get_auth(registry):
     """Get authentication for registry"""
-    if not registry.get("isAuthEnabled"):
-        return None
+    auth_config = registry.get("auth", {})
+    auth_type = auth_config.get("type", "none")
     
-    if registry.get("apiToken"):
-        return {"Authorization": f"Bearer {registry['apiToken']}"}
-    elif registry.get("user") and registry.get("password"):
-        return HTTPBasicAuth(registry["user"], registry["password"])
+    if auth_type == "none":
+        return None
+    elif auth_type == "basic":
+        username = auth_config.get("username")
+        password = auth_config.get("password")
+        if username and password:
+            return HTTPBasicAuth(username, password)
+    elif auth_type == "bearer":
+        token = auth_config.get("token")
+        if token:
+            return {"Authorization": f"Bearer {token}"}
+    
+    # Fallback to old format for backward compatibility
+    if registry.get("isAuthEnabled"):
+        if registry.get("apiToken"):
+            return {"Authorization": f"Bearer {registry['apiToken']}"}
+        elif registry.get("user") and registry.get("password"):
+            return HTTPBasicAuth(registry["user"], registry["password"])
     
     return None
 

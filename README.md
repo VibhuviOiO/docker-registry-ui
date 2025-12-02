@@ -2,8 +2,10 @@
 
 Modern web interface for managing Docker Registry with vulnerability scanning, bulk operations, and multi-registry support.
 
-[![Docker Pulls](https://img.shields.io/docker/pulls/vibhuvi/docker-registry-ui)](https://hub.docker.com/r/vibhuvi/docker-registry-ui)
+[![Docker Pulls](https://img.shields.io/docker/pulls/vibhuvi/docker-registry-ui)](https://github.com/VibhuviOiO/docker-registry-ui/pkgs/container/docker-registry-ui)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
+[![Docker Registry UI](https://vibhuvioio.com/docker-registry-ui/img/repositories.png)](https://vibhuvioio.com/docker-registry-ui/)
 
 ## 🚀 Try It Now (2 Minutes)
 
@@ -41,6 +43,20 @@ docker run -d \
 ```
 
 Access at `http://localhost:5000` - Setup wizard will guide you.
+
+## 🧭 Run Locally (Developer)
+
+If you want to run the Python application locally (outside the official container) use one of the following:
+
+```bash
+# Run with the Flask factory entrypoint
+python run.py
+
+# Or run the ASGI app (matches production image)
+uvicorn asgi:app --host 0.0.0.0 --port 5000
+```
+
+Note: The official Docker image includes the `trivy` binary so vulnerability scanning works out-of-the-box. If you run locally (not using the container) install the `trivy` CLI separately to enable scanning.
 
 ## 📖 Documentation
 

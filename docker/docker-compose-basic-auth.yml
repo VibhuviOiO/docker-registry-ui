@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  # Generate htpasswd file
+  htpasswd-generator:
+    image: httpd:2.4
+    command: htpasswd -Bbn admin secret
+    volumes:
+      - auth-data:/tmp
+    entrypoint: >
+      sh -c "htpasswd -Bbn admin secret > /tmp/htpasswd && echo 'htpasswd generated'"
+
+  # Basic registry without auth
+  registry-dev:
+    image: registry:2
+    environment:
+      REGISTRY_STORAGE_DELETE_ENABLED: "true"
+    volumes:
+      - registry-dev-data:/var/lib/registry
+    networks:
+      - registry-net
+
+  # Registry for basic auth (backend)
+  registry-auth:
+    image: registry:2
+    environment:
+      REGISTRY_STORAGE_DELETE_ENABLED: "true"
+    volumes:
+      - registry-auth-data:/var/lib/registry
+    networks:
+      - registry-net
+
+  # Nginx proxy with basic auth
+  nginx-proxy:
+    image: nginx:stable-alpine
+    ports:
+      - "5004:5004"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - auth-data:/etc/nginx:ro
+    depends_on:
+      - registry-auth
+      - htpasswd-generator
+    networks:
+      - registry-net
+    command: >
+      sh -c "while [ ! -f /etc/nginx/htpasswd ]; do sleep 1; done && nginx -g 'daemon off;'"
+
+  # Registry UI (development version)
+  registry-ui:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    ports:
+      - "5003:5000"
+    volumes:
+      - ../registries.config-basic-auth.json:/app/registries.config.json:ro
+      - ../data:/app/data
+    depends_on:
+      - registry-dev
+      - nginx-proxy
+    networks:
+      - registry-net
+    environment:
+      - PYTHONPATH=/app
+
+volumes:
+  registry-dev-data:
+  registry-auth-data:
+  auth-data:
+
+networks:
+  registry-net:
+    driver: bridge

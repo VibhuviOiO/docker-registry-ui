@@ -30,20 +30,36 @@ def api_registries():
     # Don't expose credentials
     safe_registries = []
     for reg in registries:
-        vuln_scan = reg.get("vulnerabilityScan", {})
-        safe_registries.append({
-            "name": reg["name"],
-            "api": reg["api"],
-            "url": reg.get("api", "").replace("http://", "").replace("https://", ""),
-            "isAuthEnabled": reg.get("isAuthEnabled", False),
-            "default": reg.get("default", False),
-            "bulkOperationsEnabled": reg.get("bulkOperationsEnabled", False),
-            "vulnerabilityScan": {
-                "enabled": vuln_scan.get("enabled", False),
-                "scanner": vuln_scan.get("scanner", "trivy"),
-                "scannerUrl": vuln_scan.get("scannerUrl", "")
-            }
-        })
+        # Handle both string and dictionary formats
+        if isinstance(reg, str):
+            safe_registries.append({
+                "name": reg,
+                "api": "http://registry:5000",  # Default for development
+                "url": "registry:5000",
+                "isAuthEnabled": False,
+                "default": True,
+                "bulkOperationsEnabled": False,
+                "vulnerabilityScan": {
+                    "enabled": False,
+                    "scanner": "trivy",
+                    "scannerUrl": ""
+                }
+            })
+        else:
+            vuln_scan = reg.get("vulnerabilityScan", {})
+            safe_registries.append({
+                "name": reg["name"],
+                "api": reg["api"],
+                "url": reg.get("api", "").replace("http://", "").replace("https://", ""),
+                "isAuthEnabled": reg.get("isAuthEnabled", False),
+                "default": reg.get("default", False),
+                "bulkOperationsEnabled": reg.get("bulkOperationsEnabled", False),
+                "vulnerabilityScan": {
+                    "enabled": vuln_scan.get("enabled", False),
+                    "scanner": vuln_scan.get("scanner", "trivy"),
+                    "scannerUrl": vuln_scan.get("scannerUrl", "")
+                }
+            })
     return jsonify({"registries": safe_registries})
 
 @api_bp.route("/repositories/<registry_name>")

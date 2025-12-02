@@ -52,9 +52,15 @@
                     <a href="bulk-operations.html">Bulk Operations</a>
                 </div>
                 <div class="nav-section">
+                    <h3>Examples</h3>
+                    <a href="example-multi-registry.html">Multi-Registry Setup</a>
+                    <a href="example-basic-auth.html">Basic Auth Registry</a>
+                </div>
+                <div class="nav-section">
                     <h3>Reference</h3>
                     <a href="api.html">API Integration</a>
                     <a href="development.html">Development</a>
+                    <a href="testing.html">Testing Guide</a>
                 </div>
             </nav>
         </aside>
@@ -80,10 +86,10 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td><code>CONFIG_FILE</code></td>
-                        <td>Path to registries configuration file (optional - setup wizard used if not provided)</td>
-                        <td><code>/app/data/registries.config.json</code></td>
-                    </tr>
+                          <td><code>CONFIG_FILE</code></td>
+                          <td>Path to registries configuration file (optional - setup wizard used if not provided). By default the app checks <code>/app/registries.config.json</code>. When running inside the official container it is common to set this to <code>/app/data/registries.config.json</code> (for example by mounting <code>./data:/app/data</code>).</td>
+                          <td><code>/app/registries.config.json</code></td>
+                        </tr>
                     <tr>
                         <td><code>READ_ONLY</code></td>
                         <td>Enable read-only mode (disable delete operations)</td>
@@ -116,11 +122,28 @@
                 </li>
                 <li>Click "Test Connection" to verify</li>
                 <li>Save configuration</li>
-                <li>Configuration is saved to <code>/app/data/registries.config.json</code></li>
+                <li>Configuration is saved to the directory containing the configured <code>CONFIG_FILE</code> (for example if <code>CONFIG_FILE=/app/data/registries.config.json</code>, files are saved under <code>/app/data</code>).</li>
             </ol>
 
             <h2>Manual Configuration File</h2>
             <p>For automated deployments, create a <code>registries.config.json</code> file before starting the UI:</p>
+
+            <h3>Create the config file (example)</h3>
+            <p>Create a directory to hold the config (for example <code>./data</code>) and add a file named <code>registries.config.json</code>. The application will read whatever path you point <code>CONFIG_FILE</code> at (see environment variables above). Example minimal file:</p>
+            <pre><code>mkdir -p data
+cat > ./data/registries.config.json <<'JSON'
+{
+  "registries": [
+    {
+      "name": "Local Registry",
+      "url": "http://localhost:5001",
+      "auth": { "type": "none" }
+    }
+  ]
+}
+JSON</code></pre>
+
+            <p>When launching the container, mount the <code>data</code> directory and set <code>CONFIG_FILE=/app/data/registries.config.json</code> so the app finds the file and persists scan results in the same directory.</p>
 
             <h3>Local Registry (No Authentication)</h3>
             <pre><code>{

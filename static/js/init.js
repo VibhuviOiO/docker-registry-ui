@@ -13,12 +13,19 @@ window.addEventListener('DOMContentLoaded', function() {
     
 
     
-    document.getElementById('sortTags').addEventListener('change', sortAndFilterTags);
-    document.getElementById('filterTags').addEventListener('keyup', sortAndFilterTags);
+    const sortTags = document.getElementById('sortTags');
+    if (sortTags) sortTags.addEventListener('change', sortAndFilterTags);
     
-    document.getElementById('sidebarToggle').addEventListener('click', function() {
-        document.getElementById('sidebar').classList.toggle('collapsed');
-    });
+    const filterTags = document.getElementById('filterTags');
+    if (filterTags) filterTags.addEventListener('keyup', sortAndFilterTags);
+    
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar) sidebar.classList.toggle('collapsed');
+        });
+    }
     
     document.querySelectorAll('[data-view]').forEach(link => {
         link.addEventListener('click', function(e) {
@@ -48,27 +55,36 @@ window.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    document.getElementById('registrySelector').addEventListener('change', function() {
-        const registryName = this.value;
-        if (!registryName) return;
-        currentRegistry = registryName;
-        loadRepositories(registryName);
-    });
-    
-    document.getElementById('refreshRepos').addEventListener('click', function() {
-        if (!currentRegistry) {
-            showAlert('Please select a registry first', 'warning');
-            return;
-        }
-        loadRepositories(currentRegistry);
-    });
-    
-    document.getElementById('searchBox').addEventListener('keyup', function() {
-        const q = this.value.toLowerCase();
-        document.querySelectorAll('.repo-row').forEach(row => {
-            row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+    const registrySelector = document.getElementById('registrySelector');
+    if (registrySelector) {
+        registrySelector.addEventListener('change', function() {
+            const registryName = this.value;
+            if (!registryName) return;
+            currentRegistry = registryName;
+            loadRepositories(registryName);
         });
-    });
+    }
+    
+    const refreshRepos = document.getElementById('refreshRepos');
+    if (refreshRepos) {
+        refreshRepos.addEventListener('click', function() {
+            if (!currentRegistry) {
+                showAlert('Please select a registry first', 'warning');
+                return;
+            }
+            loadRepositories(currentRegistry);
+        });
+    }
+    
+    const searchBox = document.getElementById('searchBox');
+    if (searchBox) {
+        searchBox.addEventListener('keyup', function() {
+            const q = this.value.toLowerCase();
+            document.querySelectorAll('.repo-row').forEach(row => {
+                row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+            });
+        });
+    }
     
     const deleteRepoBtn = document.getElementById('deleteRepoBtn');
     if (deleteRepoBtn) {
@@ -191,12 +207,16 @@ window.addEventListener('DOMContentLoaded', function() {
         });
     
     const selector = document.getElementById('registrySelector');
-    const defaultOption = Array.from(selector.options).find(opt => opt.dataset.default === 'true');
-    
-    if (defaultOption) {
-        selector.value = defaultOption.value;
-        currentRegistry = defaultOption.value;
-        loadRepositories(currentRegistry);
+    if (selector) {
+        const defaultOption = Array.from(selector.options).find(opt => opt.dataset.default === 'true');
+        const firstOption = Array.from(selector.options).find(opt => opt.value !== '');
+        
+        const selectedOption = defaultOption || firstOption;
+        if (selectedOption) {
+            selector.value = selectedOption.value;
+            currentRegistry = selectedOption.value;
+            loadRepositories(currentRegistry);
+        }
     }
     
     checkRegistryHealth();
