@@ -11,12 +11,12 @@ Modern web interface for managing Docker Registry with vulnerability scanning, b
 
 ```bash
 # Download test environment
-wget https://raw.githubusercontent.com/VibhuviOiO/docker-registry-ui/main/docker/docker-compose-multi-registry.yml
-wget https://raw.githubusercontent.com/VibhuviOiO/docker-registry-ui/main/docker/populate-test-images.sh
+wget https://raw.githubusercontent.com/VibhuviOiO/docker-registry-ui/main/docker/multi-registry/docker-compose.yml
+wget https://raw.githubusercontent.com/VibhuviOiO/docker-registry-ui/main/docker/multi-registry/populate-test-images.sh
 chmod +x populate-test-images.sh
 
 # Start registries and UI
-docker-compose -f docker-compose-multi-registry.yml up -d
+docker-compose -f docker-compose.yml up -d
 
 # Populate with test images (optional, takes 5-10 min)
 ./populate-test-images.sh
