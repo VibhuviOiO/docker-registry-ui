@@ -20,17 +20,17 @@ services:
     environment:
       # Set to DEBUG for detailed logging, INFO for normal, WARNING for minimal
       LOG_LEVEL: "INFO"
+      # Registry configuration (for Play with Docker compatibility)
+      REGISTRIES: '[{"name":"Local Registry","api":"http://registry:5000"}]'
     volumes:
-      - ./registries.config.json:/app/registries.config.json:ro
-      - ./data:/app/data
-    depends_on:
-      - registry
+      - ui-data:/app/data
     networks:
       - registry-net
     restart: unless-stopped
 
 volumes:
   registry-data:
+  ui-data:
 
 networks:
   registry-net:

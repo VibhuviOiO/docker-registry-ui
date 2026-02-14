@@ -1,8 +1,0 @@
-{
-  "registries": [
-    {
-      "name": "Local Registry",
-      "api": "http://registry:5000"
-    }
-  ]
-}
