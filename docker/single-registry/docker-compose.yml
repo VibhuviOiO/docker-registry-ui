@@ -1,5 +1,4 @@
 services:
-  # Docker Registry
   registry:
     image: registry:2
     ports:
@@ -10,28 +9,22 @@ services:
       - registry-data:/var/lib/registry
     networks:
       - registry-net
-    restart: unless-stopped
-
-  # Registry UI
   registry-ui:
     image: ghcr.io/vibhuvioio/docker-registry-ui:latest
     ports:
       - "5000:5000"
     environment:
-      # Set to DEBUG for detailed logging, INFO for normal, WARNING for minimal
       LOG_LEVEL: "INFO"
-      # Registry configuration (for Play with Docker compatibility)
       REGISTRIES: '[{"name":"Local Registry","api":"http://registry:5000"}]'
     volumes:
       - ui-data:/app/data
     networks:
       - registry-net
-    restart: unless-stopped
-
 volumes:
   registry-data:
   ui-data:
 
 networks:
   registry-net:
-    driver: bridge
+    driver: overlay
+    attachable: true
