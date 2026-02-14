@@ -4,6 +4,7 @@ Modern web interface for managing Docker Registry with vulnerability scanning, b
 
 [![Docker Pulls](https://img.shields.io/docker/pulls/vibhuvi/docker-registry-ui)](https://github.com/VibhuviOiO/docker-registry-ui/pkgs/container/docker-registry-ui)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Open in Gitpod](https://img.shields.io/badge/Gitpod-Ready%20to%20Code-purple?logo=gitpod)](https://gitpod.io/#https://github.com/VibhuviOiO/docker-registry-ui)
 
 [![Docker Registry UI](https://vibhuvioio.com/docker-registry-ui/img/repositories.png)](https://vibhuvioio.com/docker-registry-ui/)
 
