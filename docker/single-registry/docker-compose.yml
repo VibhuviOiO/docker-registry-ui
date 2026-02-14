@@ -1,4 +1,5 @@
 services:
+  # Docker Registry
   registry:
     image: registry:2
     ports:
@@ -7,24 +8,18 @@ services:
       REGISTRY_STORAGE_DELETE_ENABLED: "true"
     volumes:
       - registry-data:/var/lib/registry
-    networks:
-      - registry-net
+
+  # Registry UI
   registry-ui:
     image: ghcr.io/vibhuvioio/docker-registry-ui:latest
     ports:
       - "5000:5000"
     environment:
-      LOG_LEVEL: "INFO"
+      LOG_LEVEL: INFO
       REGISTRIES: '[{"name":"Local Registry","api":"http://registry:5000"}]'
     volumes:
       - ui-data:/app/data
-    networks:
-      - registry-net
+
 volumes:
   registry-data:
   ui-data:
-
-networks:
-  registry-net:
-    driver: overlay
-    attachable: true
