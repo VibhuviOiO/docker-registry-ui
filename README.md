@@ -9,6 +9,16 @@ Modern web interface for managing Docker Registry with vulnerability scanning, b
 
 ## 🚀 Try It Now (2 Minutes)
 
+### ☁️ Play with Docker (Browser)
+
+Click the button below to try Docker Registry UI instantly in your browser using [Play with Docker](https://labs.play-with-docker.com/):
+
+[![Try in PWD](https://raw.githubusercontent.com/play-with-docker/stacks/master/assets/images/button.png)](https://labs.play-with-docker.com/?stack=https://raw.githubusercontent.com/VibhuviOiO/docker-registry-ui/main/docker/single-registry/docker-compose.yml)
+
+**Note:** This launches a single-registry setup. The UI will be available on port **5000** and the registry on port **5001**.
+
+### 🖥️ Local Quick Start
+
 ```bash
 # Download test environment
 wget https://raw.githubusercontent.com/VibhuviOiO/docker-registry-ui/main/docker/multi-registry/docker-compose.yml
