@@ -1,23 +1,18 @@
 services:
-  # Docker Registry
   registry:
     image: registry:2
     ports:
-      - target: 5000
-        published: 5001
-        mode: host
+      - "5001:5000"
     environment:
       REGISTRY_STORAGE_DELETE_ENABLED: "true"
+      REGISTRY_HTTP_ADDR: 0.0.0.0:5000
     volumes:
       - registry-data:/var/lib/registry
 
-  # Registry UI
   registry-ui:
     image: ghcr.io/vibhuvioio/docker-registry-ui:latest
     ports:
-      - target: 5000
-        published: 5000
-        mode: host
+      - "5000:5000"
     environment:
       LOG_LEVEL: INFO
       REGISTRIES: '[{"name":"Local Registry","api":"http://registry:5000"}]'
