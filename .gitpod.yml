@@ -1,0 +1,31 @@
+tasks:
+  - name: Start Registry & UI
+    init: |
+      echo "Pulling Docker images..."
+      docker pull registry:2
+      docker pull ghcr.io/vibhuvioio/docker-registry-ui:latest
+    command: |
+      echo "Starting Docker Registry UI..."
+      cd docker/single-registry
+      docker-compose up -d
+      echo ""
+      echo "✅ Docker Registry UI is starting..."
+      echo "📦 Registry API: http://localhost:5001"
+      echo "🖥️  UI: Open from the Gitpod PORTS tab (5000)"
+      echo "📦 Registry API: Open from the Gitpod PORTS tab (5001)"
+      echo ""
+      sleep 5
+      docker-compose ps
+
+ports:
+  - port: 5000
+    name: Registry UI
+    description: Docker Registry UI Dashboard
+    onOpen: open-preview
+  - port: 5001
+    name: Registry API
+    description: Docker Registry API Endpoint
+    onOpen: ignore
+vscode:
+  extensions:
+    - ms-azuretools.vscode-docker
