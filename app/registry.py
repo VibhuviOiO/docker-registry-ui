@@ -1,16 +1,81 @@
 import requests
-from requests.auth import HTTPBasicAuth
+from requests.auth import HTTPBasicAuth, AuthBase
 from .config import Config
+from typing import Optional, Dict
+
+class DockerRegistryAuth(AuthBase):
+    """Custom authentication handler for Docker Registry Bearer tokens with automatic refresh on 401 responses"""
+    def __init__(self, username: str, password: str):
+        self.username = username
+        self.password = password
+        self.token: Optional[str] = None
+
+    def __call__(self, r: requests.PreparedRequest):
+        if self.token:
+            r.headers["Authorization"] = f"Bearer {self.token}"
+        
+        r.register_hook("response", self.handle_401)
+        return r
+
+    def handle_401(self, r: requests.Response, **kwargs):
+        """Handle 401 responses to automatically obtain a new Bearer token and retry the original request"""
+        if r.status_code != 401 or "Www-Authenticate" not in r.headers:
+            return r
+
+        auth_header = r.headers["Www-Authenticate"]
+        if "Bearer" not in auth_header:
+            return r
+
+        parts: Dict[str, str] = {}
+        for item in auth_header.replace("Bearer ", "").split(","):
+            if "=" in item:
+                k, v = item.split("=", 1)
+                parts[k.strip()] = v.strip('"')
+        
+        realm = parts.get("realm")
+        if not realm:
+            return r
+
+        auth_params = {
+            "service": parts.get("service"),
+            "scope": parts.get("scope")
+        }
+
+        token_resp = requests.get(
+            realm, 
+            params=auth_params, 
+            auth=HTTPBasicAuth(self.username, self.password),
+            timeout=10,
+            verify=False
+        )
+
+        if token_resp.status_code == 200:
+            self.token = token_resp.json().get("token")
+            if not self.token:
+                return r
+
+            _ = r.content
+            new_request = r.request.copy()
+            new_request.headers["Authorization"] = f"Bearer {self.token}"
+            _r = r.connection.send(new_request, **kwargs)
+            _r.history.append(r)
+            return _r
+
+        return r
 
 def get_auth(registry):
     """Get authentication for registry"""
-    if not registry.get("isAuthEnabled"):
-        return None
+    auth_config = registry.get("auth", {})
+    auth_type = auth_config.get("type", "none")
     
-    if registry.get("apiToken"):
-        return {"Authorization": f"Bearer {registry['apiToken']}"}
-    elif registry.get("user") and registry.get("password"):
-        return HTTPBasicAuth(registry["user"], registry["password"])
+    username = auth_config.get("username") or registry.get("user")
+    password = auth_config.get("password") or registry.get("password")
+
+    if auth_type == "bearer" and auth_config.get("token"):
+        return {"Authorization": f"Bearer {auth_config['token']}"}
+    
+    if username and password:
+        return DockerRegistryAuth(username, password)
     
     return None
 
@@ -25,7 +90,7 @@ def fetch_repositories(registry_api, auth=None):
     """Fetch repository list only (lightweight)"""
     try:
         headers = auth if isinstance(auth, dict) else {}
-        auth_obj = auth if isinstance(auth, HTTPBasicAuth) else None
+        auth_obj = auth if isinstance(auth, DockerRegistryAuth) else None
         
         r = requests.get(
             f"{registry_api}/v2/_catalog",
@@ -46,7 +111,7 @@ def fetch_repository_tags(registry_api, repo, auth=None):
     """Fetch tags for a specific repository (on-demand)"""
     try:
         headers = auth if isinstance(auth, dict) else {}
-        auth_obj = auth if isinstance(auth, HTTPBasicAuth) else None
+        auth_obj = auth if isinstance(auth, DockerRegistryAuth) else None
         
         r = requests.get(
             f"{registry_api}/v2/{repo}/tags/list",
@@ -66,7 +131,7 @@ def fetch_repository_tags(registry_api, repo, auth=None):
 def fetch_tag_details(registry_api, repo, tag, auth=None):
     """Fetch details for a specific tag (on-demand)"""
     try:
-        auth_obj = auth if isinstance(auth, HTTPBasicAuth) else None
+        auth_obj = auth if isinstance(auth, DockerRegistryAuth) else None
         
         # Try multiple manifest formats (order matters - try most common first)
         manifest_formats = [
@@ -169,7 +234,7 @@ def fetch_tag_details(registry_api, repo, tag, auth=None):
 def delete_tag(registry_api, repo, tag, auth=None):
     """Delete a specific tag"""
     try:
-        auth_obj = auth if isinstance(auth, HTTPBasicAuth) else None
+        auth_obj = auth if isinstance(auth, DockerRegistryAuth) else None
         digest = None
         
         # Try multiple accept headers to get digest
