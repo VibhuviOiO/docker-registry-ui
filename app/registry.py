@@ -23,44 +23,48 @@ class DockerRegistryAuth(AuthBase):
             return r
 
         auth_header = r.headers["Www-Authenticate"]
-        if "Bearer" not in auth_header:
-            return r
-
-        parts: Dict[str, str] = {}
-        for item in auth_header.replace("Bearer ", "").split(","):
-            if "=" in item:
-                k, v = item.split("=", 1)
-                parts[k.strip()] = v.strip('"')
-        
-        realm = parts.get("realm")
-        if not realm:
-            return r
-
-        auth_params = {
-            "service": parts.get("service"),
-            "scope": parts.get("scope")
-        }
-
-        token_resp = requests.get(
-            realm, 
-            params=auth_params, 
-            auth=HTTPBasicAuth(self.username, self.password),
-            timeout=10,
-            verify=False
-        )
-
-        if token_resp.status_code == 200:
-            self.token = token_resp.json().get("token")
-            if not self.token:
-                return r
-
-            _ = r.content
+        if auth_header.startswith("Basic"):
             new_request = r.request.copy()
-            new_request.headers["Authorization"] = f"Bearer {self.token}"
+            new_request.headers["Authorization"] = HTTPBasicAuth(self.username, self.password)(new_request).headers["Authorization"]
             _r = r.connection.send(new_request, **kwargs)
             _r.history.append(r)
-            return _r
+            return _r        
+        
+        elif "Bearer" in auth_header:
+            parts: Dict[str, str] = {}
+            for item in auth_header.replace("Bearer ", "").split(","):
+                if "=" in item:
+                    k, v = item.split("=", 1)
+                    parts[k.strip()] = v.strip('"')
+        
+            realm = parts.get("realm")
+            if not realm:
+                return r
 
+            auth_params = {
+                "service": parts.get("service"),
+                "scope": parts.get("scope")
+            }
+
+            token_resp = requests.get(
+                realm, 
+                params=auth_params, 
+                auth=HTTPBasicAuth(self.username, self.password),
+                timeout=10,
+                verify=False
+            )
+
+            if token_resp.status_code == 200:
+                self.token = token_resp.json().get("token")
+                if not self.token:
+                    return r
+
+                _ = r.content
+                new_request = r.request.copy()
+                new_request.headers["Authorization"] = f"Bearer {self.token}"
+                _r = r.connection.send(new_request, **kwargs)
+                _r.history.append(r)
+                return _r
         return r
 
 def get_auth(registry):
