@@ -133,6 +133,12 @@ def _load_scan_results_files(registry_name):
         try:
             with open(scan_file, "r", encoding="utf-8") as f:
                 result = json.load(f)
+            # Filter by registry_name to ensure we only load results for the requested registry
+            # For backward compatibility: if registry field is missing, include the result
+            # (legacy files don't have the registry field)
+            result_registry = result.get("registry")
+            if result_registry and result_registry != registry_name:
+                continue
             repo = result.get("repo")
             tag = result.get("tag")
             if repo and tag:
@@ -303,7 +309,7 @@ def store_scan_results(registry_name, repo, tag, result, ttl_hours=24):
 def get_scan_results(registry_name, force_refresh=False, ttl_hours=24):
     """Get all scan results for a registry from SQLite, with file fallback."""
 
-    if registry_name not in scan_results:
+    if force_refresh or registry_name not in scan_results:
         scan_results[registry_name] = {}
 
     # Load from SQLite first
@@ -321,7 +327,7 @@ def get_scan_results(registry_name, force_refresh=False, ttl_hours=24):
 
     print(f"Loaded {len(scan_results[registry_name])} scan results for {registry_name}")
     # Invalidate cache if expired or digest changed (soft/hard)
-    results = scan_results.get(registry_name, {})
+    results = scan_results[registry_name]
     valid_results = {}
     for key, res in results.items():
         expires = res.get("cacheExpiresAt")
