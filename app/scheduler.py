@@ -43,24 +43,7 @@ def _parse_time_hhmm(value):
 
 
 def _resolve_scheduler_timezone():
-    raw = (Config.MASSIVE_SCAN_TIMEZONE or "local").strip()
-    lowered = raw.lower()
-
-    if lowered in ("", "local", "system"):
-        local_tz = datetime.now().astimezone().tzinfo
-        return local_tz, "local"
-
-    if lowered == "utc":
-        return timezone.utc, "UTC"
-
-    if ZoneInfo is not None:
-        try:
-            return ZoneInfo(raw), raw
-        except Exception:
-            logger.warning(
-                f"Invalid MASSIVE_SCAN_TIMEZONE '{raw}', falling back to local timezone"
-            )
-
+    # Always use local timezone
     local_tz = datetime.now().astimezone().tzinfo
     return local_tz, "local"
 
@@ -86,6 +69,21 @@ def _build_scan_options():
         "includeAllTags": Config.MASSIVE_SCAN_INCLUDE_ALL_TAGS,
         "dryRun": Config.MASSIVE_SCAN_DRY_RUN,
     }
+
+
+def _get_cron_schedule():
+    """Return cron iterator if cron expression is configured, else None."""
+    cron_expr = Config.MASSIVE_SCAN_CRON_EXPRESSION.strip()
+    if not cron_expr:
+        return None
+    try:
+        from croniter import croniter
+        tzinfo, tz_label = _resolve_scheduler_timezone()
+        base = datetime.now(tz=tzinfo)
+        return croniter(cron_expr, base)
+    except Exception as e:
+        logger.warning(f"Failed to parse cron expression '{cron_expr}': {e}")
+        return None
 
 
 def _run_scheduled_job(run_at_iso, timezone_label):
@@ -182,31 +180,55 @@ def _run_scheduled_job(run_at_iso, timezone_label):
 def _scheduler_loop():
     global _last_run_date, _status
 
-    hour, minute = _parse_time_hhmm(Config.MASSIVE_SCAN_SCHEDULE_TIME)
-    tzinfo, tz_label = _resolve_scheduler_timezone()
-    logger.info(
-        f"Massive scan scheduler active: daily at {hour:02d}:{minute:02d} ({tz_label})"
-    )
-
-    while True:
-        try:
-            now = datetime.now(tz=tzinfo)
-            should_run_now = now.hour == hour and now.minute == minute
-            if should_run_now and _last_run_date != now.date():
-                _status["lastRunAt"] = now.isoformat()
+    cron_schedule = _get_cron_schedule()
+    if cron_schedule is not None:
+        tzinfo, tz_label = _resolve_scheduler_timezone()
+        logger.info(
+            f"Massive scan scheduler active: cron expression '{Config.MASSIVE_SCAN_CRON_EXPRESSION}' ({tz_label})"
+        )
+        while True:
+            try:
+                now = datetime.now(tz=tzinfo)
+                next_run = cron_schedule.get_next(datetime)
+                sleep_seconds = (next_run - now).total_seconds()
+                if sleep_seconds > 0:
+                    time.sleep(sleep_seconds)
+                _status["lastRunAt"] = next_run.isoformat()
                 _status["jobRunning"] = True
                 try:
                     _run_scheduled_job(_status["lastRunAt"], tz_label)
                 finally:
                     _status["jobRunning"] = False
-                _last_run_date = now.date()
-                _status["lastRunDate"] = str(_last_run_date)
-        except Exception as e:
-            logger.error(f"Scheduler loop error: {e}")
-            _status["lastError"] = str(e)
-            _status["jobRunning"] = False
+            except Exception as e:
+                logger.error(f"Scheduler loop error: {e}")
+                _status["lastError"] = str(e)
+                _status["jobRunning"] = False
+    else:
+        hour, minute = _parse_time_hhmm(Config.MASSIVE_SCAN_SCHEDULE_TIME)
+        tzinfo, tz_label = _resolve_scheduler_timezone()
+        logger.info(
+            f"Massive scan scheduler active: daily at {hour:02d}:{minute:02d} ({tz_label})"
+        )
 
-        time.sleep(30)
+        while True:
+            try:
+                now = datetime.now(tz=tzinfo)
+                should_run_now = now.hour == hour and now.minute == minute
+                if should_run_now and _last_run_date != now.date():
+                    _status["lastRunAt"] = now.isoformat()
+                    _status["jobRunning"] = True
+                    try:
+                        _run_scheduled_job(_status["lastRunAt"], tz_label)
+                    finally:
+                        _status["jobRunning"] = False
+                    _last_run_date = now.date()
+                    _status["lastRunDate"] = str(_last_run_date)
+            except Exception as e:
+                logger.error(f"Scheduler loop error: {e}")
+                _status["lastError"] = str(e)
+                _status["jobRunning"] = False
+
+            time.sleep(30)
 
 
 def start_scheduler_if_enabled():

@@ -255,6 +255,12 @@ def send_telegram_recap(registry_name, scan_result):
 
 
 def send_massive_scan_recap(registry_name, scan_result):
+    # If configured to only send on delta > 0, check for positive changes
+    if Config.NOTIFY_ONLY_IF_DELTA_GT_0:
+        alert_lines = _build_cve_alert_lines(registry_name, scan_result)
+        if not alert_lines:
+            logger.info(f"Skipping notifications for {registry_name}: no positive delta")
+            return {"email": False, "telegram": False}
     email_ok = send_email_recap(registry_name, scan_result)
     telegram_ok = send_telegram_recap(registry_name, scan_result)
     return {"email": email_ok, "telegram": telegram_ok}

@@ -22,8 +22,6 @@ class Config:
     MASSIVE_SCAN_SCHEDULE_ENABLED = (
         os.getenv("MASSIVE_SCAN_SCHEDULE_ENABLED", "false").lower() == "true"
     )
-    MASSIVE_SCAN_SCHEDULE_TIME = os.getenv("MASSIVE_SCAN_SCHEDULE_TIME", "02:00")
-    MASSIVE_SCAN_TIMEZONE = os.getenv("MASSIVE_SCAN_TIMEZONE", os.getenv("TZ", "local"))
     MASSIVE_SCAN_REGISTRIES = os.getenv("MASSIVE_SCAN_REGISTRIES", "all")
     MASSIVE_SCAN_REPO_PATTERN = os.getenv("MASSIVE_SCAN_REPO_PATTERN", "*")
     MASSIVE_SCAN_MODE = os.getenv("MASSIVE_SCAN_MODE", "all")
@@ -50,6 +48,12 @@ class Config:
     )
     NOTIFY_TELEGRAM_BOT_TOKEN = os.getenv("NOTIFY_TELEGRAM_BOT_TOKEN", "")
     NOTIFY_TELEGRAM_CHAT_ID = os.getenv("NOTIFY_TELEGRAM_CHAT_ID", "")
+
+
+    # Only send notifications if there is a positive delta (>0) in vulnerabilities
+    NOTIFY_ONLY_IF_DELTA_GT_0 = (
+        os.getenv("NOTIFY_ONLY_IF_DELTA_GT_0", "false").lower() == "true"
+    )
 
     @staticmethod
     def load_registries():

@@ -32,7 +32,7 @@ docker-compose -f docker-compose.yml up -d
 - 🧱 Layer-level vulnerability view with BASE/APP origin highlighting
 - 🗑️ Bulk operations with safety features
 - 📡 Massive scan API with advanced filters (all/older/unscanned/never-scanned)
-- 🕒 Daily scheduled massive scan
+- 🕒 Daily scheduled massive scan (supports cron expression)
 - ✉️ Massive scan recap notifications (Email + Telegram)
 - 🩺 System Status view (scheduler/notifications/storage)
 - 💾 SQLite persistence for vulnerability scan results
