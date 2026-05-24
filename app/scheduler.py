@@ -254,9 +254,9 @@ def get_scheduler_status():
     if cron_expr:
         schedule_info = {"cronExpression": cron_expr.strip()}
     else:
-        schedule_info = {}
+        # Default to daily at 02:00 local
+        schedule_info = {"defaultTime": "02:00"}
 
-    # Build JSON‑serializable response
     return {
         "enabled": Config.MASSIVE_SCAN_SCHEDULE_ENABLED,
         "running": _status.get("jobRunning", False),
