@@ -72,18 +72,24 @@ def _build_scan_options():
 
 
 def _get_cron_schedule():
-    """Return cron iterator if cron expression is configured, else None."""
-    cron_expr = Config.MASSIVE_SCAN_CRON_EXPRESSION.strip()
-    if not cron_expr:
-        return None
+    """Return a croniter iterator. If no cron expression is configured,
+    fall back to a default daily schedule at 02:00 local time.
+    """
+    raw = Config.MASSIVE_SCAN_CRON_EXPRESSION
+    tzinfo, _ = _resolve_scheduler_timezone()
+    base = datetime.now(tz=tzinfo)
+    if raw:
+        expr = raw
+    else:
+        # Default to 02:00 daily
+        expr = "0 2 * * *"
     try:
         from croniter import croniter
-        tzinfo, tz_label = _resolve_scheduler_timezone()
-        base = datetime.now(tz=tzinfo)
-        return croniter(cron_expr, base)
+        return croniter(expr, base)
     except Exception as e:
-        logger.warning(f"Failed to parse cron expression '{cron_expr}': {e}")
+        logger.warning(f"Failed to parse cron expression '{expr}': {e}")
         return None
+
 
 
 def _run_scheduled_job(run_at_iso, timezone_label):
@@ -183,8 +189,9 @@ def _scheduler_loop():
     cron_schedule = _get_cron_schedule()
     if cron_schedule is not None:
         tzinfo, tz_label = _resolve_scheduler_timezone()
+        expr = Config.MASSIVE_SCAN_CRON_EXPRESSION or "0 2 * * *"
         logger.info(
-            f"Massive scan scheduler active: cron expression '{Config.MASSIVE_SCAN_CRON_EXPRESSION}' ({tz_label})"
+            f"Massive scan scheduler active: cron expression '{expr}' ({tz_label})"
         )
         while True:
             try:
@@ -204,31 +211,11 @@ def _scheduler_loop():
                 _status["lastError"] = str(e)
                 _status["jobRunning"] = False
     else:
-        hour, minute = _parse_time_hhmm(Config.MASSIVE_SCAN_SCHEDULE_TIME)
-        tzinfo, tz_label = _resolve_scheduler_timezone()
-        logger.info(
-            f"Massive scan scheduler active: daily at {hour:02d}:{minute:02d} ({tz_label})"
-        )
-
-        while True:
-            try:
-                now = datetime.now(tz=tzinfo)
-                should_run_now = now.hour == hour and now.minute == minute
-                if should_run_now and _last_run_date != now.date():
-                    _status["lastRunAt"] = now.isoformat()
-                    _status["jobRunning"] = True
-                    try:
-                        _run_scheduled_job(_status["lastRunAt"], tz_label)
-                    finally:
-                        _status["jobRunning"] = False
-                    _last_run_date = now.date()
-                    _status["lastRunDate"] = str(_last_run_date)
-            except Exception as e:
-                logger.error(f"Scheduler loop error: {e}")
-                _status["lastError"] = str(e)
-                _status["jobRunning"] = False
-
-            time.sleep(30)
+        # This should never happen with the new cron-based scheduler
+        logger.error("No cron schedule available, scheduler disabled")
+        _status["running"] = False
+        _status["threadActive"] = False
+        _status["jobRunning"] = False
 
 
 def start_scheduler_if_enabled():
@@ -253,8 +240,6 @@ def start_scheduler_if_enabled():
 
 def get_scheduler_status():
     """Return runtime scheduler status for API/UI."""
-    hour, minute = _parse_time_hhmm(Config.MASSIVE_SCAN_SCHEDULE_TIME)
-
     last_summary = _status.get("lastRunSummary")
     prev_summary = _status.get("previousRunSummary")
     if not last_summary:
@@ -264,13 +249,21 @@ def get_scheduler_status():
         if len(history) > 1:
             prev_summary = history[1]
 
+    # Determine schedule info
+    cron_expr = Config.MASSIVE_SCAN_CRON_EXPRESSION
+    if cron_expr:
+        schedule_info = {"cronExpression": cron_expr.strip()}
+    else:
+        schedule_info = {}
+
+    # Build JSON‑serializable response
     return {
         "enabled": Config.MASSIVE_SCAN_SCHEDULE_ENABLED,
         "running": _status.get("jobRunning", False),
         "threadActive": _status.get("threadActive", False),
         "jobRunning": _status.get("jobRunning", False),
-        "scheduleTime": Config.MASSIVE_SCAN_SCHEDULE_TIME,
-        "timezone": Config.MASSIVE_SCAN_TIMEZONE,
+        "scheduleInfo": schedule_info,
+        "timezone": "local",
         "targetRegistries": Config.MASSIVE_SCAN_REGISTRIES,
         "mode": Config.MASSIVE_SCAN_MODE,
         "repoPattern": Config.MASSIVE_SCAN_REPO_PATTERN,
@@ -282,5 +275,4 @@ def get_scheduler_status():
         "previousRunSummary": prev_summary,
         "lastNotifications": _status.get("lastNotifications"),
         "lastError": _status.get("lastError"),
-        "parsedSchedule": {"hour": hour, "minute": minute},
     }

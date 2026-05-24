@@ -22,6 +22,9 @@ class Config:
     MASSIVE_SCAN_SCHEDULE_ENABLED = (
         os.getenv("MASSIVE_SCAN_SCHEDULE_ENABLED", "false").lower() == "true"
     )
+    # Cron expression for scheduling (defaults to daily 02:00 if empty)
+    MASSIVE_SCAN_CRON_EXPRESSION = os.getenv("MASSIVE_SCAN_CRON_EXPRESSION", "")
+    MASSIVE_SCAN_TIMEZONE = os.getenv("MASSIVE_SCAN_TIMEZONE", os.getenv("TZ", "local"))
     MASSIVE_SCAN_REGISTRIES = os.getenv("MASSIVE_SCAN_REGISTRIES", "all")
     MASSIVE_SCAN_REPO_PATTERN = os.getenv("MASSIVE_SCAN_REPO_PATTERN", "*")
     MASSIVE_SCAN_MODE = os.getenv("MASSIVE_SCAN_MODE", "all")
