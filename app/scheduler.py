@@ -253,9 +253,11 @@ def get_scheduler_status():
     cron_expr = Config.MASSIVE_SCAN_CRON_EXPRESSION
     if cron_expr:
         schedule_info = {"cronExpression": cron_expr.strip()}
+        schedule_time = cron_expr.strip()
     else:
         # Default to daily at 02:00 local
         schedule_info = {"defaultTime": "02:00"}
+        schedule_time = "02:00 (daily)"
 
     return {
         "enabled": Config.MASSIVE_SCAN_SCHEDULE_ENABLED,
@@ -263,6 +265,7 @@ def get_scheduler_status():
         "threadActive": _status.get("threadActive", False),
         "jobRunning": _status.get("jobRunning", False),
         "scheduleInfo": schedule_info,
+        "scheduleTime": schedule_time,
         "timezone": "local",
         "targetRegistries": Config.MASSIVE_SCAN_REGISTRIES,
         "mode": Config.MASSIVE_SCAN_MODE,
