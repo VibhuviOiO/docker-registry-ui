@@ -18,7 +18,9 @@ services:
       REGISTRIES: '[{"name":"Local Registry","api":"http://registry:5000"}]'
     volumes:
       - ui-data:/app/data
+      - trivy-data:/root/.cache/trivy
 
 volumes:
   registry-data:
   ui-data:
+  trivy-data:

@@ -48,6 +48,7 @@ services:
     volumes:
       - ./registries.config.json:/app/registries.config.json:ro
       - ./data:/app/data
+      - ./trivy-data:/root/.cache/trivy
     depends_on:
       - registry-1
       - registry-2

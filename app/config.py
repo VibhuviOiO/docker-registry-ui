@@ -14,6 +14,10 @@ class Config:
     CONFIG_FILE = os.getenv("CONFIG_FILE", "/app/registries.config.json")
     USE_ENV_CONFIG = False
     
+    # Data and cache directories
+    DATA_DIR = os.getenv("DATA_DIR", "/app/data")
+    TRIVY_CACHE_DIR = os.getenv("TRIVY_CACHE_DIR", "/root/.cache/trivy")
+    
     @staticmethod
     def load_registries():
         """Load registries from environment or config file"""
