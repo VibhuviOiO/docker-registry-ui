@@ -1,5 +1,13 @@
 import os
 import json
+import logging
+
+from .logger import setup_logging
+
+# Configure JSON logging as early as possible so that even import-time
+# messages are emitted in JSON format.
+setup_logging()
+logger = logging.getLogger(__name__)
 
 class Config:
     # Legacy single registry support
@@ -17,6 +25,14 @@ class Config:
     # Data and cache directories
     DATA_DIR = os.getenv("DATA_DIR", "/app/data")
     TRIVY_CACHE_DIR = os.getenv("TRIVY_CACHE_DIR", "/root/.cache/trivy")
+    
+    # Concurrency limits
+    UVICORN_WORKERS = int(os.getenv("UVICORN_WORKERS", "4"))
+    SCAN_WORKERS = int(os.getenv("SCAN_WORKERS", "2"))
+    
+    # Scan retry policy: transient failures (e.g. concurrent push/pull) are retried
+    SCAN_RETRIES = int(os.getenv("SCAN_RETRIES", "3"))
+    SCAN_RETRY_DELAY = int(os.getenv("SCAN_RETRY_DELAY", "2"))
     
     @staticmethod
     def load_registries():
@@ -44,7 +60,7 @@ class Config:
                         Config.REGISTRIES = []
                 Config.USE_ENV_CONFIG = False
             except Exception as e:
-                print(f"Failed to load config: {e}")
+                logger.error(f"Failed to load config: {e}")
                 pass
         
         # If no registries configured, use legacy single registry
@@ -64,7 +80,7 @@ class Config:
                 json.dump(Config.REGISTRIES, f, indent=2)
             return True
         except Exception as e:
-            print(f"Failed to save config: {e}")
+            logger.error(f"Failed to save config: {e}")
             return False
 
 # Load registries on import

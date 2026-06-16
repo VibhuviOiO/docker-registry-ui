@@ -1,7 +1,4 @@
-version: '3.8'
-
 services:
-  # Generate htpasswd file
   htpasswd-generator:
     image: httpd:2.4
     command: htpasswd -Bbn admin secret
@@ -9,8 +6,6 @@ services:
       - auth-data:/tmp
     entrypoint: >
       sh -c "htpasswd -Bbn admin secret > /tmp/htpasswd && echo 'htpasswd generated'"
-
-  # Basic registry without auth
   registry-dev:
     image: registry:2
     environment:
@@ -20,7 +15,6 @@ services:
     networks:
       - registry-net
 
-  # Registry for basic auth (backend)
   registry-auth:
     image: registry:2
     environment:
@@ -30,7 +24,6 @@ services:
     networks:
       - registry-net
 
-  # Nginx proxy with basic auth
   nginx-proxy:
     image: nginx:stable-alpine
     ports:
@@ -46,7 +39,6 @@ services:
     command: >
       sh -c "while [ ! -f /etc/nginx/htpasswd ]; do sleep 1; done && nginx -g 'daemon off;'"
 
-  # Registry UI
   registry-ui:
     image: ghcr.io/vibhuvioio/docker-registry-ui:latest
     ports:

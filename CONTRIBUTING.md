@@ -12,7 +12,7 @@ Contributions are welcome! Feel free to:
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature-name`
 3. Make your changes
-4. Test locally: `docker-compose -f docker/docker-compose.dev.yml up`
+4. Test locally: `docker compose -f docker-compose.dev.yml up -d`
 5. Commit: `git commit -am 'Add feature'`
 6. Push: `git push origin feature-name`
 7. Open a Pull Request
@@ -25,7 +25,7 @@ git clone https://github.com/YOUR_USERNAME/docker-registry-ui.git
 cd docker-registry-ui
 
 # Start development environment
-docker-compose -f docker/docker-compose.dev.yml up
+docker compose -f docker-compose.dev.yml up -d
 ```
 
 ## Guidelines

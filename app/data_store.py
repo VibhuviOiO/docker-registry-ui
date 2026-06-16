@@ -1,8 +1,85 @@
 from .config import Config
+import uuid
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Simple in-memory cache for repositories (no background updates)
 registry_cache = {}
 scan_results = {}
+scan_jobs = {}
+
+def _scan_job_path(job_id):
+    """Get file path for a scan job"""
+    import os
+    jobs_dir = os.path.join(Config.DATA_DIR, "scan_jobs")
+    os.makedirs(jobs_dir, exist_ok=True)
+    return os.path.join(jobs_dir, f"{job_id}.json")
+
+def _load_scan_job(job_id):
+    """Load scan job from disk"""
+    import json
+    import os
+    path = _scan_job_path(job_id)
+    if not os.path.exists(path):
+        return None
+    try:
+        with open(path, 'r') as f:
+            return json.load(f)
+    except Exception:
+        return None
+
+def _save_scan_job(job):
+    """Save scan job to disk"""
+    import json
+    import os
+    path = _scan_job_path(job["id"])
+    temp_path = path + ".tmp"
+    try:
+        with open(temp_path, 'w') as f:
+            json.dump(job, f, indent=2)
+        os.replace(temp_path, path)
+    except Exception as e:
+        logger.error(f"Failed to save scan job {job['id']}: {e}")
+
+def create_scan_job(registry_name, repo, tag):
+    """Create a new async scan job"""
+    job_id = str(uuid.uuid4())
+    job = {
+        "id": job_id,
+        "registry_name": registry_name,
+        "repo": repo,
+        "tag": tag,
+        "status": "in_progress",
+        "result": None,
+        "error": None
+    }
+    _save_scan_job(job)
+    # Keep in-memory copy as well for fast access
+    scan_jobs[job_id] = job
+    return job_id
+
+def get_scan_job(job_id):
+    """Get scan job by ID (from memory or disk)"""
+    job = scan_jobs.get(job_id)
+    if job:
+        return job
+    return _load_scan_job(job_id)
+
+def update_scan_job(job_id, status=None, result=None, error=None):
+    """Update scan job status and result"""
+    job = get_scan_job(job_id)
+    if not job:
+        return False
+    if status is not None:
+        job["status"] = status
+    if result is not None:
+        job["result"] = result
+    if error is not None:
+        job["error"] = error
+    _save_scan_job(job)
+    scan_jobs[job_id] = job
+    return True
 
 def get_registries():
     """Get list of configured registries"""
@@ -83,9 +160,9 @@ def store_scan_results(registry_name, repo, tag, result):
     try:
         with open(image_file, 'w') as f:
             json.dump(result, f, indent=2)
-        print(f"Saved scan to: {image_file}")
+        logger.info(f"Saved scan to: {image_file}")
     except Exception as e:
-        print(f"Failed to save scan to {image_file}: {e}")
+        logger.error(f"Failed to save scan to {image_file}: {e}")
 
 def get_scan_results(registry_name):
     """Get all scan results for a registry from individual image files"""
@@ -115,7 +192,7 @@ def get_scan_results(registry_name):
                     key = f"{repo}:{tag}"
                     scan_results[registry_name][key] = result
         except Exception as e:
-            print(f"Failed to load {scan_file}: {e}")
+            logger.error(f"Failed to load {scan_file}: {e}")
     
-    print(f"Loaded {len(scan_results[registry_name])} scan results for {registry_name}")
+    logger.info(f"Loaded {len(scan_results[registry_name])} scan results for {registry_name}")
     return scan_results.get(registry_name, {})

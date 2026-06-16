@@ -16,7 +16,7 @@ Modern web interface for managing Docker Registry with vulnerability scanning, b
 
 Click the button below to try Docker Registry UI instantly in your browser using [Play with Docker](https://labs.play-with-docker.com/):
 
-[![Try in PWD](https://raw.githubusercontent.com/play-with-docker/stacks/master/assets/images/button.png)](https://labs.play-with-docker.com/?stack=https://raw.githubusercontent.com/VibhuviOiO/docker-registry-ui/main/docker/single-registry/docker-compose.yml)
+[![Try in PWD](https://raw.githubusercontent.com/play-with-docker/stacks/master/assets/images/button.png)](https://labs.play-with-docker.com/?stack=https://raw.githubusercontent.com/VibhuviOiO/docker-registry-ui/main/docker/built-in-trivy/docker-compose.yml)
 
 **Note:** This launches a single-registry setup. The UI will be available on port **5000** and the registry on port **5001**.
 
@@ -25,13 +25,13 @@ Click the button below to try Docker Registry UI instantly in your browser using
 ```bash
 # Download test environment
 wget https://raw.githubusercontent.com/VibhuviOiO/docker-registry-ui/main/docker/multi-registry/docker-compose.yml
-
+wget https://raw.githubusercontent.com/VibhuviOiO/docker-registry-ui/main/docker/multi-registry/registries.config.json
 wget https://raw.githubusercontent.com/VibhuviOiO/docker-registry-ui/main/docker/multi-registry/populate-test-images.sh
 
 chmod +x populate-test-images.sh
 
-# Start registries and UI
-docker-compose -f docker-compose.yml up -d
+# Start registries, Trivy server, and UI
+docker compose -f docker-compose.yml up -d
 
 # Populate with test images (optional, takes 5-10 min)
 ./populate-test-images.sh
@@ -50,6 +50,8 @@ docker-compose -f docker-compose.yml up -d
 
 ## 📦 Quick Start (Production)
 
+### Built-in Trivy (simplest)
+
 ```bash
 # Simple setup (setup wizard will guide you)
 docker run -d \
@@ -63,7 +65,7 @@ docker network create registry-net
 docker run -d --name test-registry --network registry-net -p 5001:5000 \
   -e REGISTRY_STORAGE_DELETE_ENABLED=true registry:2
 docker run -d --name registry-ui --network registry-net -p 5000:5000 \
-  -e 'REGISTRIES=[{"name":"Local Registry","api":"http://test-registry:5000"}]' \
+  -e 'REGISTRIES=[{"name":"Local Registry","api":"http://test-registry:5000","vulnerabilityScan":{"enabled":true,"scanner":"trivy","scannerUrl":"builtin"}}]' \
   -v $(pwd)/data:/app/data \
   -v $(pwd)/trivy-data:/root/.cache/trivy \
   vibhuvioio/docker-registry-ui:latest
@@ -71,13 +73,24 @@ docker run -d --name registry-ui --network registry-net -p 5000:5000 \
 
 > **Tip:** Mount `/root/.cache/trivy` to persist the Trivy vulnerability database across container restarts.
 
+### Single-Registry Compose Examples
+
+- [`docker/remote-trivy`](docker/remote-trivy/docker-compose.yml) — recommended; uses a dedicated Trivy server for concurrent scans
+- [`docker/built-in-trivy`](docker/built-in-trivy/docker-compose.yml) — uses the Trivy binary inside the UI container
+
 ## 🔧 Environment Variables
 
 | Variable | Default | Description |
 |---|---|---|
 | `CONFIG_FILE` | `/app/registries.config.json` | Path to registries configuration file |
-| `DATA_DIR` | `/app/data` | Directory where scan results are persisted |
-| `TRIVY_CACHE_DIR` | `/root/.cache/trivy` | Directory where Trivy stores its vulnerability database |
+| `DATA_DIR` | `/app/data` | Directory where scan results and scan job state are persisted |
+| `TRIVY_CACHE_DIR` | `/root/.cache/trivy` | Directory where the built-in Trivy scanner stores its vulnerability database |
+| `READ_ONLY` | `false` | Disable delete operations |
+| `LOG_LEVEL` | `WARNING` | Logging verbosity (`DEBUG`, `INFO`, `WARNING`, `ERROR`) |
+| `UVICORN_WORKERS` | `4` | Number of Uvicorn worker processes |
+| `SCAN_WORKERS` | `2` | Maximum concurrent background scan workers |
+| `SCAN_RETRIES` | `3` | Retry attempts for transient scan failures |
+| `SCAN_RETRY_DELAY` | `2` | Base delay in seconds between scan retries |
 
 Access at `http://localhost:5000` - Setup wizard will guide you.
 
@@ -90,7 +103,7 @@ git clone https://github.com/vibhuvi/docker-registry-ui.git
 cd docker-registry-ui
 
 # Start development environment
-docker-compose -f docker-compose.dev.yml up -d
+docker compose -f docker-compose.dev.yml up -d
 
 # Access UI at http://localhost:5005
 ```
