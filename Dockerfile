@@ -3,11 +3,12 @@ FROM python:3.11-slim
 WORKDIR /app
 
 ARG TRIVY_VERSION=0.71.1
+ARG TARGETARCH
 
-# Install Trivy binary
+# Install Trivy binary (supports amd64 and arm64)
 RUN apt-get update && \
     apt-get install -y --no-install-recommends wget ca-certificates && \
-    wget -qO- https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz | tar -xz -C /usr/local/bin trivy && \
+    wget -qO- https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-${TARGETARCH}.tar.gz | tar -xz -C /usr/local/bin trivy && \
     chmod +x /usr/local/bin/trivy && \
     apt-get remove -y wget && \
     apt-get autoremove -y && \

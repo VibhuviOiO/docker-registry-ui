@@ -55,6 +55,7 @@ docker-compose -f docker-compose.yml up -d
 docker run -d \
   -p 5000:5000 \
   -v $(pwd)/data:/app/data \
+  -v $(pwd)/trivy-data:/root/.cache/trivy \
   vibhuvioio/docker-registry-ui:latest
 
 # With test registry (using Docker network)
@@ -64,8 +65,11 @@ docker run -d --name test-registry --network registry-net -p 5001:5000 \
 docker run -d --name registry-ui --network registry-net -p 5000:5000 \
   -e 'REGISTRIES=[{"name":"Local Registry","api":"http://test-registry:5000"}]' \
   -v $(pwd)/data:/app/data \
+  -v $(pwd)/trivy-data:/root/.cache/trivy \
   vibhuvioio/docker-registry-ui:latest
 ```
+
+> **Tip:** Mount `/root/.cache/trivy` to persist the Trivy vulnerability database across container restarts.
 
 Access at `http://localhost:5000` - Setup wizard will guide you.
 
