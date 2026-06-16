@@ -71,6 +71,14 @@ docker run -d --name registry-ui --network registry-net -p 5000:5000 \
 
 > **Tip:** Mount `/root/.cache/trivy` to persist the Trivy vulnerability database across container restarts.
 
+## 🔧 Environment Variables
+
+| Variable | Default | Description |
+|---|---|---|
+| `CONFIG_FILE` | `/app/registries.config.json` | Path to registries configuration file |
+| `DATA_DIR` | `/app/data` | Directory where scan results are persisted |
+| `TRIVY_CACHE_DIR` | `/root/.cache/trivy` | Directory where Trivy stores its vulnerability database |
+
 Access at `http://localhost:5000` - Setup wizard will guide you.
 
 ## 🧭 Run Locally (Developer)

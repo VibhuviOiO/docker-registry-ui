@@ -75,8 +75,8 @@ def store_scan_results(registry_name, repo, tag, result):
     key = f"{repo}:{tag}"
     scan_results[registry_name][key] = result
     
-    # Persist to per-image file under /app/data
-    data_dir = '/app/data'
+    # Persist to per-image file under configured data directory
+    data_dir = Config.DATA_DIR
     os.makedirs(data_dir, exist_ok=True)
     
     image_file = os.path.join(data_dir, f"{repo.replace('/', '_')}_{tag}.json")
@@ -96,7 +96,7 @@ def get_scan_results(registry_name):
     if registry_name not in scan_results:
         scan_results[registry_name] = {}
     
-    data_dir = '/app/data'
+    data_dir = Config.DATA_DIR
     
     # Load all individual scan files
     scan_files = glob.glob(os.path.join(data_dir, "*_*.json"))
