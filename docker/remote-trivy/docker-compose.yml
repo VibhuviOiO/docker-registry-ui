@@ -1,37 +1,21 @@
 services:
-  registry-1:
+  registry:
     image: registry:2
     ports:
       - "5001:5000"
     environment:
       REGISTRY_STORAGE_DELETE_ENABLED: "true"
     volumes:
-      - registry-1-data:/var/lib/registry
+      - registry-data:/var/lib/registry
     networks:
       - registry-net
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:5000/v2/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-  registry-2:
-    image: registry:2
-    ports:
-      - "5002:5000"
-    environment:
-      REGISTRY_STORAGE_DELETE_ENABLED: "true"
-    volumes:
-      - registry-2-data:/var/lib/registry
-    networks:
-      - registry-net
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:5000/v2/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   trivy-server:
     image: aquasec/trivy:latest
@@ -54,17 +38,26 @@ services:
       dockerfile: Dockerfile
     image: docker-registry-ui:local
     ports:
-      - "5003:5000"
+      - "5000:5000"
     environment:
-      LOG_LEVEL: "INFO"
+      LOG_LEVEL: INFO
       READ_ONLY: "false"
+      REGISTRIES: |-
+        [
+          {
+            "name": "Local Registry",
+            "api": "http://registry:5000",
+            "vulnerabilityScan": {
+              "enabled": true,
+              "scanner": "trivy",
+              "scannerUrl": "http://trivy-server:8080"
+            }
+          }
+        ]
     volumes:
-      - ./registries.config.json:/app/registries.config.json:ro
-      - ./data:/app/data
+      - ui-data:/app/data
     depends_on:
-      registry-1:
-        condition: service_healthy
-      registry-2:
+      registry:
         condition: service_healthy
       trivy-server:
         condition: service_healthy
@@ -79,8 +72,8 @@ services:
       start_period: 30s
 
 volumes:
-  registry-1-data:
-  registry-2-data:
+  registry-data:
+  ui-data:
   trivy-server-data:
 
 networks:

@@ -1,32 +1,35 @@
-from flask import Blueprint, jsonify
-import requests
+from fastapi import APIRouter
+from fastapi.responses import JSONResponse
 from .config import Config
 
-health_bp = Blueprint('health', __name__)
+health_router = APIRouter()
 
-@health_bp.route("/health/live")
+
+@health_router.get("/health/live")
 def liveness():
     """Liveness probe - is the app running?"""
-    return jsonify({"status": "alive"}), 200
+    return {"status": "alive"}
 
-@health_bp.route("/health/ready")
+
+@health_router.get("/health/ready")
 def readiness():
     """Readiness probe - can the app serve traffic?"""
     try:
         # Check if we can access registries
         registries = Config.REGISTRIES
         if not registries:
-            return jsonify({"status": "not ready", "reason": "no registries configured"}), 503
-        
-        return jsonify({"status": "ready", "registries": len(registries)}), 200
-    except Exception as e:
-        return jsonify({"status": "not ready", "reason": str(e)}), 503
+            return JSONResponse({"status": "not ready", "reason": "no registries configured"}, status_code=503)
 
-@health_bp.route("/health")
+        return {"status": "ready", "registries": len(registries)}
+    except Exception as e:
+        return JSONResponse({"status": "not ready", "reason": str(e)}, status_code=503)
+
+
+@health_router.get("/health")
 def health():
     """Combined health check"""
-    return jsonify({
+    return {
         "status": "healthy",
         "registries": len(Config.REGISTRIES),
         "read_only": Config.READ_ONLY
-    }), 200
+    }

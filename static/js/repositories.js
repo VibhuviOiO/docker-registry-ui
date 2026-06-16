@@ -289,56 +289,97 @@ function loadTagVulnerabilities(tags) {
 function scanTagVulnerabilities(registryName, repo, tag, btn) {
     const originalHtml = btn.innerHTML;
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Scanning...';
+    
+    function restoreButton() {
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+    }
+    
+    function finalizeScan(data) {
+        const total = data.total || 0;
+        const critical = data.summary?.CRITICAL || 0;
+        const high = data.summary?.HIGH || 0;
+        
+        const vulnEl = document.querySelector(`.tag-vuln[data-tag="${tag}"]`);
+        if (vulnEl) {
+            let badges = '<div><small class="text-muted">Vulnerabilities:</small></div>';
+            badges += '<div class="d-flex gap-2 mt-1">';
+            badges += `<span class="badge bg-danger">${critical} C</span>`;
+            badges += `<span class="badge bg-warning">${high} H</span>`;
+            badges += `<span class="badge bg-info">${data.summary?.MEDIUM || 0} M</span>`;
+            badges += `<span class="badge bg-secondary">${data.summary?.LOW || 0} L</span>`;
+            badges += '</div>';
+            vulnEl.innerHTML = badges;
+        }
+        
+        const cveBtn = document.querySelector(`.tag-cve-btn[data-tag="${tag}"]`);
+        if (cveBtn) {
+            if (total > 0) {
+                cveBtn.classList.remove('d-none');
+            } else {
+                cveBtn.classList.add('d-none');
+            }
+        }
+        
+        btn.textContent = 'Rescan';
+        btn.classList.remove('btn-outline-primary');
+        btn.classList.add('btn-outline-secondary');
+        
+        if (total === 0) {
+            showAlert(`✓ No vulnerabilities found in ${repo}:${tag}`, 'success');
+        } else {
+            showAlert(`Found ${total} vulnerabilities (Critical: ${critical}, High: ${high}) in ${repo}:${tag}`, 'warning');
+        }
+    }
+    
+    function pollScanStatus(scanId) {
+        fetch(`/api/scan-status/${encodeURIComponent(scanId)}`)
+            .then(r => r.json())
+            .then(statusData => {
+                if (statusData.error) {
+                    restoreButton();
+                    showAlert(`Scan failed: ${statusData.error}`, 'danger');
+                    return;
+                }
+                
+                if (statusData.status === 'completed') {
+                    restoreButton();
+                    finalizeScan(statusData.result || {});
+                } else if (statusData.status === 'failed') {
+                    restoreButton();
+                    showAlert(`Scan failed: ${statusData.error || 'Unknown error'}`, 'danger');
+                } else if (statusData.status === 'queued') {
+                    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Queued...';
+                    setTimeout(() => pollScanStatus(scanId), 2000);
+                } else {
+                    // in_progress
+                    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Scanning...';
+                    setTimeout(() => pollScanStatus(scanId), 2000);
+                }
+            })
+            .catch(err => {
+                restoreButton();
+                showAlert('Scan status check failed: ' + err.message, 'danger');
+            });
+    }
     
     fetch(`/api/scan/${encodeURIComponent(registryName)}/${encodeURIComponent(repo)}/${encodeURIComponent(tag)}`)
         .then(r => r.json())
         .then(data => {
-            btn.disabled = false;
-            btn.innerHTML = originalHtml;
-            
             if (data.error) {
+                restoreButton();
                 showAlert(`Scan failed: ${data.error}`, 'danger');
+            } else if (data.scanId) {
+                pollScanStatus(data.scanId);
             } else {
-                const total = data.total || 0;
-                const critical = data.summary?.CRITICAL || 0;
-                const high = data.summary?.HIGH || 0;
-                
-                const vulnEl = document.querySelector(`.tag-vuln[data-tag="${tag}"]`);
-                if (vulnEl) {
-                    let badges = '<div><small class="text-muted">Vulnerabilities:</small></div>';
-                    badges += '<div class="d-flex gap-2 mt-1">';
-                    badges += `<span class="badge bg-danger">${critical} C</span>`;
-                    badges += `<span class="badge bg-warning">${high} H</span>`;
-                    badges += `<span class="badge bg-info">${data.summary?.MEDIUM || 0} M</span>`;
-                    badges += `<span class="badge bg-secondary">${data.summary?.LOW || 0} L</span>`;
-                    badges += '</div>';
-                    vulnEl.innerHTML = badges;
-                }
-                
-                const cveBtn = document.querySelector(`.tag-cve-btn[data-tag="${tag}"]`);
-                if (cveBtn) {
-                    if (total > 0) {
-                        cveBtn.classList.remove('d-none');
-                    } else {
-                        cveBtn.classList.add('d-none');
-                    }
-                }
-                
-                btn.textContent = 'Rescan';
-                btn.classList.remove('btn-outline-primary');
-                btn.classList.add('btn-outline-secondary');
-                
-                if (total === 0) {
-                    showAlert(`✓ No vulnerabilities found in ${repo}:${tag}`, 'success');
-                } else {
-                    showAlert(`Found ${total} vulnerabilities (Critical: ${critical}, High: ${high}) in ${repo}:${tag}`, 'warning');
-                }
+                // Fallback for synchronous responses (backward compatibility)
+                restoreButton();
+                finalizeScan(data);
             }
         })
         .catch(err => {
-            btn.disabled = false;
-            btn.innerHTML = originalHtml;
+            restoreButton();
             showAlert('Scan failed: ' + err.message, 'danger');
         });
 }

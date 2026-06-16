@@ -2,11 +2,21 @@
   "registries": [
     {
       "name": "Registry 1",
-      "api": "http://registry-1:5000"
+      "api": "http://registry-1:5000",
+      "vulnerabilityScan": {
+        "enabled": true,
+        "scanner": "trivy",
+        "scannerUrl": "http://trivy-server:8080"
+      }
     },
     {
-      "name": "Registry 2", 
-      "api": "http://registry-2:5000"
+      "name": "Registry 2",
+      "api": "http://registry-2:5000",
+      "vulnerabilityScan": {
+        "enabled": true,
+        "scanner": "trivy",
+        "scannerUrl": "http://trivy-server:8080"
+      }
     }
   ]
 }

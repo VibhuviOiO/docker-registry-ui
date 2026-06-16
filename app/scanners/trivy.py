@@ -1,8 +1,40 @@
+import os
 import requests
 import logging
 from .base import VulnerabilityScanner
 
 logger = logging.getLogger(__name__)
+
+# Trivy's filesystem cache does not support concurrent scans from multiple
+# processes. Use an advisory file lock so only one Trivy invocation runs at a
+# time across all uvicorn workers.
+TRIVY_LOCK_FILE = os.path.join(os.getenv("DATA_DIR", "/app/data"), ".trivy_scan.lock")
+
+# fcntl is only available on Unix; on Windows the lock helpers become no-ops.
+try:
+    import fcntl
+    _HAS_FCNTL = True
+except ImportError:
+    _HAS_FCNTL = False
+
+
+def _acquire_trivy_lock():
+    if not _HAS_FCNTL:
+        return None
+    os.makedirs(os.path.dirname(TRIVY_LOCK_FILE), exist_ok=True)
+    fd = os.open(TRIVY_LOCK_FILE, os.O_CREAT | os.O_RDWR)
+    fcntl.flock(fd, fcntl.LOCK_EX)
+    return fd
+
+
+def _release_trivy_lock(fd):
+    if fd is None:
+        return
+    try:
+        fcntl.flock(fd, fcntl.LOCK_UN)
+    finally:
+        os.close(fd)
+
 
 class TrivyScanner(VulnerabilityScanner):
     """Trivy vulnerability scanner integration"""
@@ -15,29 +47,74 @@ class TrivyScanner(VulnerabilityScanner):
             
             registry_host = registry_url.replace('http://', '').replace('https://', '')
             image_ref = f"{registry_host}/{repository}:{tag}"
-            
-            logger.debug(f"[TRIVY] Scanning image: {image_ref}")
-            
-            # Run trivy client to scan the image
+
+            # Detect remote Trivy server mode. The scanner_url comes from the
+            # registry's vulnerabilityScan.scannerUrl config. "builtin" or empty
+            # means run Trivy locally.
+            remote_server = None
+            if self.scanner_url and self.scanner_url not in ("builtin", ""):
+                remote_server = self.scanner_url
+
+            logger.debug(f"[TRIVY] Scanning image: {image_ref} (server={remote_server or 'local'})")
+
+            # Run trivy client to scan the image.
+            # --scanners vuln avoids the slower secret scanner and its stderr noise.
+            # --quiet suppresses progress tables.
             cmd = [
                 "trivy", "image",
+                "--scanners", "vuln",
                 "--format", "json",
                 "--insecure",
                 "--timeout", "5m",
-                image_ref
+                "--quiet",
             ]
-            
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
-            
-            logger.debug(f"[TRIVY] Exit code: {result.returncode}")
-            
-            if result.returncode == 0 and result.stdout:
-                report = json.loads(result.stdout)
-                return self._parse_trivy_report(report)
+
+            if remote_server:
+                cmd.extend(["--server", remote_server])
+
+            cmd.append(image_ref)
+
+            # Local Trivy CLI shares a filesystem cache and cannot run concurrently.
+            # A remote Trivy server handles its own cache locking, so skip the lock.
+            if remote_server:
+                result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
             else:
-                error_msg = result.stderr if result.stderr else "No output"
-                logger.error(f"[TRIVY] Error: {error_msg[:200]}")
-                return {"error": f"Scan failed: {error_msg[:200]}"}
+                lock_fd = _acquire_trivy_lock()
+                try:
+                    result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+                finally:
+                    _release_trivy_lock(lock_fd)
+
+            logger.debug(f"[TRIVY] Exit code: {result.returncode}")
+
+            # Some Trivy versions emit results to stdout even when the exit code
+            # is non-zero (e.g. policy checks). Try to parse stdout first.
+            if result.stdout:
+                try:
+                    report = json.loads(result.stdout)
+                    if report.get("Results") is not None:
+                        return self._parse_trivy_report(report)
+                except json.JSONDecodeError:
+                    pass
+
+            if result.returncode == 0:
+                if result.stdout:
+                    try:
+                        report = json.loads(result.stdout)
+                        return self._parse_trivy_report(report)
+                    except json.JSONDecodeError:
+                        pass
+                # Empty stdout with exit 0 means no vulnerabilities
+                return self._parse_trivy_report({})
+
+            error_msg = result.stderr.strip() if result.stderr else "No output"
+            # Log the full stderr so the real failure is visible; truncate only
+            # the string returned to the API caller to keep payloads small.
+            logger.error(f"[TRIVY] Error (exit {result.returncode}): {error_msg}")
+            public_msg = error_msg.split('\n')[-1].strip() if error_msg else "No output"
+            if len(public_msg) > 200:
+                public_msg = public_msg[:200] + "..."
+            return {"error": f"Scan failed: {public_msg}"}
         except subprocess.TimeoutExpired:
             return {"error": "Scan timeout after 5 minutes"}
         except Exception as e:
@@ -94,8 +171,18 @@ class TrivyScanner(VulnerabilityScanner):
         return {"error": "Trivy doesn't support report retrieval"}
     
     def health_check(self):
+        # Local builtin mode: just verify the trivy binary is callable.
+        if not self.scanner_url or self.scanner_url == "builtin":
+            try:
+                import subprocess
+                subprocess.run(["trivy", "--version"], capture_output=True, check=True, timeout=5)
+                return True
+            except Exception:
+                return False
+
+        # Remote server mode: hit the Trivy server /healthz endpoint.
         try:
             response = requests.get(f"{self.scanner_url}/healthz", timeout=5)
             return response.status_code == 200
-        except:
+        except Exception:
             return False
