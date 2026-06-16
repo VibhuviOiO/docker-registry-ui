@@ -4,6 +4,7 @@ Modern web interface for managing Docker Registry with vulnerability scanning, b
 
 [![Docker Hub Pulls](https://img.shields.io/docker/pulls/vibhuvioio/docker-registry-ui)](https://hub.docker.com/r/vibhuvioio/docker-registry-ui)
 [![GHCR Pulls](https://img.shields.io/badge/GHCR%20Pulls-15.5K-blue?logo=github)](https://github.com/VibhuviOiO/docker-registry-ui/pkgs/container/docker-registry-ui)
+[![Release](https://img.shields.io/badge/release-v2.1.0-blue.svg)](https://github.com/VibhuviOiO/docker-registry-ui/releases/tag/v2.1.0)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 [![Open in Gitpod](https://img.shields.io/badge/Gitpod-Ready%20to%20Code-purple?logo=gitpod)](https://gitpod.io/#https://github.com/VibhuviOiO/docker-registry-ui)
@@ -142,9 +143,11 @@ Images are published to both [Docker Hub](https://hub.docker.com/r/vibhuvioio/do
 # Latest
 docker pull vibhuvioio/docker-registry-ui:latest
 
-# Specific version (example)
-docker pull vibhuvioio/docker-registry-ui:2.0.0
+# Specific version (recommended for production)
+docker pull vibhuvioio/docker-registry-ui:v2.1.0
 ```
+
+> **Latest release:** [v2.1.0](https://github.com/VibhuviOiO/docker-registry-ui/releases/tag/v2.1.0) — FastAPI backend, async scanning, and remote Trivy support.
 
 ---
 
