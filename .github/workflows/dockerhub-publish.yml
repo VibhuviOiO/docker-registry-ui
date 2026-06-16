@@ -50,4 +50,4 @@ jobs:
             ${{ env.DOCKERHUB_NAMESPACE }}/docker-registry-ui:latest
             ${{ env.DOCKERHUB_NAMESPACE }}/docker-registry-ui:${{ steps.version.outputs.version }}
           cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-to: type=gha,mode=min
