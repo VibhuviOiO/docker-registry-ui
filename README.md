@@ -1,4 +1,4 @@
-# Docker Registry UI
+# Docker Registry UI - [Docs](https://vibhuvioio.com/docker-registry-ui/)
 
 Modern web interface for managing Docker Registry with vulnerability scanning, bulk operations, and multi-registry support.
 
