@@ -21,6 +21,11 @@ class JSONFormatter(logging.Formatter):
 def setup_logging():
     logger = logging.getLogger()
     
+    # Avoid adding duplicate handlers when setup_logging is called multiple times
+    # (e.g. import-time in config.py and again in create_app()).
+    if any(isinstance(h, logging.StreamHandler) and isinstance(h.formatter, JSONFormatter) for h in logger.handlers):
+        return logger
+    
     # Get log level from environment variable, default to WARNING
     log_level = os.getenv('LOG_LEVEL', 'WARNING').upper()
     level_map = {

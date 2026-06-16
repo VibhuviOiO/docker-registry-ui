@@ -1,0 +1,65 @@
+services:
+  registry:
+    image: registry:2
+    ports:
+      - "5001:5000"
+    environment:
+      REGISTRY_STORAGE_DELETE_ENABLED: "true"
+    volumes:
+      - registry-data:/var/lib/registry
+    networks:
+      - registry-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:5000/v2/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  registry-ui:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+    image: docker-registry-ui:local
+    ports:
+      - "5000:5000"
+    environment:
+      LOG_LEVEL: INFO
+      READ_ONLY: "false"
+      REGISTRIES: |-
+        [
+          {
+            "name": "Local Registry",
+            "api": "http://registry:5000",
+            "vulnerabilityScan": {
+              "enabled": true,
+              "scanner": "trivy",
+              "scannerUrl": "builtin"
+            }
+          }
+        ]
+    volumes:
+      - ui-data:/app/data
+      - trivy-data:/root/.cache/trivy
+    depends_on:
+      registry:
+        condition: service_healthy
+    networks:
+      - registry-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:5000/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  registry-data:
+  ui-data:
+  trivy-data:
+
+networks:
+  registry-net:
+    driver: bridge
