@@ -2,12 +2,13 @@
 
 Modern web interface for managing Docker Registry with vulnerability scanning, bulk operations, and multi-registry support.
 
-[![Docker Pulls](https://img.shields.io/docker/pulls/vibhuvi/docker-registry-ui)](https://github.com/VibhuviOiO/docker-registry-ui/pkgs/container/docker-registry-ui)
+[![Docker Hub Pulls](https://img.shields.io/docker/pulls/vibhuvioio/docker-registry-ui)](https://hub.docker.com/r/vibhuvioio/docker-registry-ui)
+[![GHCR Pulls](https://img.shields.io/badge/GHCR%20Pulls-15.5K-blue?logo=github)](https://github.com/VibhuviOiO/docker-registry-ui/pkgs/container/docker-registry-ui)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 [![Open in Gitpod](https://img.shields.io/badge/Gitpod-Ready%20to%20Code-purple?logo=gitpod)](https://gitpod.io/#https://github.com/VibhuviOiO/docker-registry-ui)
 
-[![Docker Registry UI](https://vibhuvioio.com/docker-registry-ui/img/repositories.png)](https://vibhuvioio.com/docker-registry-ui/)
+[![Docker Registry UI](https://vibhuvioio.com/img/docker-registry-ui/repositories.png)](https://vibhuvioio.com/docker-registry-ui/)
 
 ## 🚀 Try It Now (2 Minutes)
 
@@ -24,7 +25,9 @@ Click the button below to try Docker Registry UI instantly in your browser using
 ```bash
 # Download test environment
 wget https://raw.githubusercontent.com/VibhuviOiO/docker-registry-ui/main/docker/multi-registry/docker-compose.yml
+
 wget https://raw.githubusercontent.com/VibhuviOiO/docker-registry-ui/main/docker/multi-registry/populate-test-images.sh
+
 chmod +x populate-test-images.sh
 
 # Start registries and UI
@@ -52,7 +55,7 @@ docker-compose -f docker-compose.yml up -d
 docker run -d \
   -p 5000:5000 \
   -v $(pwd)/data:/app/data \
-  ghcr.io/vibhuvioio/docker-registry-ui:latest
+  vibhuvioio/docker-registry-ui:latest
 
 # With test registry (using Docker network)
 docker network create registry-net
@@ -61,7 +64,7 @@ docker run -d --name test-registry --network registry-net -p 5001:5000 \
 docker run -d --name registry-ui --network registry-net -p 5000:5000 \
   -e 'REGISTRIES=[{"name":"Local Registry","api":"http://test-registry:5000"}]' \
   -v $(pwd)/data:/app/data \
-  ghcr.io/vibhuvioio/docker-registry-ui:latest
+  vibhuvioio/docker-registry-ui:latest
 ```
 
 Access at `http://localhost:5000` - Setup wizard will guide you.
@@ -108,7 +111,15 @@ Note: The Docker development environment includes the `trivy` binary for vulnera
 
 ## 📦 Versions
 
-[View all versions](https://github.com/VibhuviOiO/docker-registry-ui/pkgs/container/docker-registry-ui) | Use specific version: `ghcr.io/vibhuvioio/docker-registry-ui:v1.0.0`
+Images are published to both [Docker Hub](https://hub.docker.com/r/vibhuvioio/docker-registry-ui) and [GitHub Container Registry](https://github.com/VibhuviOiO/docker-registry-ui/pkgs/container/docker-registry-ui).
+
+```bash
+# Latest
+docker pull vibhuvioio/docker-registry-ui:latest
+
+# Specific version (example)
+docker pull vibhuvioio/docker-registry-ui:2.0.0
+```
 
 ---
 
