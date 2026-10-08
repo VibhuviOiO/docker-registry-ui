@@ -3,13 +3,14 @@ name: Docker Hub Publish
 permissions:
   contents: read
 
+# Releases are published from tags only. Pushing to main no longer publishes,
+# so a branch can be tested before anything is released.
 on:
   push:
-    branches:
-      - main
     tags:
-      - "*.*.*"
       - "v*.*.*"
+  # Manual re-publish after e.g. a registry outage. Still requires a tag ref;
+  # see the "tag-triggered only" guard in the job.
   workflow_dispatch:
 
 env:
@@ -32,9 +33,29 @@ jobs:
       - name: Extract version from version.py
         id: version
         run: |
-          VERSION=$(grep -oP '__version__ = "\K[^"]+' app/version.py)
+          VERSION=$(sed -n 's/^__version__ = "\(.*\)"/\1/p' app/version.py)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Extracted version: $VERSION"
+
+      - name: Tag-triggered only
+        run: |
+          if [ "${GITHUB_REF_TYPE}" != "tag" ]; then
+            echo "::error::Releases are published from tags only. Nothing is published from a branch."
+            exit 1
+          fi
+
+      - name: The tag must match app/version.py
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          VERSION="${{ steps.version.outputs.version }}"
+          if [ "$TAG" != "$VERSION" ]; then
+            echo "::error::Tag '$GITHUB_REF_NAME' does not match app/version.py ($VERSION). Bump app/version.py before tagging a release."
+            exit 1
+          fi
+          echo "Tag $GITHUB_REF_NAME matches app/version.py ($VERSION)"
+
+      - name: The release must have notes in CHANGELOG.md
+        run: python3 scripts/extract_release_notes.py "${{ steps.version.outputs.version }}" > /dev/null
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v3

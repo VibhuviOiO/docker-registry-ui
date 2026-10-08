@@ -49,4 +49,66 @@ function formatTimeAgo(dateString) {
     return `${Math.floor(seconds / 31536000)} years ago`;
 }
 
+// ---------------------------------------------------------------------------
+// Authentication support
+//
+// The server only ever returns 401 when AUTH_ENABLED=true, so wrapping fetch
+// here is a no-op on installations that do not use authentication. Doing it
+// centrally means the ~10 existing API call sites need no changes: they redirect
+// to the login page instead of silently rendering an empty table.
+// ---------------------------------------------------------------------------
+(function () {
+    const originalFetch = window.fetch.bind(window);
+
+    window.fetch = function (input, init) {
+        return originalFetch(input, init).then(function (response) {
+            if (response.status === 401 && response.headers.get('X-Auth-Required')) {
+                const next = encodeURIComponent(window.location.pathname + window.location.search);
+                window.location.href = '/login?next=' + next;
+                throw new Error('Authentication required');
+            }
+            return response;
+        });
+    };
+})();
+
+function initAccountChip() {
+    fetch('/auth/me', { headers: { 'Accept': 'application/json' } })
+        .then(function (response) { return response.ok ? response.json() : null; })
+        .then(function (user) {
+            if (!user || !user.username) return;
+
+            const host = document.querySelector('.navbar .ms-auto');
+            if (!host) return;
+
+            const wrap = document.createElement('div');
+            wrap.className = 'd-flex align-items-center ms-2';
+
+            // Values originate from the directory / identity provider, so they
+            // are set as text rather than interpolated into HTML.
+            const chip = document.createElement('span');
+            chip.className = 'badge bg-light text-dark border me-1';
+            chip.title = user.email || '';
+
+            const icon = document.createElement('i');
+            icon.className = 'bi bi-person-circle';
+            chip.appendChild(icon);
+            chip.appendChild(document.createTextNode(
+                ' ' + user.displayName + (user.isAdmin ? ' · admin' : ' · viewer')
+            ));
+
+            const signOut = document.createElement('a');
+            signOut.className = 'btn btn-sm btn-outline-secondary';
+            signOut.href = '/auth/logout';
+            signOut.innerHTML = '<i class="bi bi-box-arrow-right"></i>';
+
+            wrap.appendChild(chip);
+            wrap.appendChild(signOut);
+            host.appendChild(wrap);
+        })
+        .catch(function () { /* authentication is not enabled */ });
+}
+
+window.addEventListener('DOMContentLoaded', initAccountChip);
+
 

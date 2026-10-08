@@ -1,0 +1,178 @@
+# LDAP authentication fixture.
+#
+# Runs the UI against our own OpenLDAP image, so LDAP login can be exercised
+# end to end with no external directory.
+#
+#   cd docker/ldap-auth
+#   docker compose up -d --build
+#   open http://localhost:5006
+#
+# Log in with one of:
+#
+#   alice / alicepassword   -> admin (member of cn=registry-admins)
+#   bob   / bobpassword     -> viewer (not an admin, cannot delete)
+#   emergency / letmein-please-change  -> break-glass admin, works even when the
+#                                         directory is down
+#
+# Compare the two accounts in the UI: bob sees the dashboard but every delete,
+# bulk operation and registry change is refused with 403.
+services:
+
+  openldap:
+    image: ${LDAP_IMAGE:-vibhuvioio/openldap:latest}
+    container_name: registry-ui-ldap
+    restart: unless-stopped
+    # Non-standard host ports so this fixture does not collide with a local LDAP.
+    ports:
+      - "3389:389"
+      - "6636:636"
+    environment:
+      LDAP_DOMAIN: example.com
+      LDAP_ORGANIZATION: Example Organization
+      LDAP_ADMIN_PASSWORD: ${LDAP_ADMIN_PASSWORD:-changeme}
+      # The image loads only core.schema by default, which has neither
+      # inetOrgPerson nor the `mail` attribute (that one lives in cosine).
+      # Without these, seeding fails with
+      # "objectClass: value #0 invalid per syntax".
+      INCLUDE_SCHEMAS: "cosine,inetorgperson"
+      # Required for LDAP_ADMIN_GROUP below: the overlay maintains memberOf on
+      # user entries. Without it the UI would need LDAP_GROUP_FILTER instead.
+      ENABLE_MEMBEROF: "true"
+    volumes:
+      - ldap-data:/var/lib/ldap
+      - ldap-config:/etc/openldap/slapd.d
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/scripts/healthcheck.sh", "auto"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+    stop_grace_period: 30s
+    networks:
+      - registry-net
+
+  # One-shot: create the test users and the admin group, then exit.
+  ldap-bootstrap:
+    image: ${LDAP_IMAGE:-vibhuvioio/openldap:latest}
+    entrypoint: ["sh", "-c"]
+    command:
+      - |
+        set -e
+        echo "Waiting for the directory to answer..."
+        until ldapsearch -x -H ldap://openldap:389 -D "cn=Manager,dc=example,dc=com" \
+              -w "$$LDAP_ADMIN_PASSWORD" -b "dc=example,dc=com" -s base >/dev/null 2>&1; do
+          sleep 2
+        done
+
+        if ldapsearch -x -H ldap://openldap:389 -D "cn=Manager,dc=example,dc=com" \
+             -w "$$LDAP_ADMIN_PASSWORD" -b "dc=example,dc=com" "(uid=alice)" dn 2>/dev/null | grep -q "^dn:"; then
+          echo "Test data already present; nothing to do."
+          exit 0
+        fi
+
+        echo "Seeding test users and groups..."
+        ldapadd -x -H ldap://openldap:389 \
+          -D "cn=Manager,dc=example,dc=com" -w "$$LDAP_ADMIN_PASSWORD" \
+          -f /bootstrap/bootstrap.ldif
+        echo "Seed complete."
+    environment:
+      LDAP_ADMIN_PASSWORD: ${LDAP_ADMIN_PASSWORD:-changeme}
+    volumes:
+      - ./bootstrap.ldif:/bootstrap/bootstrap.ldif:ro
+    depends_on:
+      openldap:
+        condition: service_healthy
+    networks:
+      - registry-net
+
+  registry:
+    image: registry:2
+    ports:
+      - "5007:5000"
+    environment:
+      REGISTRY_STORAGE_DELETE_ENABLED: "true"
+    volumes:
+      - registry-data:/var/lib/registry
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:5000/v2/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - registry-net
+
+  registry-ui:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+    image: docker-registry-ui:ldap-auth
+    ports:
+      - "5006:5000"
+    environment:
+      LOG_LEVEL: INFO
+      READ_ONLY: "false"
+
+      # --- authentication -------------------------------------------------
+      AUTH_ENABLED: "true"
+      AUTH_MODE: "ldap"
+      # Every uvicorn worker must share this key, otherwise sessions are
+      # invalidated at random as requests hit different workers. Set it from a
+      # secret in production; if omitted, one is generated into DATA_DIR.
+      AUTH_SECRET_KEY: ${AUTH_SECRET_KEY:-dev-only-shared-secret-change-me}
+      AUTH_DEFAULT_ROLE: "viewer"
+
+      # Emergency account: the way back in if the directory is unreachable.
+      BREAK_GLASS_USER: emergency
+      BREAK_GLASS_PASSWORD: ${BREAK_GLASS_PASSWORD:-letmein-please-change}
+
+      # --- directory ------------------------------------------------------
+      LDAP_URL: "ldap://openldap:389"
+      LDAP_BASE_DN: "dc=example,dc=com"
+      # Search-only account from ou=Services. In production use the _FILE form,
+      # e.g. LDAP_BIND_PASSWORD_FILE: /run/secrets/ldap_bind_password, so the
+      # password never appears in `docker inspect` output.
+      LDAP_BIND_DN: "cn=registry-ui,ou=Services,dc=example,dc=com"
+      LDAP_BIND_PASSWORD: ${LDAP_BIND_PASSWORD:-ui-bind-password}
+      LDAP_USER_FILTER: "(&(objectClass=inetOrgPerson)(uid={username}))"
+      # Grants the admin role. Separate several groups with ';' -- NOT ',',
+      # because commas are part of a DN.
+      LDAP_ADMIN_GROUP: "registry-admins"
+
+      REGISTRIES: |-
+        [
+          {
+            "name": "Local Registry",
+            "api": "http://registry:5000",
+            "vulnerabilityScan": {
+              "enabled": false,
+              "scanner": "trivy",
+              "scannerUrl": "builtin"
+            }
+          }
+        ]
+    volumes:
+      - ui-data:/app/data
+    depends_on:
+      registry:
+        condition: service_healthy
+      ldap-bootstrap:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:5000/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - registry-net
+
+volumes:
+  ldap-data:
+  ldap-config:
+  registry-data:
+  ui-data:
+
+networks:
+  registry-net:
+    driver: bridge
