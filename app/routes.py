@@ -234,6 +234,7 @@ def api_bulk_operation(data: dict = Body(...)):
         repos = [r for r in repos if re.match(pattern, r)]
 
     results = []
+    failures = []
     for repo in repos:
         tags = fetch_repository_tags(registry["api"], repo, auth)
         tags_to_delete = []
@@ -263,9 +264,13 @@ def api_bulk_operation(data: dict = Body(...)):
 
             if not dry_run:
                 for tag in tags_to_delete:
-                    delete_tag(registry["api"], repo, tag, auth)
+                    deleted, error = delete_tag(registry["api"], repo, tag, auth)
+                    if not deleted:
+                        # A failed deletion used to be discarded, so the caller
+                        # was told the cleanup succeeded while nothing was removed.
+                        failures.append({"repo": repo, "tag": tag, "error": error})
 
-    return {"success": True, "results": results, "dryRun": dry_run}
+    return {"success": True, "results": results, "failures": failures, "dryRun": dry_run}
 
 
 @api_router.post("/registry/bulk-operations")

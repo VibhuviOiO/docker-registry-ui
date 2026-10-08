@@ -186,10 +186,19 @@ def delete_tag(registry_api, repo, tag, auth=None):
         auth_obj = auth if isinstance(auth, HTTPBasicAuth) else None
         digest = None
         
-        # Try multiple accept headers to get digest
+        # Try multiple accept headers to get digest.
+        #
+        # This list must cover every manifest media type the registry may have
+        # stored. A registry answers 404 (not the manifest) when the requested
+        # Accept does not match what is stored, so an incomplete list means
+        # "No digest found" and the tag cannot be deleted at all. The OCI image
+        # manifest is what modern builds produce, and it was missing here while
+        # fetch_tag_details already requested it.
         accept_headers = [
-            "application/vnd.oci.image.index.v1+json",
+            "application/vnd.oci.image.manifest.v1+json",
             "application/vnd.docker.distribution.manifest.v2+json",
+            "application/vnd.oci.image.index.v1+json",
+            "application/vnd.docker.distribution.manifest.list.v2+json",
             "application/vnd.docker.distribution.manifest.v1+json"
         ]
         
