@@ -1,0 +1,45 @@
+# Seed data for the LDAP authentication fixture.
+#
+# The openldap image itself creates the base domain (dc=example,dc=com) and the
+# ou=People / ou=Group / ou=Services organisational units. This file adds:
+#
+#   cn=registry-ui,ou=Services  a bind (service) account the UI searches with
+#   uid=alice                   a member of registry-admins -> admin in the UI
+#   uid=bob                     not a member              -> viewer in the UI
+#   cn=registry-admins          the group that grants admin
+#
+# Order matters: the users are created before the group, so the memberOf overlay
+# (ENABLE_MEMBEROF=true) populates memberOf on alice when the group is added.
+#
+# These are throwaway credentials for a local fixture. The compose file also
+# shows the *_FILE form, which is what you use with Docker or Kubernetes secrets
+# in a real deployment.
+
+dn: cn=registry-ui,ou=Services,dc=example,dc=com
+objectClass: organizationalRole
+objectClass: simpleSecurityObject
+cn: registry-ui
+description: Docker Registry UI bind account (search only, never used to log in)
+userPassword: ui-bind-password
+
+dn: uid=alice,ou=People,dc=example,dc=com
+objectClass: inetOrgPerson
+uid: alice
+cn: Alice Example
+sn: Example
+mail: alice@example.com
+userPassword: alicepassword
+
+dn: uid=bob,ou=People,dc=example,dc=com
+objectClass: inetOrgPerson
+uid: bob
+cn: Bob Example
+sn: Example
+mail: bob@example.com
+userPassword: bobpassword
+
+dn: cn=registry-admins,ou=Group,dc=example,dc=com
+objectClass: groupOfNames
+cn: registry-admins
+description: Members are granted the admin role by the registry UI
+member: uid=alice,ou=People,dc=example,dc=com

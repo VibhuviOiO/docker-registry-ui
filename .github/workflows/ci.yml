@@ -1,0 +1,126 @@
+name: CI
+
+# Runs on every branch push and pull request, before any release. Publishing an
+# image is a separate, tag-triggered concern (docker-publish / dockerhub-publish
+# / release).
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    name: Unit and integration tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Run the test suite
+        run: python -m pytest tests -q
+
+  docker-build:
+    name: Docker image builds and starts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      # Proves the Alpine image resolves the auth dependencies (cryptography is
+      # imported by PyJWT) without needing a compiler.
+      - name: Build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile
+          push: false
+          load: true
+          tags: docker-registry-ui:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=min
+
+      - name: The image starts and answers its health check
+        run: |
+          docker run -d --name ui -p 5000:5000 -e READ_ONLY=true docker-registry-ui:ci
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:5000/health/live >/dev/null 2>&1; then
+              echo "healthy after ${i} attempts"
+              break
+            fi
+            sleep 2
+          done
+          curl -fsS http://127.0.0.1:5000/health/live
+          echo
+          docker logs ui | tail -20
+
+      - name: Container logs on failure
+        if: failure()
+        run: docker logs ui || true
+
+  e2e:
+    name: End-to-end (OpenLDAP, real registry, LDAP + SSO + RBAC + scan + audit)
+    runs-on: ubuntu-latest
+    needs: tests
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt -r requirements-dev.txt
+
+      # The scan journey needs a scanner. Take the binary from the same image the
+      # Dockerfile uses, so CI tests the Trivy we actually ship rather than a
+      # separately-installed one. Without this the run fails by design instead of
+      # silently skipping the product's headline feature.
+      - name: Provide Trivy to the application
+        run: |
+          docker create --name trivy-source aquasec/trivy:latest
+          docker cp trivy-source:/usr/local/bin/trivy /usr/local/bin/trivy
+          docker rm trivy-source
+          trivy --version
+
+      # The UI image is not needed: the validation runs the application from
+      # source and only needs the directory and a registry to talk to.
+      - name: Start OpenLDAP and the registry
+        working-directory: docker/ldap-auth
+        run: docker compose up -d --no-build openldap ldap-bootstrap registry
+
+      - name: Wait for the directory to be seeded
+        working-directory: docker/ldap-auth
+        run: |
+          for i in $(seq 1 40); do
+            status=$(docker compose ps -a --format '{{.Service}} {{.Status}}' | grep ldap-bootstrap || true)
+            case "$status" in *Exited*) break;; esac
+            sleep 5
+          done
+          docker compose logs ldap-bootstrap
+          docker compose ps
+
+      - name: Validate every feature against the live stack
+        run: python tests/validate_full_stack.py
+
+      - name: Stack logs on failure
+        if: failure()
+        working-directory: docker/ldap-auth
+        run: docker compose logs

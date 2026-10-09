@@ -1,0 +1,21 @@
+<div id="audit-view" style="display: none;">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h4 class="mb-0"><i class="bi bi-clipboard-check"></i> Audit Log</h4>
+      <small class="text-muted">Sign-ins and privileged actions, newest first.</small>
+    </div>
+    <button class="btn btn-outline-secondary btn-sm" onclick="loadAuditLog()">
+      <i class="bi bi-arrow-clockwise"></i> Refresh
+    </button>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body p-0" id="audit-results">
+      <p class="text-muted text-center py-4 mb-0">Loading…</p>
+    </div>
+  </div>
+
+  <p class="text-muted small mt-3 mb-0">
+    Entries are appended to <code>audit.log</code> in the data directory and are never edited or deleted by the application.
+  </p>
+</div>

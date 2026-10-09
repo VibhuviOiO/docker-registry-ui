@@ -2,13 +2,19 @@ import os
 import requests
 import logging
 from .base import VulnerabilityScanner
+from ..config import Config
 
 logger = logging.getLogger(__name__)
 
 # Trivy's filesystem cache does not support concurrent scans from multiple
 # processes. Use an advisory file lock so only one Trivy invocation runs at a
 # time across all uvicorn workers.
-TRIVY_LOCK_FILE = os.path.join(os.getenv("DATA_DIR", "/app/data"), ".trivy_scan.lock")
+#
+# The path is resolved per call rather than captured at import, so it follows
+# DATA_DIR the same way every other persisted file does.
+def trivy_lock_file():
+    return os.path.join(Config.DATA_DIR, ".trivy_scan.lock")
+
 
 # fcntl is only available on Unix; on Windows the lock helpers become no-ops.
 try:
@@ -21,8 +27,9 @@ except ImportError:
 def _acquire_trivy_lock():
     if not _HAS_FCNTL:
         return None
-    os.makedirs(os.path.dirname(TRIVY_LOCK_FILE), exist_ok=True)
-    fd = os.open(TRIVY_LOCK_FILE, os.O_CREAT | os.O_RDWR)
+    lock_file = trivy_lock_file()
+    os.makedirs(os.path.dirname(lock_file), exist_ok=True)
+    fd = os.open(lock_file, os.O_CREAT | os.O_RDWR)
     fcntl.flock(fd, fcntl.LOCK_EX)
     return fd
 
@@ -68,6 +75,14 @@ class TrivyScanner(VulnerabilityScanner):
                 "--timeout", "5m",
                 "--quiet",
             ]
+
+            # Only override Trivy's cache when the operator explicitly asked for
+            # it. Passing Config's default unconditionally forced
+            # /root/.cache/trivy even on a local (non-container) run, where that
+            # path is not writable -- which broke scanning outside Docker.
+            cache_dir = os.getenv("TRIVY_CACHE_DIR")
+            if cache_dir:
+                cmd.extend(["--cache-dir", cache_dir])
 
             if remote_server:
                 cmd.extend(["--server", remote_server])
@@ -116,7 +131,19 @@ class TrivyScanner(VulnerabilityScanner):
                 public_msg = public_msg[:200] + "..."
             return {"error": f"Scan failed: {public_msg}"}
         except subprocess.TimeoutExpired:
-            return {"error": "Scan timeout after 5 minutes"}
+            return {"error": "Scan timeout after 5 minutes", "permanent": False}
+        except FileNotFoundError:
+            # Permanent. Retrying cannot help, and the operator needs to know
+            # which of the three supported setups to fix.
+            logger.error("[TRIVY] the trivy executable was not found on PATH")
+            return {
+                "error": (
+                    "The Trivy CLI is not available in this environment. Run the "
+                    "container image (which bundles it), install the Trivy CLI, or "
+                    "set vulnerabilityScan.scannerUrl to a remote Trivy server."
+                ),
+                "permanent": True,
+            }
         except Exception as e:
             logger.error(f"[TRIVY] Exception: {str(e)}")
             return {"error": str(e)}

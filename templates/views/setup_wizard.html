@@ -74,18 +74,37 @@
             </div>
             
             <div id="vuln-fields" style="display: none;">
-              <div class="row">
-                <div class="col-md-6 mb-3">
-                  <label class="form-label">Scanner</label>
-                  <select class="form-select" id="setup-scanner">
-                    <option value="trivy">Trivy</option>
-                    <option value="clair">Clair</option>
-                  </select>
-                </div>
-                <div class="col-md-6 mb-3">
-                  <label class="form-label">Scanner URL</label>
-                  <input type="text" class="form-control" id="setup-scanner-url" placeholder="http://trivy-server:8080">
-                </div>
+              <label class="form-label">Where should Trivy run?</label>
+
+              <div class="form-check mb-2">
+                <input class="form-check-input" type="radio" name="setup-scan-mode"
+                       id="setup-scan-builtin" value="builtin" checked>
+                <label class="form-check-label" for="setup-scan-builtin">
+                  <strong>Inside this container</strong>
+                  <span class="badge bg-secondary">default</span>
+                  <div class="form-text mt-0">
+                    Trivy is bundled here. Nothing else to run, but scans compete with
+                    the UI for this container's CPU.
+                  </div>
+                </label>
+              </div>
+
+              <div class="form-check mb-3">
+                <input class="form-check-input" type="radio" name="setup-scan-mode"
+                       id="setup-scan-remote" value="remote">
+                <label class="form-check-label" for="setup-scan-remote">
+                  <strong>On a separate Trivy server</strong>
+                  <div class="form-text mt-0">
+                    Scans run outside this container, so they scale and update
+                    independently of the UI.
+                  </div>
+                </label>
+              </div>
+
+              <div id="setup-scan-remote-fields" style="display: none;">
+                <label class="form-label" for="setup-scanner-url">Trivy server URL</label>
+                <input type="text" class="form-control" id="setup-scanner-url"
+                       placeholder="http://trivy-server:8080">
               </div>
             </div>
             

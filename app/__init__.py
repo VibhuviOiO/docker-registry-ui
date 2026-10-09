@@ -26,6 +26,12 @@ def create_app():
     app.include_router(api_router, prefix="/api")
     app.include_router(health_router)
 
+    # Optional authentication (LDAP / SSO). A no-op unless AUTH_ENABLED is set,
+    # so existing deployments and every env var above are unaffected.
+    from .auth import install_auth
+
+    install_auth(app)
+
     logger.info(f"Configured {len(Config.REGISTRIES)} registries")
     logger.info(f"Read-only mode: {Config.READ_ONLY}")
 

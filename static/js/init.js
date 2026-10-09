@@ -41,12 +41,20 @@ window.addEventListener('DOMContentLoaded', function() {
             document.getElementById('bulk-operations-view').style.display = view === 'bulk' ? 'block' : 'none';
             document.getElementById('analytics-view').style.display = view === 'analytics' ? 'block' : 'none';
 
+            // Guarded so the view stays optional: it only exists in builds that
+            // ship the audit template.
+            const auditViewEl = document.getElementById('audit-view');
+            if (auditViewEl) auditViewEl.style.display = view === 'audit' ? 'block' : 'none';
+
             
             const setupView = document.getElementById('setup-wizard-view');
             if (setupView) setupView.style.display = 'none';
             
             if (view === 'analytics' && currentRegistry) {
                 loadAnalytics(currentRegistry);
+            }
+            if (view === 'audit') {
+                loadAuditLog();
             }
             if (view === 'bulk' && currentRegistry) {
                 checkBulkOpsEnabled();
@@ -223,6 +231,7 @@ window.addEventListener('DOMContentLoaded', function() {
     initBulkOperations();
     initSetupWizard();
     checkFirstRun();
+    initAuditView();
     
 
     
@@ -350,4 +359,15 @@ window.addEventListener('DOMContentLoaded', function() {
     }
     
 
+});
+
+// Deep links: /#analytics, /#audit, /#cleanup ... open that view on load, so a
+// view can be bookmarked or shared. Registered after the main handler so the
+// navigation listeners already exist.
+window.addEventListener('DOMContentLoaded', function () {
+    const view = (window.location.hash || '').replace(/^#/, '');
+    if (!view) return;
+
+    const link = document.querySelector('[data-view="' + view + '"]');
+    if (link) link.click();
 });

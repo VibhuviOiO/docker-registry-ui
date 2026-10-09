@@ -1,0 +1,11 @@
+# Development and test dependencies (not installed in the runtime image).
+#
+#   python3 -m venv venv
+#   ./venv/bin/pip install -r requirements.txt -r requirements-dev.txt
+#   ./venv/bin/python -m pytest tests -q
+#
+# pytest and httpx are only needed to run the suite.
+pytest==8.3.4
+# starlette 0.35 (pinned by fastapi 0.109) calls httpx.Client(app=...), which
+# httpx removed in 0.28. Do not raise this pin without also moving fastapi.
+httpx==0.27.2

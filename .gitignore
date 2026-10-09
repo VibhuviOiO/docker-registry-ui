@@ -45,3 +45,8 @@ build/
 tmp/
 data/
 trivy-data/
+
+# Scratch and local artefacts (never the system temp area)
+.e2e-tmp/
+.scratch/
+.pytest-tmp/

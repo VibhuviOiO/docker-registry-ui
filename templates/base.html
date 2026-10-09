@@ -12,6 +12,11 @@
 </head>
 <body>
 
+<!-- Notifications stack here, below the navbar, and never overwrite each other. -->
+<div id="toast-container" class="position-fixed end-0 p-3"
+     style="top: 4rem; z-index: 1080; max-width: min(92vw, 30rem);"
+     aria-live="polite" aria-atomic="false"></div>
+
 {% include 'components/navbar.html' %}
 
 <div class="d-flex flex-column" style="min-height: calc(100vh - 36px);">
@@ -40,6 +45,7 @@ const version = "{{ version }}";
 <script src="{{ url_for('static', filename='js/repositories.js') }}"></script>
 <script src="{{ url_for('static', filename='js/bulk-operations.js') }}"></script>
 <script src="{{ url_for('static', filename='js/analytics.js') }}"></script>
+<script src="{{ url_for('static', filename='js/audit.js') }}"></script>
 
 <script src="{{ url_for('static', filename='js/setup.js') }}"></script>
 <script src="{{ url_for('static', filename='js/ui.js') }}"></script>

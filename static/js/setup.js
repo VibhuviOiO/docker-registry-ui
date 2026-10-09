@@ -1,3 +1,16 @@
+// Where Trivy runs. Built-in is the default so a single container is enough to
+// get started; a separate Trivy server is opt-in.
+function scanSettings() {
+    const remote = document.getElementById('setup-scan-remote');
+    if (remote && remote.checked) {
+        return {
+            scanner: 'trivy',
+            scannerUrl: (document.getElementById('setup-scanner-url')?.value || '').trim()
+        };
+    }
+    return { scanner: 'trivy', scannerUrl: 'builtin' };
+}
+
 // Setup wizard module
 function initSetupWizard() {
     const authEnabled = document.getElementById('setup-auth-enabled');
@@ -16,8 +29,17 @@ function initSetupWizard() {
             updateConfigPreview();
         });
     }
+
+    // Reveal the server URL only when the user asks for a remote scanner.
+    document.querySelectorAll('input[name="setup-scan-mode"]').forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            const remote = document.getElementById('setup-scan-remote').checked;
+            document.getElementById('setup-scan-remote-fields').style.display = remote ? 'block' : 'none';
+            updateConfigPreview();
+        });
+    });
     
-    const formInputs = ['setup-name', 'setup-api', 'setup-user', 'setup-password', 'setup-default', 'setup-bulk-ops', 'setup-scanner', 'setup-scanner-url'];
+    const formInputs = ['setup-name', 'setup-api', 'setup-user', 'setup-password', 'setup-default', 'setup-bulk-ops', 'setup-scan-builtin', 'setup-scan-remote', 'setup-scanner-url'];
     formInputs.forEach(id => {
         const el = document.getElementById(id);
         if (el) {
@@ -91,13 +113,14 @@ function createRegistry(e) {
         apiToken: '',
         default: document.getElementById('setup-default').checked,
         bulkOperationsEnabled: document.getElementById('setup-bulk-ops').checked,
-        vulnerabilityScan: {
-            enabled: document.getElementById('setup-vuln-enabled').checked,
-            scanner: document.getElementById('setup-scanner').value,
-            scannerUrl: document.getElementById('setup-scanner-url').value || '',
-            autoScanRules: [],
-            scanLatestOnly: 1
-        }
+        vulnerabilityScan: Object.assign(
+            {
+                enabled: document.getElementById('setup-vuln-enabled').checked,
+                autoScanRules: [],
+                scanLatestOnly: 1
+            },
+            scanSettings()
+        )
     };
     
     fetch('/api/registry/create', {
@@ -226,13 +249,14 @@ function updateConfigPreview() {
         apiToken: '',
         default: document.getElementById('setup-default')?.checked !== false,
         bulkOperationsEnabled: document.getElementById('setup-bulk-ops')?.checked || false,
-        vulnerabilityScan: {
-            enabled: document.getElementById('setup-vuln-enabled')?.checked || false,
-            scanner: document.getElementById('setup-scanner')?.value || 'trivy',
-            scannerUrl: document.getElementById('setup-scanner-url')?.value || '',
-            autoScanRules: [],
-            scanLatestOnly: 1
-        }
+        vulnerabilityScan: Object.assign(
+            {
+                enabled: document.getElementById('setup-vuln-enabled')?.checked || false,
+                autoScanRules: [],
+                scanLatestOnly: 1
+            },
+            scanSettings()
+        )
     };
     
     if (config.isAuthEnabled) {
