@@ -26,8 +26,17 @@ python -m pytest tests -q                    # unit + integration
 
 cd docker/ldap-auth
 docker compose up -d --no-build openldap ldap-bootstrap registry
-cd ../.. && python tests/validate_full_stack.py   # end-to-end, exit 0 = pass
+cd ../..
+
+# End-to-end. It scans a real image with real Trivy, so the Trivy CLI must be on
+# PATH or the run FAILS -- deliberately. Accept the gap explicitly if you have no
+# scanner locally; CI always installs Trivy, so the scan is never skipped there.
+python tests/validate_full_stack.py
+python tests/validate_full_stack.py --allow-no-scanner   # a SKIP, never a pass
 ```
+
+Trivy is only needed for the scanning journey (group `[6]`). Everything else
+runs without it.
 
 ## 2. Write the release notes
 

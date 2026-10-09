@@ -184,7 +184,7 @@ def test_read_only_still_bounds_an_admin(app, monkeypatch):
     manager = app.state.session_manager
     client.cookies.set(manager.cookie_name, manager.issue(User(username="a", role="admin")))
 
-    assert Config.READ_ONLY is True
+    monkeypatch.setattr(Config, "READ_ONLY", True)
     response = client.delete("/api/delete/tag/reg/repo/latest")
     assert response.status_code == 403
     assert response.json()["error"] == "Read-only mode"

@@ -12,6 +12,11 @@
 </head>
 <body>
 
+<!-- Notifications stack here, below the navbar, and never overwrite each other. -->
+<div id="toast-container" class="position-fixed end-0 p-3"
+     style="top: 4rem; z-index: 1080; max-width: min(92vw, 30rem);"
+     aria-live="polite" aria-atomic="false"></div>
+
 {% include 'components/navbar.html' %}
 
 <div class="d-flex flex-column" style="min-height: calc(100vh - 36px);">

@@ -11,18 +11,63 @@ let pendingDelete = null;
 let repoSizeChart = null;
 let repoTagChart = null;
 
-function showAlert(message, type = 'success') {
-    const alert = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>`;
-    document.getElementById('alert-container').innerHTML = alert;
-    setTimeout(() => { document.getElementById('alert-container').innerHTML = ''; }, 5000);
+// Notifications stack in the corner instead of overwriting each other.
+//
+// showAlert used to replace the contents of a single #alert-container and clear
+// it after 5 seconds, so a second message destroyed the first and a scan result
+// or a failed delete could vanish before it was read. showToast keeps its own
+// element per message, and showAlert keeps the old signature -- including
+// accepting HTML, because call sites pass markup like <strong>...</strong>.
+function showToast(message, type = 'success', timeoutMs = 8000) {
+    const host = document.getElementById('toast-container');
+    if (!host) {
+        // Never let a missing container swallow the message.
+        console.warn('toast container missing:', message);
+        return null;
+    }
+
+    const el = document.createElement('div');
+    el.className = `alert alert-${type} alert-dismissible fade show shadow-sm mb-2`;
+    // Errors are interruptive; everything else is informational.
+    el.setAttribute('role', type === 'danger' ? 'alert' : 'status');
+    el.innerHTML = `${message}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>`;
+    host.appendChild(el);
+
+    setTimeout(() => {
+        if (!el.parentNode) return;
+        el.classList.remove('show');
+        setTimeout(() => el.remove(), 300);
+    }, timeoutMs);
+
+    return el;
 }
 
-function showLoading(elementId) {
+function showAlert(message, type = 'success') {
+    // Give errors longer: they usually need reading or acting on.
+    showToast(message, type, type === 'danger' ? 15000 : 8000);
+}
+
+function showLoading(elementId, message = 'Loading…') {
     const el = document.getElementById(elementId);
-    el.innerHTML = '<div class="text-center p-4"><div class="spinner-border text-primary" role="status"></div></div>';
+    if (!el) return;
+    el.innerHTML = `<div class="text-center text-muted p-4">
+        <div class="spinner-border spinner-border-sm text-primary mb-2" role="status"></div>
+        <div class="small">${message}</div>
+    </div>`;
+}
+
+function showEmptyState(elementId, message) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+    el.innerHTML = `<p class="text-muted text-center py-4 mb-0">${message}</p>`;
+}
+
+function showErrorState(elementId, message) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+    el.innerHTML = `<p class="text-danger text-center py-4 mb-0">
+        <i class="bi bi-exclamation-triangle"></i> ${message}
+    </p>`;
 }
 
 function formatSize(bytes) {

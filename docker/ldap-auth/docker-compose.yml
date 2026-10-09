@@ -145,14 +145,14 @@ services:
             "name": "Local Registry",
             "api": "http://registry:5000",
             "vulnerabilityScan": {
-              "enabled": false,
+              "enabled": true,
               "scanner": "trivy",
               "scannerUrl": "builtin"
             }
           }
         ]
     volumes:
-      - ui-data:/app/data
+      - ./data:/app/data
     depends_on:
       registry:
         condition: service_healthy

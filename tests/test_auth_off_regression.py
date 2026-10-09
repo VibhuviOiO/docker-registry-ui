@@ -65,15 +65,16 @@ def test_existing_endpoints_unchanged():
     assert client.get("/static/js/core.js").status_code == 200
 
 
-def test_delete_still_gated_by_read_only_not_by_auth():
-    """READ_ONLY keeps its default of true, exactly as before.
+def test_delete_is_gated_by_read_only_not_by_auth(monkeypatch):
+    """With READ_ONLY on, the refusal must come from read-only mode.
 
-    The rejection must come from read-only mode, not from an authentication
-    layer that did not exist before.
+    Not from an authentication layer that does not exist while auth is off.
+    READ_ONLY is set explicitly rather than taken from its default: relying on
+    the default is exactly how the code and the documentation drifted apart.
     """
     from app.config import Config
 
-    assert Config.READ_ONLY is True
+    monkeypatch.setattr(Config, "READ_ONLY", True)
 
     _, client = _client()
     response = client.delete("/api/delete/tag/reg/repo/latest")

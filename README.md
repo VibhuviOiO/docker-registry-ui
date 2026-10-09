@@ -84,15 +84,20 @@ docker run -d --name registry-ui --network registry-net -p 5000:5000 \
 
 | Variable | Default | Description |
 |---|---|---|
-| `CONFIG_FILE` | `/app/registries.config.json` | Path to registries configuration file |
-| `DATA_DIR` | `/app/data` | Directory where scan results and scan job state are persisted |
+| `CONFIG_FILE` | `<DATA_DIR>/registries.config.json` | Path to registries configuration file |
+| `DATA_DIR` | `/app/data` | Directory where the registries configuration, scan results and scan job state are persisted |
 | `TRIVY_CACHE_DIR` | `/root/.cache/trivy` | Directory where the built-in Trivy scanner stores its vulnerability database |
-| `READ_ONLY` | `false` | Disable delete operations |
+| `READ_ONLY` | `false` | Disable delete operations (deleting tags and repositories, bulk cleanup). Set `true` when exposing the UI publicly |
 | `LOG_LEVEL` | `WARNING` | Logging verbosity (`DEBUG`, `INFO`, `WARNING`, `ERROR`) |
 | `UVICORN_WORKERS` | `4` | Number of Uvicorn worker processes |
-| `SCAN_WORKERS` | `2` | Maximum concurrent background scan workers |
+| `SCAN_WORKERS` | `2` | Concurrent background scans per Uvicorn worker |
 | `SCAN_RETRIES` | `3` | Retry attempts for transient scan failures |
 | `SCAN_RETRY_DELAY` | `2` | Base delay in seconds between scan retries |
+
+The registries configuration now lives inside `DATA_DIR`, so the single volume in
+the quick start below persists the setup wizard's configuration across restarts.
+An existing deployment that mounts `/app/registries.config.json` keeps working —
+that path is still read when it is present — or set `CONFIG_FILE` explicitly.
 
 Access at `http://localhost:5000` - Setup wizard will guide you.
 
@@ -243,7 +248,22 @@ python run.py
 # Or: uvicorn asgi:app --host 0.0.0.0 --port 5000
 ```
 
-Note: The Docker development environment includes the `trivy` binary for vulnerability scanning. For local Python development, install `trivy` CLI separately.
+Vulnerability scanning needs a scanner. Pick one:
+
+| Setup | Command |
+|---|---|
+| Container image (bundles Trivy) | `docker run -v $(pwd)/data:/app/data vibhuvioio/docker-registry-ui:latest` |
+| Remote Trivy server | set `vulnerabilityScan.scannerUrl` — see [`docker/remote-trivy`](docker/remote-trivy/docker-compose.yml) |
+| Local Python | install the Trivy CLI, or scanning will fail |
+
+Running from source without Trivy is detected, not guessed: the scan fails
+immediately and `GET /api/scanner-status/<registry>` reports why.
+
+```bash
+curl -s localhost:5000/api/scanner-status/Local%20Registry
+# {"enabled":true,"scanner":"trivy","scannerUrl":"builtin","available":false,
+#  "reason":"The Trivy CLI is not available in this environment. ..."}
+```
 
 ## 📖 Documentation
 

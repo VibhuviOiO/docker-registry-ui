@@ -161,13 +161,16 @@ def sign_in(client, idp, groups, username="alice"):
     return response
 
 
-def test_group_membership_grants_admin_through_the_flow(client, idp):
+def test_group_membership_grants_admin_through_the_flow(client, idp, monkeypatch):
     """An admin from the groups claim passes RBAC.
 
-    READ_ONLY still defaults to true, so the request is stopped by read-only
-    mode rather than by RBAC -- a viewer would get "Administrator role required"
+    READ_ONLY is turned on explicitly so the request is stopped by read-only mode
+    rather than by RBAC -- a viewer would get "Administrator role required"
     instead, which is what distinguishes the two layers.
     """
+    from app.config import Config
+
+    monkeypatch.setattr(Config, "READ_ONLY", True)
     sign_in(client, idp, ["registry-admins"])
 
     response = client.delete("/api/delete/tag/nope/repo/latest")

@@ -311,32 +311,68 @@ def api_update_registry_config(data: dict = Body(...)):
         return JSONResponse({"success": False, "error": "Failed to update registry"}, status_code=500)
 
 
+def _scanner_unavailable_message(scanner_type, scanner_url):
+    """Name the setup that is missing, not merely that something failed."""
+    if scanner_url and scanner_url not in ("builtin", ""):
+        return (
+            f"The {scanner_type} server at {scanner_url} is not reachable. Check that it "
+            "is running and that vulnerabilityScan.scannerUrl is correct."
+        )
+    if scanner_type == "trivy":
+        return (
+            "The Trivy CLI is not available in this environment. Run the container image "
+            "(which bundles it), install the Trivy CLI, or set "
+            "vulnerabilityScan.scannerUrl to a remote Trivy server."
+        )
+    return f"The {scanner_type} scanner is not available in this environment."
+
+
 def _run_scan_job(job_id, registry, repo, tag):
-    """Background scan worker with retry for transient registry contention."""
+    """Background scan worker.
+
+    Retries are for transient registry contention only. A scanner that is not
+    installed, or any error the scanner marks permanent, fails immediately
+    instead of burning the retry budget on something that cannot succeed.
+    """
     update_scan_job(job_id, status="in_progress")
     try:
-        from .scanners.trivy import TrivyScanner
+        from .scanners.factory import get_scanner
 
-        scanner = TrivyScanner("builtin", 300)
+        vuln_config = registry.get("vulnerabilityScan") or {}
+        scanner_type = vuln_config.get("scanner", "trivy")
+        scanner_url = vuln_config.get("scannerUrl") or "builtin"
+
+        # Honour the registry's configured scanner. This was hardcoded to the
+        # built-in Trivy binary, so a configured remote Trivy server was silently
+        # ignored for single-image scans.
+        scanner = get_scanner(scanner_type, scanner_url)
         registry_url = registry["api"]
+
+        if not scanner.health_check():
+            message = _scanner_unavailable_message(scanner_type, scanner_url)
+            logger.error(f"[Scan {job_id}] {message}")
+            update_scan_job(job_id, status="failed", error=message)
+            return
+
         result = None
-        last_error = None
+        attempts = 0
 
         for attempt in range(1, SCAN_RETRIES + 1):
+            attempts = attempt
             logger.info(f"[Scan {job_id}] Scanning {registry_url}/{repo}:{tag} (attempt {attempt}/{SCAN_RETRIES})")
             result = scanner.scan_image(registry_url, repo, tag)
 
-            if isinstance(result, dict) and result.get("error"):
-                last_error = result["error"]
-                logger.warning(f"[Scan {job_id}] Attempt {attempt} failed: {last_error}")
-                if attempt < SCAN_RETRIES:
-                    time.sleep(SCAN_RETRY_DELAY * attempt)
-                    continue
-            else:
+            if not (isinstance(result, dict) and result.get("error")):
                 break
 
+            logger.warning(f"[Scan {job_id}] Attempt {attempt} failed: {result['error']}")
+            if result.get("permanent"):
+                break
+            if attempt < SCAN_RETRIES:
+                time.sleep(SCAN_RETRY_DELAY * attempt)
+
         if isinstance(result, dict) and result.get("error"):
-            logger.error(f"[Scan {job_id}] Failed after {SCAN_RETRIES} attempts: {result['error']}")
+            logger.error(f"[Scan {job_id}] Failed after {attempts} attempt(s): {result['error']}")
             update_scan_job(job_id, status="failed", error=result["error"])
         else:
             logger.info(f"[Scan {job_id}] Completed")
@@ -347,6 +383,35 @@ def _run_scan_job(job_id, registry, repo, tag):
         update_scan_job(job_id, status="failed", error=str(e))
 
 
+@api_router.get("/scanner-status/{registry_name}")
+def api_scanner_status(registry_name: str):
+    """Whether the configured scanner is usable, so this can be reported up front."""
+    registry = get_registry_by_name(registry_name)
+    if not registry:
+        return JSONResponse({"error": "Registry not found"}, status_code=404)
+
+    vuln_config = registry.get("vulnerabilityScan") or {}
+    scanner_type = vuln_config.get("scanner", "trivy")
+    scanner_url = vuln_config.get("scannerUrl") or "builtin"
+
+    try:
+        from .scanners.factory import get_scanner
+
+        available = bool(get_scanner(scanner_type, scanner_url).health_check())
+        reason = None if available else _scanner_unavailable_message(scanner_type, scanner_url)
+    except Exception as e:
+        available = False
+        reason = str(e)
+
+    return {
+        "enabled": bool(vuln_config.get("enabled")),
+        "scanner": scanner_type,
+        "scannerUrl": scanner_url,
+        "available": available,
+        "reason": reason,
+    }
+
+
 @api_router.get("/scan/{registry_name}/{repo:path}/{tag}")
 def api_scan_image(registry_name: str, repo: str, tag: str, background_tasks: BackgroundTasks):
     """Queue an async vulnerability scan"""
@@ -355,7 +420,10 @@ def api_scan_image(registry_name: str, repo: str, tag: str, background_tasks: Ba
         return JSONResponse({"error": "Registry not found"}, status_code=404)
 
     job_id = create_scan_job(registry_name, repo, tag)
-    background_tasks.add_task(_run_scan_job, job_id, registry, repo, tag)
+    # Queued onto the bounded pool so SCAN_WORKERS actually limits concurrency.
+    # Starlette's background thread pool is far larger, which made the documented
+    # knob a no-op.
+    background_tasks.add_task(scan_executor.submit, _run_scan_job, job_id, registry, repo, tag)
 
     logger.info(f"Queued scan job {job_id} for {registry_name}/{repo}:{tag}")
     return {"scanId": job_id, "status": "queued"}
