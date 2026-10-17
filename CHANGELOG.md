@@ -7,6 +7,26 @@ tag that has no section — so write the notes before tagging.
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Registry V2 Bearer authentication through `WWW-Authenticate`, including
+  anonymous token exchange, username/password credentials, and a single retry
+  with the issued token. Existing Basic and fixed-token configurations remain
+  supported.
+- Per-registry `allowHttp` and `skipTlsVerify` options in the setup wizard,
+  Add Registry form, and JSON configuration. Both default to `false`.
+
+### Fixed
+
+- Registry connection tests use the same authentication and TLS settings as
+  repository operations.
+- Bearer challenge parsing preserves quoted scopes containing commas and
+  accepts whitespace around parameter assignments.
+- Token requests resolve proxy settings for their own address, respecting
+  `NO_PROXY` independently of the registry address.
+
 ## [2.2.0] - Unreleased
 
 ### Added

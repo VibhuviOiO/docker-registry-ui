@@ -1,6 +1,7 @@
 import os
 import logging
 import requests
+from requests.auth import AuthBase
 import time
 from datetime import datetime, timedelta
 from concurrent.futures import ThreadPoolExecutor
@@ -18,6 +19,7 @@ from .registry import (
     format_size, fetch_repositories, fetch_repository_tags,
     fetch_tag_details, delete_tag, delete_repository, get_auth
 )
+from .registry_auth import registry_request_options
 
 logger = logging.getLogger(__name__)
 
@@ -93,6 +95,8 @@ def api_registries():
                 "api": reg["api"],
                 "url": reg.get("api", "").replace("http://", "").replace("https://", ""),
                 "isAuthEnabled": reg.get("isAuthEnabled", False),
+                "allowHttp": reg.get("allowHttp") is True,
+                "skipTlsVerify": reg.get("skipTlsVerify") is True,
                 "default": reg.get("default", False),
                 "bulkOperationsEnabled": reg.get("bulkOperationsEnabled", False),
                 "vulnerabilityScan": {
@@ -456,12 +460,14 @@ def api_test_registry(data: dict = Body(...)):
         return JSONResponse({"success": False, "error": "API URL required"}, status_code=400)
 
     try:
-        auth = None
-        if data.get("isAuthEnabled"):
-            from requests.auth import HTTPBasicAuth
-            auth = HTTPBasicAuth(data.get("user"), data.get("password"))
-
-        response = requests.get(f"{api}/v2/_catalog", auth=auth, timeout=5)
+        auth = get_auth(data)
+        response = requests.get(
+            f"{api}/v2/_catalog",
+            headers=auth if isinstance(auth, dict) else {},
+            auth=auth if isinstance(auth, AuthBase) else None,
+            timeout=5,
+            **registry_request_options(auth),
+        )
 
         if response.status_code == 200:
             return {"success": True}

@@ -124,6 +124,9 @@ def update_registry_config(registry_name, config):
     """Update registry configuration"""
     for reg in Config.REGISTRIES:
         if reg["name"] == registry_name:
+            for key in ("allowHttp", "skipTlsVerify"):
+                if key in config:
+                    reg[key] = config[key] is True
             reg["bulkOperationsEnabled"] = config.get("bulkOperationsEnabled", False)
             if "vulnerabilityScan" in config:
                 if "vulnerabilityScan" not in reg:

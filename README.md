@@ -101,6 +101,67 @@ that path is still read when it is present — or set `CONFIG_FILE` explicitly.
 
 Access at `http://localhost:5000` - Setup wizard will guide you.
 
+### Registry authentication
+
+Registry credentials authenticate the UI to the image registry. They are
+separate from the optional LDAP/OIDC authentication used to sign in to the UI.
+
+For registries using Basic authentication or Registry V2 Bearer challenges
+(such as Harbor), enable authentication in the setup wizard or Add Registry
+form and enter the registry username and password. When the registry returns
+`401` with a Bearer `WWW-Authenticate` challenge, the UI requests a token from
+the advertised `realm`, passes its `service` and `scope`, and retries the
+original request once. Both `token` and `access_token` responses are supported.
+Registries without configured credentials can use anonymous token exchange.
+
+For file-based configuration, this array can be saved in
+`registries.config.json` or supplied through `REGISTRIES`:
+
+```json
+[
+  {
+    "name": "Harbor",
+    "api": "https://harbor.example.com",
+    "auth": {
+      "type": "basic",
+      "username": "registry-user",
+      "password": "replace-with-registry-password"
+    },
+    "allowHttp": false,
+    "skipTlsVerify": false
+  }
+]
+```
+
+`auth.type` can be `basic` (username/password with Bearer challenge support),
+`bearer` (a fixed token in `auth.token`), or `none` (anonymous access). The
+existing `isAuthEnabled` with `user`/`password` or `apiToken` configuration is
+also supported when `auth.type` is not set. Fixed tokens are sent as supplied;
+they are not automatically exchanged or refreshed.
+
+The registry must expose `/v2/_catalog` for repository discovery. Bearer
+authentication alone does not add Docker Hub or GHCR repository-list support.
+
+### Registry connection options
+
+The setup wizard and Add Registry form expose these per-registry Boolean
+options. Both default to `false` and can also be set in the configuration above:
+
+| Option | Effect when `true` |
+|---|---|
+| `allowHttp` | Allow an HTTP Bearer token service and cross-host credential delegation from an HTTP registry |
+| `skipTlsVerify` | Skip certificate verification for this registry's API and token service |
+
+Existing HTTP registry API connections remain supported independently of
+`allowHttp`. `skipTlsVerify` does not change Trivy's TLS settings. These options
+allow credentials or tokens to be intercepted on untrusted networks. Token
+service redirects remain disabled.
+
+These settings apply to repository/tag browsing, manifest and config retrieval,
+deletion, and the connection test. Token requests resolve `HTTP_PROXY`,
+`HTTPS_PROXY`, and `NO_PROXY` for the token service's own address. A registry
+redirect to a different origin cannot trigger another credential exchange.
+
 ## 🔐 Authentication (optional)
 
 Authentication is **opt-in and off by default**. With `AUTH_ENABLED` unset the UI
