@@ -74,5 +74,5 @@ LDAP_ADMIN_GROUP=registry-admins \
 DATA_DIR="$DATA" \
 READ_ONLY=false \
 LOG_LEVEL=INFO \
-REGISTRIES='[{"name":"Local Registry","api":"http://127.0.0.1:5007"}]' \
+REGISTRIES='[{"name":"Local Registry","api":"http://127.0.0.1:5007","auth":{"type":"none"},"allowHttp":false,"skipTlsVerify":false}]' \
 exec "$PY" -m uvicorn asgi:app --host 127.0.0.1 --port "$PORT" --reload

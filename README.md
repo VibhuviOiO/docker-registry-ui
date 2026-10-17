@@ -66,7 +66,7 @@ docker network create registry-net
 docker run -d --name test-registry --network registry-net -p 5001:5000 \
   -e REGISTRY_STORAGE_DELETE_ENABLED=true registry:2
 docker run -d --name registry-ui --network registry-net -p 5000:5000 \
-  -e 'REGISTRIES=[{"name":"Local Registry","api":"http://test-registry:5000","vulnerabilityScan":{"enabled":true,"scanner":"trivy","scannerUrl":"builtin"}}]' \
+  -e 'REGISTRIES=[{"name":"Local Registry","api":"http://test-registry:5000","auth":{"type":"none"},"allowHttp":false,"skipTlsVerify":false,"vulnerabilityScan":{"enabled":true,"scanner":"trivy","scannerUrl":"builtin"}}]' \
   -v $(pwd)/data:/app/data \
   -v $(pwd)/trivy-data:/root/.cache/trivy \
   vibhuvioio/docker-registry-ui:latest
@@ -75,6 +75,9 @@ docker run -d --name registry-ui --network registry-net -p 5000:5000 \
 > **Tip:** Mount `/root/.cache/trivy` to persist the Trivy vulnerability database across container restarts.
 
 ### Single-Registry Compose Examples
+
+See [`docker/README.md`](docker/README.md) for authentication and HTTP/TLS
+settings shared by all examples.
 
 - [`docker/remote-trivy`](docker/remote-trivy/docker-compose.yml) — recommended; uses a dedicated Trivy server for concurrent scans
 - [`docker/built-in-trivy`](docker/built-in-trivy/docker-compose.yml) — uses the Trivy binary inside the UI container
@@ -145,7 +148,10 @@ authentication alone does not add Docker Hub or GHCR repository-list support.
 ### Registry connection options
 
 The setup wizard and Add Registry form expose these per-registry Boolean
-options. Both default to `false` and can also be set in the configuration above:
+options. Both default to `false` and can also be set in the configuration above.
+The Docker examples specify them explicitly; see
+[`docker/README.md`](docker/README.md) for examples that enable HTTP token
+services or disable certificate verification:
 
 | Option | Effect when `true` |
 |---|---|
