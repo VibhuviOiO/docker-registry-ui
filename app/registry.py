@@ -1,32 +1,37 @@
 import requests
-from requests.auth import HTTPBasicAuth
+from requests.auth import AuthBase
 from .config import Config
+from .registry_auth import RegistryAuth, RegistryHeaders, registry_request_options
 
 def get_auth(registry):
     """Get authentication for registry"""
     auth_config = registry.get("auth", {})
-    auth_type = auth_config.get("type", "none")
+    auth_type = auth_config.get("type")
+    options = {
+        "allow_http": registry.get("allowHttp") is True,
+        "skip_tls_verify": registry.get("skipTlsVerify") is True,
+    }
     
     if auth_type == "none":
-        return None
+        return RegistryAuth(**options)
     elif auth_type == "basic":
         username = auth_config.get("username")
         password = auth_config.get("password")
         if username and password:
-            return HTTPBasicAuth(username, password)
+            return RegistryAuth(username, password, **options)
     elif auth_type == "bearer":
         token = auth_config.get("token")
         if token:
-            return {"Authorization": f"Bearer {token}"}
+            return RegistryHeaders({"Authorization": f"Bearer {token}"}, options["skip_tls_verify"])
     
     # Fallback to old format for backward compatibility
     if registry.get("isAuthEnabled"):
         if registry.get("apiToken"):
-            return {"Authorization": f"Bearer {registry['apiToken']}"}
+            return RegistryHeaders({"Authorization": f"Bearer {registry['apiToken']}"}, options["skip_tls_verify"])
         elif registry.get("user") and registry.get("password"):
-            return HTTPBasicAuth(registry["user"], registry["password"])
+            return RegistryAuth(registry["user"], registry["password"], **options)
     
-    return None
+    return RegistryAuth(**options)
 
 def format_size(bytes):
     for unit in ['B', 'KB', 'MB', 'GB', 'TB']:
@@ -39,13 +44,14 @@ def fetch_repositories(registry_api, auth=None):
     """Fetch repository list only (lightweight)"""
     try:
         headers = auth if isinstance(auth, dict) else {}
-        auth_obj = auth if isinstance(auth, HTTPBasicAuth) else None
+        auth_obj = auth if isinstance(auth, AuthBase) else None
         
         r = requests.get(
             f"{registry_api}/v2/_catalog",
             headers=headers,
             auth=auth_obj,
-            timeout=Config.TIMEOUT
+            timeout=Config.TIMEOUT,
+            **registry_request_options(auth)
         )
         
         if r.status_code == 200:
@@ -60,13 +66,14 @@ def fetch_repository_tags(registry_api, repo, auth=None):
     """Fetch tags for a specific repository (on-demand)"""
     try:
         headers = auth if isinstance(auth, dict) else {}
-        auth_obj = auth if isinstance(auth, HTTPBasicAuth) else None
+        auth_obj = auth if isinstance(auth, AuthBase) else None
         
         r = requests.get(
             f"{registry_api}/v2/{repo}/tags/list",
             headers=headers,
             auth=auth_obj,
-            timeout=Config.TIMEOUT
+            timeout=Config.TIMEOUT,
+            **registry_request_options(auth)
         )
         
         if r.status_code != 200:
@@ -80,7 +87,7 @@ def fetch_repository_tags(registry_api, repo, auth=None):
 def fetch_tag_details(registry_api, repo, tag, auth=None):
     """Fetch details for a specific tag (on-demand)"""
     try:
-        auth_obj = auth if isinstance(auth, HTTPBasicAuth) else None
+        auth_obj = auth if isinstance(auth, AuthBase) else None
         
         # Try multiple manifest formats (order matters - try most common first)
         manifest_formats = [
@@ -99,7 +106,8 @@ def fetch_tag_details(registry_api, repo, tag, auth=None):
                 f"{registry_api}/v2/{repo}/manifests/{tag}",
                 headers=headers,
                 auth=auth_obj,
-                timeout=Config.TIMEOUT
+                timeout=Config.TIMEOUT,
+                **registry_request_options(auth)
             )
             
             if r.status_code != 200:
@@ -124,7 +132,8 @@ def fetch_tag_details(registry_api, repo, tag, auth=None):
                         f"{registry_api}/v2/{repo}/manifests/{manifest_digest}",
                         headers=headers2,
                         auth=auth_obj,
-                        timeout=Config.TIMEOUT
+                        timeout=Config.TIMEOUT,
+                        **registry_request_options(auth)
                     )
                     
                     if r2.status_code == 200:
@@ -141,7 +150,8 @@ def fetch_tag_details(registry_api, repo, tag, auth=None):
                                 f"{registry_api}/v2/{repo}/blobs/{config_digest}",
                                 headers=headers2,
                                 auth=auth_obj,
-                                timeout=Config.TIMEOUT
+                                timeout=Config.TIMEOUT,
+                                **registry_request_options(auth)
                             )
                             if config_r.status_code == 200:
                                 config = config_r.json()
@@ -167,7 +177,8 @@ def fetch_tag_details(registry_api, repo, tag, auth=None):
                         f"{registry_api}/v2/{repo}/blobs/{config_digest}",
                         headers=headers,
                         auth=auth_obj,
-                        timeout=Config.TIMEOUT
+                        timeout=Config.TIMEOUT,
+                        **registry_request_options(auth)
                     )
                     if config_r.status_code == 200:
                         config = config_r.json()
@@ -183,7 +194,7 @@ def fetch_tag_details(registry_api, repo, tag, auth=None):
 def delete_tag(registry_api, repo, tag, auth=None):
     """Delete a specific tag"""
     try:
-        auth_obj = auth if isinstance(auth, HTTPBasicAuth) else None
+        auth_obj = auth if isinstance(auth, AuthBase) else None
         digest = None
         
         # Try multiple accept headers to get digest.
@@ -211,7 +222,8 @@ def delete_tag(registry_api, repo, tag, auth=None):
                 f"{registry_api}/v2/{repo}/manifests/{tag}",
                 headers=headers,
                 auth=auth_obj,
-                timeout=Config.TIMEOUT
+                timeout=Config.TIMEOUT,
+                **registry_request_options(auth)
             )
             
             if manifest_r.status_code == 200:
@@ -231,7 +243,8 @@ def delete_tag(registry_api, repo, tag, auth=None):
             f"{registry_api}/v2/{repo}/manifests/{digest}",
             headers=delete_headers,
             auth=auth_obj,
-            timeout=Config.TIMEOUT
+            timeout=Config.TIMEOUT,
+            **registry_request_options(auth)
         )
         
         if delete_r.status_code in [200, 202]:

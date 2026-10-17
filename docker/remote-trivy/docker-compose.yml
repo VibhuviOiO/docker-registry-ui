@@ -47,6 +47,9 @@ services:
           {
             "name": "Local Registry",
             "api": "http://registry:5000",
+            "auth": {"type": "none"},
+            "allowHttp": false,
+            "skipTlsVerify": false,
             "vulnerabilityScan": {
               "enabled": true,
               "scanner": "trivy",

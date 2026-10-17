@@ -39,7 +39,7 @@ function initSetupWizard() {
         });
     });
     
-    const formInputs = ['setup-name', 'setup-api', 'setup-user', 'setup-password', 'setup-default', 'setup-bulk-ops', 'setup-scan-builtin', 'setup-scan-remote', 'setup-scanner-url'];
+    const formInputs = ['setup-name', 'setup-api', 'setup-user', 'setup-password', 'setup-default', 'setup-bulk-ops', 'setup-scan-builtin', 'setup-scan-remote', 'setup-scanner-url', 'setup-allow-http', 'setup-skip-tls-verify'];
     formInputs.forEach(id => {
         const el = document.getElementById(id);
         if (el) {
@@ -79,6 +79,8 @@ function testRegistryConnection() {
         body: JSON.stringify({
             api: api,
             isAuthEnabled: document.getElementById('setup-auth-enabled').checked,
+            allowHttp: document.getElementById('setup-allow-http').checked,
+            skipTlsVerify: document.getElementById('setup-skip-tls-verify').checked,
             user: document.getElementById('setup-user').value,
             password: document.getElementById('setup-password').value
         })
@@ -108,6 +110,8 @@ function createRegistry(e) {
         name: document.getElementById('setup-name').value,
         api: document.getElementById('setup-api').value,
         isAuthEnabled: document.getElementById('setup-auth-enabled').checked,
+        allowHttp: document.getElementById('setup-allow-http').checked,
+        skipTlsVerify: document.getElementById('setup-skip-tls-verify').checked,
         user: document.getElementById('setup-user').value || '',
         password: document.getElementById('setup-password').value || '',
         apiToken: '',
@@ -244,6 +248,8 @@ function updateConfigPreview() {
         name: document.getElementById('setup-name')?.value || 'Your Registry Name',
         api: document.getElementById('setup-api')?.value || 'http://registry.example.com:5000',
         isAuthEnabled: document.getElementById('setup-auth-enabled')?.checked || false,
+        allowHttp: document.getElementById('setup-allow-http')?.checked || false,
+        skipTlsVerify: document.getElementById('setup-skip-tls-verify')?.checked || false,
         user: '',
         password: '',
         apiToken: '',

@@ -291,6 +291,8 @@ window.addEventListener('DOMContentLoaded', function() {
                 body: JSON.stringify({
                     api: api,
                     isAuthEnabled: document.getElementById('inline-auth').checked,
+                    allowHttp: document.getElementById('inline-allow-http').checked,
+                    skipTlsVerify: document.getElementById('inline-skip-tls-verify').checked,
                     user: document.getElementById('inline-user').value,
                     password: document.getElementById('inline-password').value
                 })
@@ -324,6 +326,8 @@ window.addEventListener('DOMContentLoaded', function() {
                 api: document.getElementById('inline-api').value,
                 url: document.getElementById('inline-url').value || '',
                 isAuthEnabled: document.getElementById('inline-auth').checked,
+                allowHttp: document.getElementById('inline-allow-http').checked,
+                skipTlsVerify: document.getElementById('inline-skip-tls-verify').checked,
                 user: document.getElementById('inline-user').value || '',
                 password: document.getElementById('inline-password').value || '',
                 apiToken: '',

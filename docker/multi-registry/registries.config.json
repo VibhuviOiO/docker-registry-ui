@@ -3,6 +3,11 @@
     {
       "name": "Registry 1",
       "api": "http://registry-1:5000",
+      "auth": {
+        "type": "none"
+      },
+      "allowHttp": false,
+      "skipTlsVerify": false,
       "vulnerabilityScan": {
         "enabled": true,
         "scanner": "trivy",
@@ -12,6 +17,11 @@
     {
       "name": "Registry 2",
       "api": "http://registry-2:5000",
+      "auth": {
+        "type": "none"
+      },
+      "allowHttp": false,
+      "skipTlsVerify": false,
       "vulnerabilityScan": {
         "enabled": true,
         "scanner": "trivy",
