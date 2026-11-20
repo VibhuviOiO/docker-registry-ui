@@ -27,6 +27,22 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Token requests resolve proxy settings for their own address, respecting
   `NO_PROXY` independently of the registry address.
 
+## [2.3.0] - 2026-11-20
+
+### Added
+
+- Registry V2 Bearer authentication: a `401` with a `WWW-Authenticate: Bearer`
+  challenge is answered by exchanging credentials at the advertised token
+  service and retrying once. Harbor-style registries work without pasting an
+  expiring token.
+- Per-registry `allowHttp` and `skipTlsVerify`, both default `false`, exposed in
+  the setup wizard and Add Registry form.
+
+### Fixed
+
+- Connection tests and repository, tag and delete operations against registries
+  that require a Bearer token no longer fail with `401`.
+
 ## [2.2.0] - Unreleased
 
 ### Added
