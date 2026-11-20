@@ -66,7 +66,7 @@ docker network create registry-net
 docker run -d --name test-registry --network registry-net -p 5001:5000 \
   -e REGISTRY_STORAGE_DELETE_ENABLED=true registry:2
 docker run -d --name registry-ui --network registry-net -p 5000:5000 \
-  -e 'REGISTRIES=[{"name":"Local Registry","api":"http://test-registry:5000","vulnerabilityScan":{"enabled":true,"scanner":"trivy","scannerUrl":"builtin"}}]' \
+  -e 'REGISTRIES=[{"name":"Local Registry","api":"http://test-registry:5000","auth":{"type":"none"},"allowHttp":false,"skipTlsVerify":false,"vulnerabilityScan":{"enabled":true,"scanner":"trivy","scannerUrl":"builtin"}}]' \
   -v $(pwd)/data:/app/data \
   -v $(pwd)/trivy-data:/root/.cache/trivy \
   vibhuvioio/docker-registry-ui:latest
@@ -75,6 +75,9 @@ docker run -d --name registry-ui --network registry-net -p 5000:5000 \
 > **Tip:** Mount `/root/.cache/trivy` to persist the Trivy vulnerability database across container restarts.
 
 ### Single-Registry Compose Examples
+
+See [`docker/README.md`](docker/README.md) for authentication and HTTP/TLS
+settings shared by all examples.
 
 - [`docker/remote-trivy`](docker/remote-trivy/docker-compose.yml) — recommended; uses a dedicated Trivy server for concurrent scans
 - [`docker/built-in-trivy`](docker/built-in-trivy/docker-compose.yml) — uses the Trivy binary inside the UI container
@@ -100,6 +103,70 @@ An existing deployment that mounts `/app/registries.config.json` keeps working �
 that path is still read when it is present — or set `CONFIG_FILE` explicitly.
 
 Access at `http://localhost:5000` - Setup wizard will guide you.
+
+### Registry authentication
+
+Registry credentials authenticate the UI to the image registry. They are
+separate from the optional LDAP/OIDC authentication used to sign in to the UI.
+
+For registries using Basic authentication or Registry V2 Bearer challenges
+(such as Harbor), enable authentication in the setup wizard or Add Registry
+form and enter the registry username and password. When the registry returns
+`401` with a Bearer `WWW-Authenticate` challenge, the UI requests a token from
+the advertised `realm`, passes its `service` and `scope`, and retries the
+original request once. Both `token` and `access_token` responses are supported.
+Registries without configured credentials can use anonymous token exchange.
+
+For file-based configuration, this array can be saved in
+`registries.config.json` or supplied through `REGISTRIES`:
+
+```json
+[
+  {
+    "name": "Harbor",
+    "api": "https://harbor.example.com",
+    "auth": {
+      "type": "basic",
+      "username": "registry-user",
+      "password": "replace-with-registry-password"
+    },
+    "allowHttp": false,
+    "skipTlsVerify": false
+  }
+]
+```
+
+`auth.type` can be `basic` (username/password with Bearer challenge support),
+`bearer` (a fixed token in `auth.token`), or `none` (anonymous access). The
+existing `isAuthEnabled` with `user`/`password` or `apiToken` configuration is
+also supported when `auth.type` is not set. Fixed tokens are sent as supplied;
+they are not automatically exchanged or refreshed.
+
+The registry must expose `/v2/_catalog` for repository discovery. Bearer
+authentication alone does not add Docker Hub or GHCR repository-list support.
+
+### Registry connection options
+
+The setup wizard and Add Registry form expose these per-registry Boolean
+options. Both default to `false` and can also be set in the configuration above.
+The Docker examples specify them explicitly; see
+[`docker/README.md`](docker/README.md) for examples that enable HTTP token
+services or disable certificate verification:
+
+| Option | Effect when `true` |
+|---|---|
+| `allowHttp` | Allow an HTTP Bearer token service and cross-host credential delegation from an HTTP registry |
+| `skipTlsVerify` | Skip certificate verification for this registry's API and token service |
+
+Existing HTTP registry API connections remain supported independently of
+`allowHttp`. `skipTlsVerify` does not change Trivy's TLS settings. These options
+allow credentials or tokens to be intercepted on untrusted networks. Token
+service redirects remain disabled.
+
+These settings apply to repository/tag browsing, manifest and config retrieval,
+deletion, and the connection test. Token requests resolve `HTTP_PROXY`,
+`HTTPS_PROXY`, and `NO_PROXY` for the token service's own address. A registry
+redirect to a different origin cannot trigger another credential exchange.
 
 ## 🔐 Authentication (optional)
 

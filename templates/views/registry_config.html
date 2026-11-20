@@ -18,6 +18,15 @@
     </div>
     <div class="card-body">
       <form id="inline-registry-form">
+        <div class="form-check mb-2">
+          <input class="form-check-input" type="checkbox" id="inline-allow-http">
+          <label class="form-check-label" for="inline-allow-http">Allow HTTP token service</label>
+        </div>
+        <div class="form-check mb-3">
+          <input class="form-check-input" type="checkbox" id="inline-skip-tls-verify">
+          <label class="form-check-label" for="inline-skip-tls-verify">Skip TLS certificate verification</label>
+          <small class="d-block text-muted">Applies to this registry and its token service.</small>
+        </div>
         <div class="row">
           <div class="col-md-6">
             <div class="mb-3">
